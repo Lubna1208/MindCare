@@ -1,0 +1,16 @@
+@model MindCare.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1 class="h3 mb-3">Dashboard</h1>
+
+<div class="mb-3">
+    <p class="mb-1"><strong>Name:</strong> @Model.Name</p>
+    <p class="mb-0"><strong>Email:</strong> @Model.Email</p>
+</div>
+
+<form asp-controller="Account" asp-action="Logout" method="post">
+    <button type="submit" class="btn btn-outline-danger">Logout</button>
+</form>
