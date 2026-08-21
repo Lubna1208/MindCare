@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MindCare.Models;
+using MindCare.Services;
 using MindCare.ViewModels;
 
 namespace MindCare.Controllers;
@@ -10,21 +11,28 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleRedirectService _roleRedirectService;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        RoleRedirectService roleRedirectService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleRedirectService = roleRedirectService;
     }
 
     [HttpGet]
-    public IActionResult Register()
+    public async Task<IActionResult> Register()
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "Dashboard");
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser is not null)
+            {
+                return await _roleRedirectService.RedirectToDashboardAsync(currentUser, Url);
+            }
         }
 
         return View();
@@ -57,8 +65,9 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            await _userManager.AddToRoleAsync(user, RoleNames.User);
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Dashboard");
+            return await _roleRedirectService.RedirectToDashboardAsync(user, Url);
         }
 
         foreach (var error in result.Errors)
@@ -70,11 +79,15 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login()
+    public async Task<IActionResult> Login()
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "Dashboard");
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser is not null)
+            {
+                return await _roleRedirectService.RedirectToDashboardAsync(currentUser, Url);
+            }
         }
 
         return View();
@@ -98,7 +111,11 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
-            return RedirectToAction("Index", "Dashboard");
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is not null)
+            {
+                return await _roleRedirectService.RedirectToDashboardAsync(user, Url);
+            }
         }
 
         ModelState.AddModelError(string.Empty, "Invalid email or password.");
@@ -112,5 +129,11 @@ public class AccountController : Controller
     {
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 }

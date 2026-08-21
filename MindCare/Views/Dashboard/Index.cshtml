@@ -4,12 +4,24 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<h1 class="h3 mb-3">Dashboard</h1>
+<h1 class="h3 mb-3">User Dashboard</h1>
+<p>Welcome, @Model.Name.</p>
 
-<div class="mb-3">
+<section class="mb-3">
+    <h2 class="h5">Profile</h2>
     <p class="mb-1"><strong>Name:</strong> @Model.Name</p>
     <p class="mb-0"><strong>Email:</strong> @Model.Email</p>
-</div>
+</section>
+
+<section class="mb-3">
+    <h2 class="h5">Future MindCare Features</h2>
+    <ul>
+        <li>Mood tracking</li>
+        <li>Assessment</li>
+        <li>Resources</li>
+        <li>Counselling</li>
+    </ul>
+</section>
 
 <form asp-controller="Account" asp-action="Logout" method="post">
     <button type="submit" class="btn btn-outline-danger">Logout</button>

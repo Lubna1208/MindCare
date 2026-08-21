@@ -6,6 +6,7 @@ using MindCare.Models;
 namespace MindCare.Controllers;
 
 [Authorize]
+[Authorize(Roles = RoleNames.User)]
 public class DashboardController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;

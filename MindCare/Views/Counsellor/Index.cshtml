@@ -1,0 +1,28 @@
+@model MindCare.Models.CounsellorProfile?
+
+@{
+    ViewData["Title"] = "Counsellor Dashboard";
+    var user = Model?.ApplicationUser;
+}
+
+<h1 class="h3 mb-3">Counsellor Dashboard</h1>
+<p>Welcome, @user?.Name.</p>
+
+<section class="mb-3">
+    <h2 class="h5">Profile</h2>
+    <p class="mb-1"><strong>Name:</strong> @user?.Name</p>
+    <p class="mb-1"><strong>Email:</strong> @user?.Email</p>
+    <p class="mb-1"><strong>Phone:</strong> @Model?.Phone</p>
+    <p class="mb-1"><strong>Specialization:</strong> @Model?.Specialization</p>
+    <p class="mb-1"><strong>Qualification:</strong> @Model?.Qualification</p>
+    <p class="mb-0"><strong>Experience:</strong> @Model?.Experience</p>
+</section>
+
+<section class="mb-3">
+    <h2 class="h5">Appointments</h2>
+    <p>Appointments will be added later.</p>
+</section>
+
+<form asp-controller="Account" asp-action="Logout" method="post">
+    <button type="submit" class="btn btn-outline-danger">Logout</button>
+</form>

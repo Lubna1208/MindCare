@@ -1,0 +1,57 @@
+@model IEnumerable<MindCare.Models.CounsellorProfile>
+
+@{
+    ViewData["Title"] = "Counsellors";
+}
+
+<h1 class="h3 mb-3">Counsellors</h1>
+
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="alert alert-success">@message</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<p>
+    <a asp-controller="Admin" asp-action="AddCounsellor" class="btn btn-primary">Add Counsellor</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Specialization</th>
+            <th>Qualification</th>
+            <th>Experience</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ApplicationUser.Name</td>
+                <td>@item.ApplicationUser.Email</td>
+                <td>@item.Phone</td>
+                <td>@item.Specialization</td>
+                <td>@item.Qualification</td>
+                <td>@item.Experience</td>
+                <td class="text-end">
+                    <form asp-controller="Admin"
+                          asp-action="DeleteCounsellor"
+                          asp-route-id="@item.Id"
+                          method="post"
+                          onsubmit="return confirm('Delete this counsellor?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
