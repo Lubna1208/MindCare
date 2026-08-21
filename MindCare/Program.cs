@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
+using MindCare.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +23,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddScoped<RoleRedirectService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

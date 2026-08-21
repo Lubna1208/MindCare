@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1 class="h3 mb-3">Admin Dashboard</h1>
+<p>Welcome to the Admin Dashboard.</p>
+
+<div class="list-group mb-3">
+    <a class="list-group-item list-group-item-action" asp-controller="Admin" asp-action="AddCounsellor">Add Counsellor</a>
+    <a class="list-group-item list-group-item-action" asp-controller="Admin" asp-action="Counsellors">View Counsellors</a>
+</div>
+
+<form asp-controller="Account" asp-action="Logout" method="post">
+    <button type="submit" class="btn btn-outline-danger">Logout</button>
+</form>

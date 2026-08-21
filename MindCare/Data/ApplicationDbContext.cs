@@ -10,4 +10,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
+
+    public DbSet<CounsellorProfile> CounsellorProfiles => Set<CounsellorProfile>();
 }
