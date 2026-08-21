@@ -1,0 +1,38 @@
+@model MindCare.ViewModels.MoodLogViewModel
+
+@{
+    ViewData["Title"] = "Mood Tracking";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <h1 class="h3 mb-3">Mood Tracking</h1>
+        <p>How are you feeling today?</p>
+
+        <form asp-action="Save" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3" role="group" aria-label="Mood options">
+                @foreach (var mood in MoodLog.AvailableMoods)
+                {
+                    <input asp-for="Mood" type="radio" value="@mood" class="btn-check" id="mood-@mood.Replace(" ", "-")" />
+                    <label class="btn btn-outline-primary mb-2 me-1" for="mood-@mood.Replace(" ", "-")">@mood</label>
+                }
+                <span asp-validation-for="Mood" class="d-block text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Note" class="form-label">Note <span class="text-muted">(optional)</span></label>
+                <textarea asp-for="Note" class="form-control" rows="4" placeholder="Add a note about how you feel"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Mood</button>
+            <a asp-action="History" class="btn btn-outline-secondary ms-2">View Mood History</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
