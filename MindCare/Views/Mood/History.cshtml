@@ -1,0 +1,44 @@
+@model IEnumerable<MindCare.Models.MoodLog>
+
+@{
+    ViewData["Title"] = "Mood History";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Mood History</h1>
+    <a asp-action="Index" class="btn btn-primary">Track Today's Mood</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Mood</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var moodLog in Model)
+                {
+                    <tr>
+                        <td>@moodLog.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@moodLog.Mood</td>
+                        <td>@(string.IsNullOrWhiteSpace(moodLog.Note) ? "—" : moodLog.Note)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">You have not saved any moods yet.</p>
+}
