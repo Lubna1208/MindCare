@@ -7,4 +7,6 @@ public class ApplicationUser : IdentityUser
     public string Name { get; set; } = string.Empty;
 
     public ICollection<MoodLog> MoodLogs { get; set; } = new List<MoodLog>();
+
+    public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
 }

@@ -15,6 +15,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<MoodLog> MoodLogs => Set<MoodLog>();
 
+    public DbSet<Assessment> Assessments => Set<Assessment>();
+
+    public DbSet<AssessmentAnswer> AssessmentAnswers => Set<AssessmentAnswer>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -23,6 +27,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(moodLog => moodLog.User)
             .WithMany(user => user.MoodLogs)
             .HasForeignKey(moodLog => moodLog.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Assessment>()
+            .HasOne(assessment => assessment.User)
+            .WithMany(user => user.Assessments)
+            .HasForeignKey(assessment => assessment.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AssessmentAnswer>()
+            .HasOne(answer => answer.Assessment)
+            .WithMany(assessment => assessment.Answers)
+            .HasForeignKey(answer => answer.AssessmentId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

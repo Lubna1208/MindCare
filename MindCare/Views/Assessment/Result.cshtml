@@ -1,0 +1,31 @@
+@model MindCare.ViewModels.AssessmentResultViewModel
+
+@{
+    ViewData["Title"] = "Assessment Result";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <h1 class="h3 mb-3">Assessment Result</h1>
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="mb-2"><strong>Score:</strong> @Model.Score of @AssessmentQuestionnaire.MaximumScore</p>
+                <p class="mb-3"><strong>Wellbeing indication:</strong> @Model.RiskLevel</p>
+                <h2 class="h5">Recommendation</h2>
+                <p class="mb-0">@Model.Recommendation</p>
+            </div>
+        </div>
+
+        @if (Model.IsHighRisk)
+        {
+            <div class="alert alert-warning" role="alert">
+                This result is a screening indication, not a diagnosis. Consider contacting a qualified mental health professional for support.
+            </div>
+        }
+
+        <p class="text-muted">This assessment cannot diagnose a mental health condition. If you have concerns about your wellbeing, consider speaking with a qualified professional.</p>
+
+        <a asp-action="History" class="btn btn-primary">View Assessment History</a>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary ms-2">Back to Dashboard</a>
+    </div>
+</div>

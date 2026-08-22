@@ -1,0 +1,46 @@
+@model MindCare.ViewModels.AssessmentFormViewModel
+
+@{
+    ViewData["Title"] = "Assessment";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-2">Wellbeing Assessment</h1>
+        <p class="text-muted">This short screening tool is not a medical diagnosis. Please answer based on how you have felt over the last two weeks.</p>
+
+        <form asp-action="Submit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            @for (var index = 0; index < Model.Questions.Count; index++)
+            {
+                var question = Model.Questions[index];
+                <fieldset class="card mb-3">
+                    <div class="card-body">
+                        <legend class="h6">Question @(index + 1) of @Model.Questions.Count</legend>
+                        <p class="mb-3">@question.QuestionText</p>
+                        <input asp-for="Questions[index].QuestionId" type="hidden" />
+
+                        @for (var optionIndex = 0; optionIndex < question.Options.Count; optionIndex++)
+                        {
+                            var option = question.Options[optionIndex];
+                            var id = $"question-{question.QuestionId}-option-{optionIndex}";
+                            <div class="form-check mb-2">
+                                <input asp-for="Questions[index].SelectedScore" class="form-check-input" type="radio" value="@option.Score" id="@id" />
+                                <label class="form-check-label" for="@id">@option.Text</label>
+                            </div>
+                        }
+                        <span asp-validation-for="Questions[index].SelectedScore" class="text-danger"></span>
+                    </div>
+                </fieldset>
+            }
+
+            <button type="submit" class="btn btn-primary">Submit Assessment</button>
+            <a asp-action="History" class="btn btn-outline-secondary ms-2">View Assessment History</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
