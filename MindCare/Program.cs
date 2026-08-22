@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
@@ -11,7 +12,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    options.UseSqlServer(connectionString, sqlServerOptions =>
+        sqlServerOptions.EnableRetryOnFailure());
+    options.ConfigureWarnings(warnings =>
+        warnings.Log(RelationalEventId.PendingModelChangesWarning));
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -31,7 +37,14 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
+await ResourceSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -39,6 +52,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+
 }
 
 app.UseHttpsRedirection();

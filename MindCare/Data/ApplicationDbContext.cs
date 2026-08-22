@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<AssessmentAnswer> AssessmentAnswers => Set<AssessmentAnswer>();
 
+    public DbSet<Resource> Resources => Set<Resource>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -40,5 +42,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(assessment => assessment.Answers)
             .HasForeignKey(answer => answer.AssessmentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Resource>()
+            .Property(resource => resource.Content)
+            .HasColumnType("nvarchar(max)");
     }
 }
