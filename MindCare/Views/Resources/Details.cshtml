@@ -4,102 +4,29 @@
     ViewData["Title"] = Model.Title;
 }
 
-<style>
-    .mc-page { max-width: 780px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-btn-outline {
-        border: 1px solid var(--mc-deep, #2F5D57);
-        color: var(--mc-deep, #2F5D57);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.5rem 1.2rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.65rem 1.5rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-resource-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 20px;
-        padding: 1.75rem;
-        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
-    }
-    .mc-category-badge {
-        display: inline-block;
-        background: var(--mc-soft, #A7E3D4);
-        color: var(--mc-deep, #2F5D57);
-        border-radius: 999px;
-        padding: 0.3rem 0.9rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-        margin-bottom: 0.75rem;
-    }
-    .mc-lead {
-        font-size: 1.1rem;
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.9;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-    .mc-resource-heading {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-        margin-bottom: 0.5rem;
-    }
-    .mc-resource-content {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.9;
-        line-height: 1.7;
-        white-space: pre-line;
-    }
-    .mc-added-date {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.6;
-        font-size: 0.88rem;
-        margin-top: 1.5rem;
-    }
-</style>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@Model.Title</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to Resources</a>
+</div>
 
-<div class="mc-page">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h1 class="h3 mb-0">@Model.Title</h1>
-        <a asp-action="Index" class="mc-btn-outline">Back to Resources</a>
-    </div>
-
-    <article class="mc-resource-card">
-        <span class="mc-category-badge">@Model.Category</span>
-        <p class="mc-lead">@Model.Description</p>
+<article class="card shadow-sm">
+    <div class="card-body">
+        <p><span class="badge text-bg-light border">@Model.Category</span></p>
+        <p class="lead">@Model.Description</p>
 
         @if (!string.IsNullOrWhiteSpace(Model.Content))
         {
             <section class="mb-4">
-                <h2 class="h5 mc-resource-heading">Resource</h2>
-                <p class="mc-resource-content mb-0">@Model.Content</p>
+                <h2 class="h5">Resource</h2>
+                <p class="mb-0" style="white-space: pre-line">@Model.Content</p>
             </section>
         }
 
         @if (Resource.IsSafeExternalUrl(Model.Url))
         {
-            <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="mc-btn-primary">Open External Resource</a>
+            <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open External Resource</a>
         }
 
-        <p class="mc-added-date mb-0">Added @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</p>
-    </article>
-</div>
+        <p class="text-muted small mt-4 mb-0">Added @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</p>
+    </div>
+</article>

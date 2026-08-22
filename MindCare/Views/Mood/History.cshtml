@@ -4,20 +4,20 @@
     ViewData["Title"] = "Mood History";
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mc-mood-history-heading mb-4">
-    <h1 class="h3 mc-page-title mb-0">Mood History</h1>
-    <a asp-action="Index" class="btn btn-primary mc-track-mood-button">Track Today's Mood</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Mood History</h1>
+    <a asp-action="Index" class="btn btn-primary">Track Today's Mood</a>
 </div>
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
-    <div class="alert alert-success mc-mood-success-alert" role="alert"><span aria-hidden="true">✓</span>@successMessage</div>
+    <div class="alert alert-success" role="alert">@successMessage</div>
 }
 
 @if (Model.Any())
 {
-    <div class="table-responsive mc-mood-history-table-wrap">
-        <table class="table table-striped align-middle mc-mood-history-table">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
             <thead>
                 <tr>
                     <th>Date</th>
@@ -40,5 +40,5 @@
 }
 else
 {
-    <p class="text-muted mc-mood-history-empty"><span aria-hidden="true">☼</span>You have not saved any moods yet.</p>
+    <p class="text-muted">You have not saved any moods yet.</p>
 }
