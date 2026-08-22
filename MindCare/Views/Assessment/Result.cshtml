@@ -4,28 +4,44 @@
     ViewData["Title"] = "Assessment Result";
 }
 
-<div class="row justify-content-center">
+<div class="row justify-content-center mc-assessment-result-page">
     <div class="col-md-8 col-lg-7">
-        <h1 class="h3 mb-3">Assessment Result</h1>
-        <div class="card mb-3">
-            <div class="card-body">
-                <p class="mb-2"><strong>Score:</strong> @Model.Score of @AssessmentQuestionnaire.MaximumScore</p>
-                <p class="mb-3"><strong>Wellbeing indication:</strong> @Model.RiskLevel</p>
-                <h2 class="h5">Recommendation</h2>
-                <p class="mb-0">@Model.Recommendation</p>
+        <div class="mc-result-heading mb-3">
+            <p class="mc-eyebrow mb-1">Your wellbeing check-in</p>
+            <h1 class="mc-page-title mb-0">Assessment Result</h1>
+        </div>
+        <div class="card mb-3 mc-assessment-result-card">
+            <div class="card-body mc-assessment-result-body">
+                <div class="mc-result-summary">
+                    <div class="mc-result-score">
+                        <span class="mc-result-label">Score</span>
+                        <p class="mb-0"><strong>@Model.Score</strong><span>of @AssessmentQuestionnaire.MaximumScore</span></p>
+                    </div>
+                    <div class="mc-result-indication">
+                        <span class="mc-result-label">Wellbeing indication</span>
+                        <p class="mb-0"><span>@Model.RiskLevel</span></p>
+                    </div>
+                </div>
+                <div class="mc-result-recommendation">
+                    <h2 class="h5">Recommendation</h2>
+                    <p class="mb-0">@Model.Recommendation</p>
+                </div>
             </div>
         </div>
 
         @if (Model.IsHighRisk)
         {
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-warning mc-high-risk-alert" role="alert">
+                <span class="mc-high-risk-icon" aria-hidden="true">♥</span>
                 This result is a screening indication, not a diagnosis. Consider contacting a qualified mental health professional for support.
             </div>
         }
 
-        <p class="text-muted">This assessment cannot diagnose a mental health condition. If you have concerns about your wellbeing, consider speaking with a qualified professional.</p>
+        <p class="text-muted mc-assessment-disclaimer-note">This assessment cannot diagnose a mental health condition. If you have concerns about your wellbeing, consider speaking with a qualified professional.</p>
 
-        <a asp-action="History" class="btn btn-primary">View Assessment History</a>
-        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary ms-2">Back to Dashboard</a>
+        <div class="mc-result-actions">
+            <a asp-action="History" class="btn btn-primary mc-result-history-button">View Assessment History</a>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary mc-result-dashboard-button">Back to Dashboard</a>
+        </div>
     </div>
 </div>

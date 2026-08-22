@@ -8,48 +8,55 @@
     var search = (string?)ViewBag.Search;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Resources</h1>
-</div>
-
-<form method="get" class="row g-2 mb-3">
-    <div class="col-sm-8 col-md-6">
-        <label for="search" class="visually-hidden">Search resources</label>
-        <input id="search" name="search" value="@search" class="form-control" placeholder="Search resources" />
+<div class="mc-resources-page">
+    <div class="d-flex justify-content-between align-items-center mc-resources-heading mb-3">
+        <div>
+            <p class="mc-eyebrow mb-1">Support at your pace</p>
+            <h1 class="mc-page-title mb-0">Resources</h1>
+        </div>
     </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Search</button>
-    </div>
-</form>
 
-<section class="mb-4" aria-label="Resource categories">
-    <h2 class="h5">Categories</h2>
-    <a asp-action="Index" asp-route-search="@search" class="btn btn-sm @(selectedCategory is null ? "btn-primary" : "btn-outline-primary") me-1 mb-1">All</a>
-    @foreach (var category in categories)
+    <form method="get" class="row g-2 mc-resource-search mb-4">
+        <div class="col-sm-8 col-md-6">
+            <label for="search" class="visually-hidden">Search resources</label>
+            <input id="search" name="search" value="@search" class="form-control mc-resource-search-input" placeholder="Search resources" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary mc-resource-search-button">Search</button>
+        </div>
+    </form>
+
+    <section class="mc-resource-categories mb-4" aria-label="Resource categories">
+        <h2 class="h5 mc-resource-category-title">Categories</h2>
+        <div class="mc-category-pills">
+            <a asp-action="Index" asp-route-search="@search" class="btn btn-sm mc-category-pill @(selectedCategory is null ? "btn-primary" : "btn-outline-primary") me-1 mb-1">All</a>
+            @foreach (var category in categories)
+            {
+                <a asp-action="Index" asp-route-category="@category" asp-route-search="@search" class="btn btn-sm mc-category-pill @(selectedCategory == category ? "btn-primary" : "btn-outline-primary") me-1 mb-1">@category</a>
+            }
+        </div>
+    </section>
+
+    @if (!Model.Any())
     {
-        <a asp-action="Index" asp-route-category="@category" asp-route-search="@search" class="btn btn-sm @(selectedCategory == category ? "btn-primary" : "btn-outline-primary") me-1 mb-1">@category</a>
+        <p class="text-muted mc-resource-empty-state">No resources match your search.</p>
     }
-</section>
-
-@if (!Model.Any())
-{
-    <p class="text-muted">No resources match your search.</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-2 g-3">
-        @foreach (var resource in Model)
-        {
-            <div class="col">
-                <article class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <span class="badge text-bg-light border align-self-start mb-2">@resource.Category</span>
-                        <h2 class="h5 card-title">@resource.Title</h2>
-                        <p class="card-text">@resource.Description</p>
-                        <a asp-action="Details" asp-route-id="@resource.Id" class="btn btn-outline-primary mt-auto align-self-start">Read More</a>
-                    </div>
-                </article>
-            </div>
-        }
-    </div>
-}
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+            @foreach (var resource in Model)
+            {
+                <div class="col">
+                    <article class="card h-100 shadow-sm mc-resource-card">
+                        <div class="card-body d-flex flex-column mc-resource-card-body">
+                            <span class="badge text-bg-light border align-self-start mb-2 mc-resource-badge">@resource.Category</span>
+                            <h2 class="h5 card-title mc-resource-title">@resource.Title</h2>
+                            <p class="card-text mc-resource-description">@resource.Description</p>
+                            <a asp-action="Details" asp-route-id="@resource.Id" class="btn btn-outline-primary mt-auto align-self-start mc-read-more">Read More</a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+</div>
