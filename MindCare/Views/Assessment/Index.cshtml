@@ -4,80 +4,43 @@
     ViewData["Title"] = "Assessment";
 }
 
-<div class="row justify-content-center mc-assessment-page">
+<div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="mc-assessment-intro">
-            <p class="mc-eyebrow mb-1">A moment for yourself</p>
-            <h1 class="mc-page-title mb-2">Wellbeing Assessment</h1>
-            <p class="text-muted mc-assessment-disclaimer mb-0">This short screening tool is not a medical diagnosis. Please answer based on how you have felt over the last two weeks.</p>
-        </div>
+        <h1 class="h3 mb-2">Wellbeing Assessment</h1>
+        <p class="text-muted">This short screening tool is not a medical diagnosis. Please answer based on how you have felt over the last two weeks.</p>
 
-        <form asp-action="Submit" method="post" class="mc-assessment-form">
-            <div asp-validation-summary="ModelOnly" class="text-danger mc-validation-message mb-3"></div>
-            <div class="mc-assessment-progress" aria-live="polite">
-                <div class="mc-assessment-progress-copy"><span>Assessment progress</span><span id="assessment-progress-text">0 answered</span></div>
-                <div class="mc-progress-track" role="progressbar" aria-label="Assessment progress" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
-                    <span class="mc-progress-value"></span>
-                </div>
-            </div>
+        <form asp-action="Submit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             @for (var index = 0; index < Model.Questions.Count; index++)
             {
                 var question = Model.Questions[index];
-                <fieldset class="card mb-3 mc-question-card">
-                    <div class="card-body mc-question-card-body">
-                        <legend class="h6 mc-question-number">Question @(index + 1) of @Model.Questions.Count</legend>
-                        <p class="mb-3 mc-question-text">@question.QuestionText</p>
+                <fieldset class="card mb-3">
+                    <div class="card-body">
+                        <legend class="h6">Question @(index + 1) of @Model.Questions.Count</legend>
+                        <p class="mb-3">@question.QuestionText</p>
                         <input asp-for="Questions[index].QuestionId" type="hidden" />
 
                         @for (var optionIndex = 0; optionIndex < question.Options.Count; optionIndex++)
                         {
                             var option = question.Options[optionIndex];
                             var id = $"question-{question.QuestionId}-option-{optionIndex}";
-                            <div class="form-check mb-2 mc-assessment-option">
-                                <input asp-for="Questions[index].SelectedScore" class="form-check-input mc-assessment-radio" type="radio" value="@option.Score" id="@id" />
-                                <label class="form-check-label mc-assessment-option-label" for="@id">@option.Text</label>
+                            <div class="form-check mb-2">
+                                <input asp-for="Questions[index].SelectedScore" class="form-check-input" type="radio" value="@option.Score" id="@id" />
+                                <label class="form-check-label" for="@id">@option.Text</label>
                             </div>
                         }
-                        <span asp-validation-for="Questions[index].SelectedScore" class="text-danger mc-validation-message"></span>
+                        <span asp-validation-for="Questions[index].SelectedScore" class="text-danger"></span>
                     </div>
                 </fieldset>
             }
 
-            <div class="mc-assessment-actions">
-                <button type="submit" class="btn btn-primary mc-submit-assessment">Submit Assessment</button>
-                <a asp-action="History" class="btn btn-outline-secondary mc-assessment-history">View Assessment History</a>
-            </div>
+            <button type="submit" class="btn btn-primary">Submit Assessment</button>
+            <a asp-action="History" class="btn btn-outline-secondary ms-2">View Assessment History</a>
         </form>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const groups = [...document.querySelectorAll('.mc-question-card')];
-            const track = document.querySelector('.mc-progress-track');
-            const value = document.querySelector('.mc-progress-value');
-            const text = document.getElementById('assessment-progress-text');
-
-            if (!track || !value || !text) return;
-
-            const updateProgress = function () {
-                const answered = groups.filter(function (group) { return group.querySelector('input[type="radio"]:checked'); }).length;
-                const total = groups.length;
-                const percentage = total ? (answered / total) * 100 : 0;
-                value.style.width = percentage + '%';
-                text.textContent = answered + ' of ' + total + ' answered';
-                track.setAttribute('aria-valuemax', total);
-                track.setAttribute('aria-valuenow', answered);
-            };
-
-            document.querySelectorAll('.mc-assessment-radio').forEach(function (radio) {
-                radio.addEventListener('change', updateProgress);
-            });
-
-            updateProgress();
-        });
-    </script>
 }

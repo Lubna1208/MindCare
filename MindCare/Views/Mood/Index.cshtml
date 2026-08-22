@@ -4,45 +4,32 @@
     ViewData["Title"] = "Mood Tracking";
 }
 
-<div class="row justify-content-center mc-mood-page">
+<div class="row justify-content-center">
     <div class="col-md-8 col-lg-7">
-        <section class="mc-mood-card" aria-labelledby="mood-title">
-            <div class="mc-mood-heading">
-                <span class="mc-mood-heading-icon" aria-hidden="true">☀</span>
-                <div>
-                    <p class="mc-eyebrow mb-1">Daily check-in</p>
-                    <h1 id="mood-title" class="mc-page-title mb-1">Mood Tracking</h1>
-                    <p class="mc-mood-subtitle mb-0">How are you feeling today?</p>
-                </div>
+        <h1 class="h3 mb-3">Mood Tracking</h1>
+        <p>How are you feeling today?</p>
+
+        <form asp-action="Save" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3" role="group" aria-label="Mood options">
+                @foreach (var mood in MoodLog.AvailableMoods)
+                {
+                    <input asp-for="Mood" type="radio" value="@mood" class="btn-check" id="mood-@mood.Replace(" ", "-")" />
+                    <label class="btn btn-outline-primary mb-2 me-1" for="mood-@mood.Replace(" ", "-")">@mood</label>
+                }
+                <span asp-validation-for="Mood" class="d-block text-danger"></span>
             </div>
 
-            <form asp-action="Save" method="post" class="mc-mood-form">
-                <div asp-validation-summary="ModelOnly" class="text-danger mc-validation-message mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="Note" class="form-label">Note <span class="text-muted">(optional)</span></label>
+                <textarea asp-for="Note" class="form-control" rows="4" placeholder="Add a note about how you feel"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
 
-                <div class="mc-mood-options mb-4" role="group" aria-label="Mood options">
-                    <p class="mc-field-label mb-2">Choose the feeling that fits best</p>
-                    <div class="mc-mood-chip-list">
-                        @foreach (var mood in MoodLog.AvailableMoods)
-                        {
-                            <input asp-for="Mood" type="radio" value="@mood" class="btn-check mc-mood-input" id="mood-@mood.Replace(" ", "-")" />
-                            <label class="btn btn-outline-primary mc-mood-chip" for="mood-@mood.Replace(" ", "-")"><span class="mc-mood-chip-icon" aria-hidden="true">✦</span>@mood</label>
-                        }
-                    </div>
-                    <span asp-validation-for="Mood" class="d-block text-danger mc-validation-message"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="Note" class="form-label mc-note-label">Note <span class="text-muted">(optional)</span></label>
-                    <textarea asp-for="Note" class="form-control mc-mood-note" rows="4" placeholder="Add a note about how you feel"></textarea>
-                    <span asp-validation-for="Note" class="text-danger mc-validation-message"></span>
-                </div>
-
-                <div class="mc-mood-actions">
-                    <button type="submit" class="btn btn-primary mc-save-mood">Save Mood</button>
-                    <a asp-action="History" class="btn btn-outline-secondary mc-mood-history">View Mood History</a>
-                </div>
-            </form>
-        </section>
+            <button type="submit" class="btn btn-primary">Save Mood</button>
+            <a asp-action="History" class="btn btn-outline-secondary ms-2">View Mood History</a>
+        </form>
     </div>
 </div>
 

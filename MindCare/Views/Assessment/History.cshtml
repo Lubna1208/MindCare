@@ -4,134 +4,38 @@
     ViewData["Title"] = "Assessment History";
 }
 
-<style>
-    .mc-page { max-width: 900px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.55rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-table-wrap {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 18px;
-        overflow: hidden;
-    }
-    .mc-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .mc-table thead th {
-        background: var(--mc-pale, #D9F5EF);
-        color: var(--mc-deep, #2F5D57);
-        text-align: left;
-        padding: 0.9rem 1.1rem;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-    .mc-table tbody td {
-        padding: 0.9rem 1.1rem;
-        border-top: 1px solid var(--mc-mist, #F7FFFD);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-table tbody tr:hover { background: var(--mc-mist, #F7FFFD); }
-    .mc-indication-pill {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 0.25rem 0.75rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    .mc-risk-low { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-risk-moderate { background: var(--mc-soft, #A7E3D4); color: var(--mc-deep, #2F5D57); }
-    .mc-risk-high { background: #F3E3D3; color: #8A5A2B; }
-    .mc-view-link {
-        color: var(--mc-teal, #5BB9A6);
-        font-weight: 600;
-        text-decoration: none;
-        border: 1px solid var(--mc-teal, #5BB9A6);
-        border-radius: 999px;
-        padding: 0.3rem 0.9rem;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-view-link:hover { background: var(--mc-teal, #5BB9A6); color: #fff; }
-    .mc-empty-state {
-        background: var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-    }
-    @@media (max-width: 700px) {
-        .mc-table thead { display: none; }
-        .mc-table, .mc-table tbody, .mc-table tr, .mc-table td { display: block; width: 100%; }
-        .mc-table tbody tr {
-            border-top: 1px solid var(--mc-pale, #D9F5EF);
-            padding: 0.75rem 0;
-        }
-        .mc-table tbody td {
-            border-top: none;
-            padding: 0.25rem 1.1rem;
-        }
-    }
-</style>
-
-<div class="mc-page">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h1 class="h3 mb-0">Assessment History</h1>
-        <a asp-action="Index" class="mc-btn-primary">Take Assessment</a>
-    </div>
-
-    @if (Model.Any())
-    {
-        <div class="mc-table-wrap">
-            <table class="mc-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Score</th>
-                        <th>Wellbeing indication</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var assessment in Model)
-                    {
-                        var riskClass = assessment.RiskLevel switch
-                        {
-                            "Low" => "mc-risk-low",
-                            "Moderate" => "mc-risk-moderate",
-                            "High" => "mc-risk-high",
-                            _ => "mc-risk-moderate"
-                        };
-                        <tr>
-                            <td>@assessment.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@assessment.Score of @AssessmentQuestionnaire.MaximumScore</td>
-                            <td><span class="mc-indication-pill @riskClass">@assessment.RiskLevel</span></td>
-                            <td><a asp-action="Result" asp-route-id="@assessment.Id" class="mc-view-link">View result</a></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="mc-empty-state">
-            <p class="mb-0">You have not completed an assessment yet.</p>
-        </div>
-    }
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Assessment History</h1>
+    <a asp-action="Index" class="btn btn-primary">Take Assessment</a>
 </div>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Score</th>
+                    <th>Wellbeing indication</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assessment in Model)
+                {
+                    <tr>
+                        <td>@assessment.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@assessment.Score of @AssessmentQuestionnaire.MaximumScore</td>
+                        <td>@assessment.RiskLevel</td>
+                        <td><a asp-action="Result" asp-route-id="@assessment.Id">View result</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">You have not completed an assessment yet.</p>
+}
