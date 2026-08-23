@@ -9,4 +9,6 @@ public class ApplicationUser : IdentityUser
     public ICollection<MoodLog> MoodLogs { get; set; } = new List<MoodLog>();
 
     public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
+
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 }

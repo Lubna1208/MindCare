@@ -1,0 +1,83 @@
+@model MindCare.ViewModels.CounsellorAvailabilityViewModel
+
+@{
+    ViewData["Title"] = "My Availability";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    var groupedSlots = Model.Slots.GroupBy(slot => slot.Date.Date);
+}
+
+<h1 class="h3 mb-3">My Availability</h1>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+<section class="mb-4">
+    <h2 class="h5">Create Availability</h2>
+    <form asp-action="Availability" method="post" class="row g-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="col-md-3">
+            <label asp-for="Form.Date" class="form-label"></label>
+            <input asp-for="Form.Date" class="form-control" type="date" />
+            <span asp-validation-for="Form.Date" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="Form.StartTime" class="form-label"></label>
+            <input asp-for="Form.StartTime" class="form-control" type="time" />
+            <span asp-validation-for="Form.StartTime" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="Form.EndTime" class="form-label"></label>
+            <input asp-for="Form.EndTime" class="form-control" type="time" />
+            <span asp-validation-for="Form.EndTime" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="Form.SlotDurationMinutes" class="form-label"></label>
+            <input asp-for="Form.SlotDurationMinutes" class="form-control" min="1" />
+            <span asp-validation-for="Form.SlotDurationMinutes" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Generate Slots</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+    </form>
+</section>
+
+<section>
+    <h2 class="h5">Created Slots</h2>
+
+    @if (!Model.Slots.Any())
+    {
+        <p>No availability has been created yet.</p>
+    }
+    else
+    {
+        foreach (var group in groupedSlots)
+        {
+            <div class="mb-3">
+                <h3 class="h6">@group.Key.ToString("dd MMMM yyyy")</h3>
+                <div class="list-group">
+                    @foreach (var slot in group)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
+                            <span class="badge @(slot.IsBooked ? "bg-secondary" : "bg-success")">
+                                @(slot.IsBooked ? "Booked" : "Available")
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

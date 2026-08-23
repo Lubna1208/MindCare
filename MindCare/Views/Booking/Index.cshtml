@@ -1,0 +1,70 @@
+@model MindCare.ViewModels.BookAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Find and Book Counsellor";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+}
+
+<h1 class="h3 mb-3">Find and Book Counsellor</h1>
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<form asp-action="Index" method="get" class="row g-3 mb-4">
+    <div class="col-md-5">
+        <label for="counsellorProfileId" class="form-label">Select Counsellor</label>
+        <select id="counsellorProfileId" name="counsellorProfileId" class="form-select" required>
+            <option value="">Choose a counsellor</option>
+            @foreach (var counsellor in Model.Counsellors)
+            {
+                if (Model.CounsellorProfileId == counsellor.Id)
+                {
+                    <option value="@counsellor.Id" selected>@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
+                }
+                else
+                {
+                    <option value="@counsellor.Id">@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <label for="date" class="form-label">Select Date</label>
+        <input id="date" name="date" value="@Model.Date?.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">View Slots</button>
+    </div>
+</form>
+
+<section>
+    <h2 class="h5">Available Slots</h2>
+
+    @if (Model.CounsellorProfileId is null || Model.Date is null)
+    {
+        <p>Select a counsellor and date to view available slots.</p>
+    }
+    else if (!Model.AvailableSlots.Any())
+    {
+        <p>No available slots were found for this date.</p>
+    }
+    else
+    {
+        <div class="list-group mb-3">
+            @foreach (var slot in Model.AvailableSlots)
+            {
+                <form asp-action="SelectSlot" method="post" class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
+                    <input type="hidden" name="slotId" value="@slot.Id" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Continue to Payment</button>
+                </form>
+            }
+        </div>
+    }
+</section>
+
+<a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>

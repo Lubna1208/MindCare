@@ -21,6 +21,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Resource> Resources => Set<Resource>();
 
+    public DbSet<AvailabilitySlot> AvailabilitySlots => Set<AvailabilitySlot>();
+
+    public DbSet<Appointment> Appointments => Set<Appointment>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -46,5 +50,37 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Resource>()
             .Property(resource => resource.Content)
             .HasColumnType("nvarchar(max)");
+
+        builder.Entity<AvailabilitySlot>()
+            .HasOne(slot => slot.CounsellorProfile)
+            .WithMany(profile => profile.AvailabilitySlots)
+            .HasForeignKey(slot => slot.CounsellorProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AvailabilitySlot>()
+            .HasIndex(slot => new { slot.CounsellorProfileId, slot.Date, slot.StartTime, slot.EndTime })
+            .IsUnique();
+
+        builder.Entity<Appointment>()
+            .HasOne(appointment => appointment.User)
+            .WithMany(user => user.Appointments)
+            .HasForeignKey(appointment => appointment.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Appointment>()
+            .HasOne(appointment => appointment.CounsellorProfile)
+            .WithMany(profile => profile.Appointments)
+            .HasForeignKey(appointment => appointment.CounsellorProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Appointment>()
+            .HasOne(appointment => appointment.AvailabilitySlot)
+            .WithOne(slot => slot.Appointment)
+            .HasForeignKey<Appointment>(appointment => appointment.AvailabilitySlotId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<Appointment>()
+            .HasIndex(appointment => appointment.AvailabilitySlotId)
+            .IsUnique();
     }
 }
