@@ -1,6 +1,49 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
+<style>
+    .mc-privacy-page { max-width: 800px; padding: 2rem 0 3rem; margin: 0 auto; }
+    .mc-privacy-card { padding: clamp(1.5rem, 4vw, 2.5rem); background: #fff; border: 1px solid rgba(91, 185, 166, .15); border-radius: 1rem; box-shadow: 0 8px 24px rgba(47, 93, 87, .07); }
+    .mc-privacy-card > h1 { padding-bottom: .9rem; margin-bottom: 1.25rem; color: var(--mc-deep); border-bottom: 3px solid var(--mc-soft); font-family: "Lora", serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; }
+    .mc-privacy-intro { padding: 1rem 1.1rem; margin-bottom: 1.5rem; color: #426f68; background: var(--mc-pale); border-radius: .75rem; }
+    .mc-privacy-section { padding-bottom: 1.25rem; margin-top: 1.35rem; border-bottom: 1px solid var(--mc-pale); }
+    .mc-privacy-section:last-child { padding-bottom: 0; border-bottom: 0; }
+    .mc-privacy-section h2 { display: flex; align-items: center; gap: .55rem; color: var(--mc-deep); font-family: "Lora", serif; font-size: 1.2rem; font-weight: 700; }
+    .mc-privacy-section h2::before { width: .5rem; height: .5rem; background: var(--mc-teal); border-radius: 50%; content: ""; }
+    .mc-privacy-section p, .mc-privacy-section li { color: #426f68; line-height: 1.7; }
+    .mc-privacy-section ul { padding-left: 1.25rem; margin-bottom: 0; }
+    .mc-privacy-section li::marker { color: var(--mc-teal); }
+    @@media (max-width: 575.98px) { .mc-privacy-page { padding-top: 1rem; } }
+</style>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<main class="mc-privacy-page">
+    <article class="mc-privacy-card">
+        <h1>@ViewData["Title"]</h1>
+        <p class="mc-privacy-intro">MindCare respects your privacy. This page explains, in clear terms, the information our CSE 3224 Information System Design &amp; Software Engineering Lab project may collect and how it is used to support the app experience.</p>
+
+        <section class="mc-privacy-section">
+            <h2>Information We Collect</h2>
+            <p>When you use MindCare, we may collect the account details you provide, such as your name and email address. The app may also store your mood tracking entries, wellbeing assessment responses, and resource browsing activity needed to provide its features.</p>
+        </section>
+
+        <section class="mc-privacy-section">
+            <h2>How We Use Your Information</h2>
+            <p>Your information is used to provide mood tracking and assessment features, help present relevant resources, and improve the MindCare experience. We use this information only for the purposes of this academic project and its intended wellbeing-support tools.</p>
+        </section>
+
+        <section class="mc-privacy-section">
+            <h2>Data Storage &amp; Security</h2>
+            <p>MindCare is designed to store information securely and limit access to authorized roles, including Users, Counsellors, and Administrators. As a student project, MindCare is not a replacement for a production healthcare service and should not be used to share emergency or highly sensitive information.</p>
+        </section>
+
+        <section class="mc-privacy-section">
+            <h2>Your Rights</h2>
+            <p>You can view the information connected to your account and may request that your data be corrected or deleted. We aim to handle such requests thoughtfully and respectfully within the scope of this project.</p>
+        </section>
+
+        <section class="mc-privacy-section">
+            <h2>Contact</h2>
+            <p>If you have questions or concerns about privacy in MindCare, please contact the project team or your course instructor. We welcome feedback that helps us make this learning project more responsible and supportive.</p>
+        </section>
+    </article>
+</main>
