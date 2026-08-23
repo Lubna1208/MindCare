@@ -1,0 +1,34 @@
+@model IReadOnlyList<MindCare.Models.Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+}
+
+<h1 class="h3 mb-3">My Appointments</h1>
+
+@if (!Model.Any())
+{
+    <p>You do not have any appointments yet.</p>
+}
+else
+{
+    <div class="list-group mb-3">
+        @foreach (var appointment in Model)
+        {
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <div>
+                        <strong>@appointment.Date.ToString("dd MMM yyyy")</strong>
+                        <div>@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</div>
+                    </div>
+                    <span class="badge bg-primary align-self-start">@appointment.Status</span>
+                </div>
+                <div class="mt-2">Counsellor: @appointment.CounsellorProfile.ApplicationUser.Name</div>
+            </div>
+        }
+    </div>
+}
+
+<a asp-controller="Booking" asp-action="Index" class="btn btn-primary">Find/Book Counsellor</a>
+<a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>

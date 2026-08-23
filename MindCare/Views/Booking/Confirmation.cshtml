@@ -1,0 +1,24 @@
+@model MindCare.Models.Appointment
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    var counsellor = Model.CounsellorProfile.ApplicationUser;
+}
+
+<h1 class="h3 mb-3">Booking Confirmed</h1>
+
+<div class="alert alert-success">Your dummy payment was successful and the appointment has been booked.</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-1"><strong>Counsellor:</strong> @counsellor.Name</p>
+        <p class="mb-1"><strong>Date:</strong> @Model.Date.ToString("dd MMMM yyyy")</p>
+        <p class="mb-1"><strong>Time:</strong> @FormatTime(Model.StartTime) - @FormatTime(Model.EndTime)</p>
+        <p class="mb-1"><strong>Status:</strong> @Model.Status</p>
+        <p class="mb-0"><strong>Payment:</strong> @Model.PaymentStatus</p>
+    </div>
+</div>
+
+<a asp-action="MyAppointments" class="btn btn-primary">My Appointments</a>
+<a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>

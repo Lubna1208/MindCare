@@ -26,4 +26,8 @@ public class CounsellorProfile
     [Required]
     [StringLength(100)]
     public string Experience { get; set; } = string.Empty;
+
+    public ICollection<AvailabilitySlot> AvailabilitySlots { get; set; } = new List<AvailabilitySlot>();
+
+    public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 }

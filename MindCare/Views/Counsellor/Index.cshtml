@@ -20,7 +20,10 @@
 
 <section class="mb-3">
     <h2 class="h5">Appointments</h2>
-    <p>Appointments will be added later.</p>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Availability" class="btn btn-primary">My Availability</a>
+        <a asp-action="BookedAppointments" class="btn btn-outline-primary">My Booked Appointments</a>
+    </div>
 </section>
 
 <form asp-controller="Account" asp-action="Logout" method="post">
