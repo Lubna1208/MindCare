@@ -2,14 +2,75 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h1 class="h3 mb-3">Admin Dashboard</h1>
-<p>Welcome to the Admin Dashboard.</p>
+<style>
+    .mc-page { max-width: 700px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-subtitle {
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.75;
+        margin-bottom: 1.5rem;
+    }
+    .mc-menu-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.75rem;
+    }
+    .mc-menu-item {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.1rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--mc-deep, #2F5D57);
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+        transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    }
+    .mc-menu-item:hover {
+        box-shadow: 0 8px 22px rgba(47, 93, 87, 0.1);
+        transform: translateY(-1px);
+        background: var(--mc-mist, #F7FFFD);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-menu-item .mc-arrow {
+        color: var(--mc-teal, #5BB9A6);
+        font-size: 1.1rem;
+    }
+    .mc-btn-logout {
+        border: 1px solid #C96A6A;
+        color: #C96A6A;
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.55rem 1.3rem;
+        font-weight: 600;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-logout:hover { background: #FBEAEA; color: #C96A6A; }
+</style>
 
-<div class="list-group mb-3">
-    <a class="list-group-item list-group-item-action" asp-controller="Admin" asp-action="AddCounsellor">Add Counsellor</a>
-    <a class="list-group-item list-group-item-action" asp-controller="Admin" asp-action="Counsellors">View Counsellors</a>
+<div class="mc-page">
+    <h1 class="h3 mb-2">Admin Dashboard</h1>
+    <p class="mc-subtitle">Welcome to the Admin Dashboard.</p>
+
+    <div class="mc-menu-list">
+        <a class="mc-menu-item" asp-controller="Admin" asp-action="AddCounsellor">
+            <span>Add Counsellor</span>
+            <span class="mc-arrow">&rarr;</span>
+        </a>
+        <a class="mc-menu-item" asp-controller="Admin" asp-action="Counsellors">
+            <span>View Counsellors</span>
+            <span class="mc-arrow">&rarr;</span>
+        </a>
+    </div>
+
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="mc-btn-logout">Logout</button>
+    </form>
 </div>
-
-<form asp-controller="Account" asp-action="Logout" method="post">
-    <button type="submit" class="btn btn-outline-danger">Logout</button>
-</form>

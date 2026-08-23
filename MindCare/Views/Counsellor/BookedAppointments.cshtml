@@ -5,32 +5,117 @@
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
 }
 
-<h1 class="h3 mb-3">Booked Appointments</h1>
+<style>
+    .mc-page { max-width: 900px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-empty-state {
+        background: var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.75rem;
+        text-align: center;
+        color: var(--mc-deep, #2F5D57);
+        margin-bottom: 1.5rem;
+    }
+    .mc-appt-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .mc-appt-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.1rem 1.3rem;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .mc-appt-card:hover {
+        box-shadow: 0 8px 22px rgba(47, 93, 87, 0.09);
+        transform: translateY(-1px);
+    }
+    .mc-appt-date {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 700;
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        font-size: 1.05rem;
+    }
+    .mc-appt-time {
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.8;
+        font-size: 0.95rem;
+    }
+    .mc-appt-user {
+        margin-top: 0.6rem;
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.85;
+        font-size: 0.95rem;
+    }
+    .mc-status-pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.28rem 0.85rem;
+        font-weight: 600;
+        font-size: 0.82rem;
+        align-self: flex-start;
+    }
+    .mc-status-booked { background: var(--mc-soft, #A7E3D4); color: var(--mc-deep, #2F5D57); }
+    .mc-status-completed { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+    .mc-status-cancelled { background: #F3E3D3; color: #8A5A2B; }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-deep, #2F5D57);
+        color: var(--mc-deep, #2F5D57);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+</style>
 
-@if (!Model.Any())
-{
-    <p>No appointments have been booked yet.</p>
-}
-else
-{
-    <div class="list-group mb-3">
-        @foreach (var appointment in Model)
-        {
-            <div class="list-group-item">
-                <div class="d-flex justify-content-between flex-wrap gap-2">
-                    <div>
-                        <strong>@appointment.Date.ToString("dd MMM yyyy")</strong>
-                        <div>@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</div>
+<div class="mc-page">
+    <h1 class="h3 mb-3">Booked Appointments</h1>
+
+    @if (!Model.Any())
+    {
+        <div class="mc-empty-state">
+            <p class="mb-0">No appointments have been booked yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="mc-appt-list">
+            @foreach (var appointment in Model)
+            {
+                var statusClass = appointment.Status switch
+                {
+                    MindCare.Models.AppointmentStatuses.Booked => "mc-status-booked",
+                    MindCare.Models.AppointmentStatuses.Completed => "mc-status-completed",
+                    MindCare.Models.AppointmentStatuses.Cancelled => "mc-status-cancelled",
+                    _ => "mc-status-booked"
+                };
+                <div class="mc-appt-card">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <div>
+                            <div class="mc-appt-date">@appointment.Date.ToString("dd MMM yyyy")</div>
+                            <div class="mc-appt-time">@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</div>
+                        </div>
+                        <span class="mc-status-pill @statusClass">@appointment.Status</span>
                     </div>
-                    <span class="badge bg-primary align-self-start">@appointment.Status</span>
+                    <div class="mc-appt-user">
+                        <div>User: @appointment.User.Name</div>
+                        <div>Email: @appointment.User.Email</div>
+                    </div>
                 </div>
-                <div class="mt-2">
-                    <div>User: @appointment.User.Name</div>
-                    <div>Email: @appointment.User.Email</div>
-                </div>
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
+    }
 
-<a asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
+    <a asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
+</div>

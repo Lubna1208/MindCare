@@ -5,66 +5,188 @@
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
 }
 
-<h1 class="h3 mb-3">Find and Book Counsellor</h1>
+<style>
+    .mc-page { max-width: 900px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-page h2 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-alert-danger {
+        background: #FBEAEA;
+        border: 1px solid #E7B3B3;
+        border-left: 4px solid #C96A6A;
+        color: #7A3535;
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-filter-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
+        margin-bottom: 1.5rem;
+    }
+    .mc-filter-card .form-label {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .mc-filter-card .form-select,
+    .mc-filter-card .form-control {
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 12px;
+        padding: 0.6rem 0.9rem;
+        background: var(--mc-mist, #F7FFFD);
+    }
+    .mc-filter-card .form-select:focus,
+    .mc-filter-card .form-control:focus {
+        border-color: var(--mc-teal, #5BB9A6);
+        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
+        background: #fff;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-deep, #2F5D57);
+        color: var(--mc-deep, #2F5D57);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+    .mc-btn-slot {
+        border: 1px solid var(--mc-teal, #5BB9A6);
+        color: var(--mc-teal, #5BB9A6);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.4rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-slot:hover { background: var(--mc-teal, #5BB9A6); color: #fff; }
+    .mc-slots-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        margin-bottom: 1.5rem;
+    }
+    .mc-slot-row {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 14px;
+        padding: 0.85rem 1.15rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .mc-slot-row:hover {
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.08);
+        transform: translateY(-1px);
+    }
+    .mc-slot-time {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 600;
+    }
+    .mc-empty-state {
+        background: var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--mc-deep, #2F5D57);
+        margin-bottom: 1.5rem;
+    }
+</style>
 
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
+<div class="mc-page">
+    <h1 class="h3 mb-3">Find and Book Counsellor</h1>
 
-<form asp-action="Index" method="get" class="row g-3 mb-4">
-    <div class="col-md-5">
-        <label for="counsellorProfileId" class="form-label">Select Counsellor</label>
-        <select id="counsellorProfileId" name="counsellorProfileId" class="form-select" required>
-            <option value="">Choose a counsellor</option>
-            @foreach (var counsellor in Model.Counsellors)
-            {
-                if (Model.CounsellorProfileId == counsellor.Id)
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="mc-alert-danger">@errorMessage</div>
+    }
+
+    <div class="mc-filter-card">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="counsellorProfileId" class="form-label">Select Counsellor</label>
+                <select id="counsellorProfileId" name="counsellorProfileId" class="form-select" required>
+                    <option value="">Choose a counsellor</option>
+                    @foreach (var counsellor in Model.Counsellors)
+                    {
+                        if (Model.CounsellorProfileId == counsellor.Id)
+                        {
+                            <option value="@counsellor.Id" selected>@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
+                        }
+                        else
+                        {
+                            <option value="@counsellor.Id">@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="date" class="form-label">Select Date</label>
+                <input id="date" name="date" value="@Model.Date?.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="mc-btn-primary w-100">View Slots</button>
+            </div>
+        </form>
+    </div>
+
+    <section>
+        <h2 class="h5 mb-3">Available Slots</h2>
+
+        @if (Model.CounsellorProfileId is null || Model.Date is null)
+        {
+            <div class="mc-empty-state">
+                <p class="mb-0">Select a counsellor and date to view available slots.</p>
+            </div>
+        }
+        else if (!Model.AvailableSlots.Any())
+        {
+            <div class="mc-empty-state">
+                <p class="mb-0">No available slots were found for this date.</p>
+            </div>
+        }
+        else
+        {
+            <div class="mc-slots-list">
+                @foreach (var slot in Model.AvailableSlots)
                 {
-                    <option value="@counsellor.Id" selected>@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
+                    <form asp-action="SelectSlot" method="post" class="mc-slot-row">
+                        <span class="mc-slot-time">@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
+                        <input type="hidden" name="slotId" value="@slot.Id" />
+                        <button type="submit" class="mc-btn-slot">Continue to Payment</button>
+                    </form>
                 }
-                else
-                {
-                    <option value="@counsellor.Id">@counsellor.ApplicationUser.Name - @counsellor.Specialization</option>
-                }
-            }
-        </select>
-    </div>
+            </div>
+        }
+    </section>
 
-    <div class="col-md-4">
-        <label for="date" class="form-label">Select Date</label>
-        <input id="date" name="date" value="@Model.Date?.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
-    </div>
-
-    <div class="col-md-3 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">View Slots</button>
-    </div>
-</form>
-
-<section>
-    <h2 class="h5">Available Slots</h2>
-
-    @if (Model.CounsellorProfileId is null || Model.Date is null)
-    {
-        <p>Select a counsellor and date to view available slots.</p>
-    }
-    else if (!Model.AvailableSlots.Any())
-    {
-        <p>No available slots were found for this date.</p>
-    }
-    else
-    {
-        <div class="list-group mb-3">
-            @foreach (var slot in Model.AvailableSlots)
-            {
-                <form asp-action="SelectSlot" method="post" class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
-                    <input type="hidden" name="slotId" value="@slot.Id" />
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Continue to Payment</button>
-                </form>
-            }
-        </div>
-    }
-</section>
-
-<a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
+    <a asp-controller="Dashboard" asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
+</div>
