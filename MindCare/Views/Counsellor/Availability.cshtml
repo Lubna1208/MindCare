@@ -6,77 +6,188 @@
     var groupedSlots = Model.Slots.GroupBy(slot => slot.Date.Date);
 }
 
-<h1 class="h3 mb-3">My Availability</h1>
-
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div class="alert alert-success">@successMessage</div>
-}
-
-<section class="mb-4">
-    <h2 class="h5">Create Availability</h2>
-    <form asp-action="Availability" method="post" class="row g-3">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-        <div class="col-md-3">
-            <label asp-for="Form.Date" class="form-label"></label>
-            <input asp-for="Form.Date" class="form-control" type="date" />
-            <span asp-validation-for="Form.Date" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label asp-for="Form.StartTime" class="form-label"></label>
-            <input asp-for="Form.StartTime" class="form-control" type="time" />
-            <span asp-validation-for="Form.StartTime" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label asp-for="Form.EndTime" class="form-label"></label>
-            <input asp-for="Form.EndTime" class="form-control" type="time" />
-            <span asp-validation-for="Form.EndTime" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3">
-            <label asp-for="Form.SlotDurationMinutes" class="form-label"></label>
-            <input asp-for="Form.SlotDurationMinutes" class="form-control" min="1" />
-            <span asp-validation-for="Form.SlotDurationMinutes" class="text-danger"></span>
-        </div>
-
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Generate Slots</button>
-            <a asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
-        </div>
-    </form>
-</section>
-
-<section>
-    <h2 class="h5">Created Slots</h2>
-
-    @if (!Model.Slots.Any())
-    {
-        <p>No availability has been created yet.</p>
+<style>
+    .mc-page { max-width: 1000px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
     }
-    else
+    .mc-section-heading {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+        margin-bottom: 0.85rem;
+    }
+    .mc-alert-success {
+        background: var(--mc-pale, #D9F5EF);
+        border: 1px solid var(--mc-soft, #A7E3D4);
+        border-left: 4px solid var(--mc-teal, #5BB9A6);
+        color: var(--mc-deep, #2F5D57);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-form-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 18px;
+        padding: 1.5rem 1.75rem;
+        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
+        margin-bottom: 2rem;
+    }
+    .mc-form-card .form-label {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .mc-form-card .form-control {
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 12px;
+        padding: 0.55rem 0.85rem;
+        background: var(--mc-mist, #F7FFFD);
+    }
+    .mc-form-card .form-control:focus {
+        border-color: var(--mc-teal, #5BB9A6);
+        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
+        background: #fff;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-deep, #2F5D57);
+        color: var(--mc-deep, #2F5D57);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 0.6rem;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+    .mc-empty-state {
+        background: var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-date-group { margin-bottom: 1.5rem; }
+    .mc-date-heading {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+        font-size: 0.98rem;
+    }
+    .mc-slot-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .mc-slot-row {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 14px;
+        padding: 0.7rem 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .mc-slot-time { color: var(--mc-deep, #2F5D57); font-weight: 600; }
+    .mc-status-pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.25rem 0.8rem;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    .mc-status-available { background: var(--mc-soft, #A7E3D4); color: var(--mc-deep, #2F5D57); }
+    .mc-status-booked { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+</style>
+
+<div class="mc-page">
+    <h1 class="h3 mb-3">My Availability</h1>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
     {
-        foreach (var group in groupedSlots)
-        {
-            <div class="mb-3">
-                <h3 class="h6">@group.Key.ToString("dd MMMM yyyy")</h3>
-                <div class="list-group">
-                    @foreach (var slot in group)
-                    {
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
-                            <span class="badge @(slot.IsBooked ? "bg-secondary" : "bg-success")">
-                                @(slot.IsBooked ? "Booked" : "Available")
-                            </span>
-                        </div>
-                    }
+        <div class="mc-alert-success">@successMessage</div>
+    }
+
+    <section>
+        <h2 class="h5 mc-section-heading">Create Availability</h2>
+        <div class="mc-form-card">
+            <form asp-action="Availability" method="post" class="row g-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="col-md-3">
+                    <label asp-for="Form.Date" class="form-label"></label>
+                    <input asp-for="Form.Date" class="form-control" type="date" />
+                    <span asp-validation-for="Form.Date" class="text-danger"></span>
                 </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Form.StartTime" class="form-label"></label>
+                    <input asp-for="Form.StartTime" class="form-control" type="time" />
+                    <span asp-validation-for="Form.StartTime" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Form.EndTime" class="form-label"></label>
+                    <input asp-for="Form.EndTime" class="form-control" type="time" />
+                    <span asp-validation-for="Form.EndTime" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Form.SlotDurationMinutes" class="form-label"></label>
+                    <input asp-for="Form.SlotDurationMinutes" class="form-control" min="1" />
+                    <span asp-validation-for="Form.SlotDurationMinutes" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <button type="submit" class="mc-btn-primary">Generate Slots</button>
+                    <a asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="h5 mc-section-heading">Created Slots</h2>
+
+        @if (!Model.Slots.Any())
+        {
+            <div class="mc-empty-state">
+                <p class="mb-0">No availability has been created yet.</p>
             </div>
         }
-    }
-</section>
+        else
+        {
+            foreach (var group in groupedSlots)
+            {
+                <div class="mc-date-group">
+                    <div class="mc-date-heading">@group.Key.ToString("dd MMMM yyyy")</div>
+                    <div class="mc-slot-list">
+                        @foreach (var slot in group)
+                        {
+                            <div class="mc-slot-row">
+                                <span class="mc-slot-time">@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
+                                <span class="mc-status-pill @(slot.IsBooked ? "mc-status-booked" : "mc-status-available")">
+                                    @(slot.IsBooked ? "Booked" : "Available")
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </section>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
