@@ -4,8 +4,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

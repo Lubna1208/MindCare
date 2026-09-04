@@ -34,6 +34,17 @@ public class Appointment
     [StringLength(20)]
     public string PaymentStatus { get; set; } = PaymentStatuses.Pending;
 
+    [StringLength(255)]
+    public string? StripeSessionId { get; set; }
+
+    [StringLength(255)]
+    public string? StripePaymentIntentId { get; set; }
+
+    public long? AmountPaidCents { get; set; }
+
+    [StringLength(10)]
+    public string? Currency { get; set; }
+
     public DateTime CreatedAt { get; set; }
 }
 
@@ -47,5 +58,6 @@ public static class AppointmentStatuses
 public static class PaymentStatuses
 {
     public const string Pending = "Pending";
-    public const string DummyPaid = "DummyPaid";
+    public const string Paid = "Paid";
+    public const string Failed = "Failed";
 }
