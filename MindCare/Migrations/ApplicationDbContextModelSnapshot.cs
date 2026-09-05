@@ -431,6 +431,121 @@ namespace MindCare.Migrations
                     b.ToTable("CounsellorProfiles");
                 });
 
+            modelBuilder.Entity("MindCare.Models.ForumComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ForumPostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ForumPostId", "CreatedAt");
+
+                    b.ToTable("ForumComments");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ForumPosts");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ReporterUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("ReporterUserId", "CommentId", "Status")
+                        .IsUnique()
+                        .HasFilter("[CommentId] IS NOT NULL AND [Status] = 'Pending'");
+
+                    b.HasIndex("ReporterUserId", "PostId", "Status")
+                        .IsUnique()
+                        .HasFilter("[PostId] IS NOT NULL AND [Status] = 'Pending'");
+
+                    b.ToTable("ForumReports");
+                });
+
             modelBuilder.Entity("MindCare.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -766,6 +881,53 @@ namespace MindCare.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
+            modelBuilder.Entity("MindCare.Models.ForumComment", b =>
+                {
+                    b.HasOne("MindCare.Models.ForumPost", "ForumPost")
+                        .WithMany("Comments")
+                        .HasForeignKey("ForumPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithMany("ForumComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ForumPost");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumPost", b =>
+                {
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithMany("ForumPosts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumReport", b =>
+                {
+                    b.HasOne("MindCare.Models.ForumComment", "Comment")
+                        .WithMany("Reports")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("MindCare.Models.ForumPost", "Post")
+                        .WithMany("Reports")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("MindCare.Models.Message", b =>
                 {
                     b.HasOne("MindCare.Models.Appointment", "Appointment")
@@ -843,6 +1005,10 @@ namespace MindCare.Migrations
 
                     b.Navigation("Assessments");
 
+                    b.Navigation("ForumComments");
+
+                    b.Navigation("ForumPosts");
+
                     b.Navigation("MoodLogs");
 
                     b.Navigation("NotificationPreference");
@@ -876,6 +1042,18 @@ namespace MindCare.Migrations
                     b.Navigation("Appointments");
 
                     b.Navigation("AvailabilitySlots");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumComment", b =>
+                {
+                    b.Navigation("Reports");
+                });
+
+            modelBuilder.Entity("MindCare.Models.ForumPost", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Reports");
                 });
 #pragma warning restore 612, 618
         }
