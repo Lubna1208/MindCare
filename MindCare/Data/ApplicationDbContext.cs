@@ -27,6 +27,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Message> Messages => Set<Message>();
 
+    public DbSet<TrustedContact> TrustedContacts => Set<TrustedContact>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -105,5 +107,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Message>()
             .HasIndex(message => new { message.AppointmentId, message.SentAt });
+
+        builder.Entity<TrustedContact>()
+            .HasOne(contact => contact.User)
+            .WithMany(user => user.TrustedContacts)
+            .HasForeignKey(contact => contact.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<TrustedContact>()
+            .HasIndex(contact => new { contact.UserId, contact.Name });
     }
 }

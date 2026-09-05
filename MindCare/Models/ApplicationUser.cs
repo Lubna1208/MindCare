@@ -15,4 +15,6 @@ public class ApplicationUser : IdentityUser
     public ICollection<Message> SentMessages { get; set; } = new List<Message>();
 
     public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+
+    public ICollection<TrustedContact> TrustedContacts { get; set; } = new List<TrustedContact>();
 }

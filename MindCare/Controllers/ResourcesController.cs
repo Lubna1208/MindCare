@@ -6,7 +6,7 @@ using MindCare.Models;
 
 namespace MindCare.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 public class ResourcesController : Controller
 {
     private readonly ApplicationDbContext _context;

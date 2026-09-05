@@ -218,6 +218,14 @@ public class BookingController : Controller
                 return (int?)null;
             }
 
+            var latestAssessment = await _context.Assessments
+                .Where(assessmentItem => assessmentItem.UserId == user.Id)
+                .OrderByDescending(assessmentItem => assessmentItem.CreatedAt)
+                .ThenByDescending(assessmentItem => assessmentItem.Id)
+                .FirstOrDefaultAsync();
+
+            var isHighRisk = string.Equals(latestAssessment?.RiskLevel?.Trim(), "High", StringComparison.OrdinalIgnoreCase);
+
             slot.IsBooked = true;
             var appointment = new Appointment
             {
@@ -229,6 +237,9 @@ public class BookingController : Controller
                 EndTime = slot.EndTime,
                 Status = AppointmentStatuses.Booked,
                 PaymentStatus = PaymentStatuses.Paid,
+                IsHighRisk = isHighRisk,
+                RiskLevel = isHighRisk ? "High" : (latestAssessment?.RiskLevel ?? "Low"),
+                Priority = isHighRisk ? AppointmentPriorities.High : AppointmentPriorities.Normal,
                 StripeSessionId = session.Id,
                 StripePaymentIntentId = session.PaymentIntentId,
                 AmountPaidCents = session.AmountTotal,

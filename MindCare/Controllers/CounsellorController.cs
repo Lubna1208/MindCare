@@ -32,6 +32,17 @@ public class CounsellorController : Controller
             .Include(item => item.ApplicationUser)
             .FirstOrDefaultAsync(item => item.ApplicationUserId == user.Id);
 
+        if (profile is not null)
+        {
+            var highPriorityCount = await _context.Appointments
+                .CountAsync(appointment =>
+                    appointment.CounsellorProfileId == profile.Id &&
+                    (appointment.IsHighRisk || appointment.Priority == AppointmentPriorities.High) &&
+                    (appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed));
+
+            ViewBag.HighPriorityAppointmentsCount = highPriorityCount;
+        }
+
         return View(profile);
     }
 

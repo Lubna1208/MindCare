@@ -6,55 +6,31 @@
 
 <div class="mc-dashboard">
     <section class="mc-welcome-banner mb-4" aria-labelledby="dashboard-title">
-        <div class="mc-avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6-3.8-6-10a3.5 3.5 0 0 1 6-2.4A3.5 3.5 0 0 1 18 11c0 6.2-6 10-6 10Z" /><path d="M12 8.6v8.2" /></svg>
-        </div>
+        <div class="mc-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6-3.8-6-10a3.5 3.5 0 0 1 6-2.4A3.5 3.5 0 0 1 18 11c0 6.2-6 10-6 10Z" /><path d="M12 8.6v8.2" /></svg></div>
         <div>
             <p class="mc-eyebrow mb-1">Your wellbeing space</p>
-            <h1 id="dashboard-title" class="mc-page-title mb-1">User Dashboard</h1>
-            <p class="mc-welcome-copy mb-0">Welcome, @Model.Name.</p>
+            <h1 id="dashboard-title" class="mc-page-title mb-1">Welcome back, @Model.Name</h1>
+            <p class="mc-welcome-copy mb-0">How are you feeling today? Take a small moment to check in with yourself.</p>
         </div>
     </section>
 
-    <div class="row g-4">
-        <div class="col-12 col-lg-5">
-            <section class="mc-card mc-profile-card h-100" aria-labelledby="profile-title">
-                <div class="mc-card-heading">
-                    <span class="mc-heading-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.25" /><path d="M5.5 20c.5-3.4 3.05-5.25 6.5-5.25s6 1.85 6.5 5.25" /></svg>
-                    </span>
-                    <h2 id="profile-title" class="mc-section-title mb-0">Profile</h2>
-                </div>
-                <div class="mc-profile-details">
-                    <p class="mb-3"><strong>Name</strong><span>@Model.Name</span></p>
-                    <p class="mb-0"><strong>Email</strong><span>@Model.Email</span></p>
-                </div>
-            </section>
+    <section class="mb-4" aria-labelledby="quick-actions-title">
+        <p class="mc-eyebrow mb-1">Start where you are</p>
+        <h2 id="quick-actions-title" class="mc-section-title mb-3">Quick actions</h2>
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-xl-4"><article class="mc-card mc-action-card-dashboard h-100"><span class="mc-feature-icon mb-3" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8" /><path d="M8.5 14.5c1 .9 2.2 1.35 3.5 1.35s2.5-.45 3.5-1.35M9 9.5h.01M15 9.5h.01" /></svg></span><h3 class="h4 mc-action-card-title">How are you feeling today?</h3><p class="mc-action-card-copy">Notice your mood and keep a private record of what is on your mind.</p><a class="btn mc-btn-primary mt-auto align-self-start" asp-controller="Mood" asp-action="Index">Track My Mood</a></article></div>
+            <div class="col-12 col-md-6 col-xl-4"><article class="mc-card mc-action-card-dashboard h-100"><span class="mc-feature-icon mb-3" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8M9 3v2M15 3v2M7 7h10v13H7z" /><path d="m9.5 12 1.5 1.5 3.5-3.5M9.5 17h5" /></svg></span><h3 class="h4 mc-action-card-title">Check in with yourself</h3><p class="mc-action-card-copy">Use a brief assessment to reflect on how things have been feeling lately.</p><a class="btn mc-btn-primary mt-auto align-self-start" asp-controller="Assessment" asp-action="Index">Take Assessment</a></article></div>
+            <div class="col-12 col-md-6 col-xl-4"><article class="mc-card mc-action-card-dashboard h-100"><span class="mc-feature-icon mb-3" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17.5H7.5A2.5 2.5 0 0 0 5 22z" /><path d="M5 4.5v15" /></svg></span><h3 class="h4 mc-action-card-title">Explore resources</h3><p class="mc-action-card-copy">Find calm, practical reading for everyday wellbeing and support.</p><a class="btn mc-btn-outline mt-auto align-self-start" asp-controller="Resources" asp-action="Index">Browse Resources</a></article></div>
         </div>
+    </section>
 
-        <div class="col-12 col-lg-7">
-            <section class="mc-card mc-features-card h-100" aria-labelledby="features-title">
-                <div class="mc-card-heading">
-                    <span class="mc-heading-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V10" /><path d="M8 20v-5M16 20v-7" /><path d="M5 20h14" /></svg>
-                    </span>
-                    <div>
-                        <h2 id="features-title" class="mc-section-title mb-1">MindCare Features</h2>
-                        <p class="mc-section-intro mb-0">Small steps can support a steadier day.</p>
-                    </div>
-                </div>
-                <ul class="mc-feature-grid">
-                    <li><a class="mc-feature-link" asp-controller="Mood" asp-action="Index"><span class="mc-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8" /><path d="M8.5 14.5c1 .9 2.2 1.35 3.5 1.35s2.5-.45 3.5-1.35M9 9.5h.01M15 9.5h.01" /></svg></span><span>Mood tracking</span><span class="mc-arrow" aria-hidden="true">→</span></a></li>
-                    <li><a class="mc-feature-link" asp-controller="Assessment" asp-action="Index"><span class="mc-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8M9 3v2M15 3v2M7 7h10v13H7z" /><path d="m9.5 12 1.5 1.5 3.5-3.5M9.5 17h5" /></svg></span><span>Take Assessment</span><span class="mc-arrow" aria-hidden="true">→</span></a></li>
-                    <li><a class="mc-feature-link" asp-controller="Resources" asp-action="Index"><span class="mc-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17.5H7.5A2.5 2.5 0 0 0 5 22z" /><path d="M5 4.5v15" /></svg></span><span>Resources</span><span class="mc-arrow" aria-hidden="true">→</span></a></li>
-                    <li><a class="mc-feature-link" asp-controller="Booking" asp-action="Index"><span class="mc-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6-3.8-6-10a3.5 3.5 0 0 1 6-2.4A3.5 3.5 0 0 1 18 11c0 6.2-6 10-6 10Z" /><path d="M12 8.6v8.2" /></svg></span><span>Find/Book Counsellor</span><span class="mc-arrow" aria-hidden="true">&rarr;</span></a></li>
-                    <li><a class="mc-feature-link" asp-controller="Booking" asp-action="MyAppointments"><span class="mc-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v3M16 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /><path d="m9 14 2 2 4-4" /></svg></span><span>My Appointments</span><span class="mc-arrow" aria-hidden="true">&rarr;</span></a></li>
-                </ul>
-            </section>
-        </div>
-    </div>
+    <section class="mc-immediate-help-card mb-4" aria-labelledby="immediate-help-title">
+        <div><p class="mc-eyebrow mb-1">Support when it matters</p><h2 id="immediate-help-title" class="mc-section-title mb-2">Need immediate help?</h2><p class="mb-0">Sometimes things can feel overwhelming. Find trusted contacts and next steps for support right now.</p></div>
+        <a class="btn mc-btn-support flex-shrink-0" asp-controller="Support" asp-action="Immediate">Get Immediate Support</a>
+    </section>
 
-    <form asp-controller="Account" asp-action="Logout" method="post" class="mc-dashboard-logout">
-        <button type="submit" class="btn btn-outline-danger mc-logout-button">Logout</button>
-    </form>
+    <section class="row g-4" aria-label="Your account and care options">
+        <div class="col-12 col-lg-5"><article class="mc-card h-100" aria-labelledby="profile-title"><div class="mc-card-heading"><span class="mc-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.25" /><path d="M5.5 20c.5-3.4 3.05-5.25 6.5-5.25s6 1.85 6.5 5.25" /></svg></span><h2 id="profile-title" class="mc-section-title mb-0">Your profile</h2></div><div class="mc-profile-details"><p class="mb-3"><strong>Name</strong><span>@Model.Name</span></p><p class="mb-0"><strong>Email</strong><span>@Model.Email</span></p></div></article></div>
+        <div class="col-12 col-lg-7"><article class="mc-card h-100" aria-labelledby="care-title"><div class="mc-card-heading"><span class="mc-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6-3.8-6-10a3.5 3.5 0 0 1 6-2.4A3.5 3.5 0 0 1 18 11c0 6.2-6 10-6 10Z" /><path d="M12 8.6v8.2" /></svg></span><div><h2 id="care-title" class="mc-section-title mb-1">Continue your care</h2><p class="mc-section-intro mb-0">Connect with a counsellor or review your appointments when you are ready.</p></div></div><div class="d-flex flex-wrap gap-2"><a class="btn mc-btn-outline" asp-controller="Booking" asp-action="Index">Find a Counsellor</a><a class="btn mc-btn-outline" asp-controller="Booking" asp-action="MyAppointments">My Appointments</a></div></article></div>
+    </section>
 </div>

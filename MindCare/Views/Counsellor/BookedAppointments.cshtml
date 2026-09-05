@@ -123,17 +123,35 @@
                     MindCare.Models.AppointmentStatuses.Cancelled => "mc-status-cancelled",
                     _ => "mc-status-booked"
                 };
-                <div class="mc-appt-card">
+                var isHighPriority = appointment.IsHighPriority ||
+                    appointment.IsHighRisk ||
+                    appointment.Priority == MindCare.Models.AppointmentPriorities.High ||
+                    string.Equals(appointment.RiskLevel, "High", StringComparison.OrdinalIgnoreCase);
+                <div class="mc-appt-card" style="@(isHighPriority ? "border-left: 5px solid #dc3545;" : "")">
                     <div class="d-flex justify-content-between flex-wrap gap-2">
                         <div>
                             <div class="mc-appt-date">@appointment.Date.ToString("dd MMM yyyy")</div>
                             <div class="mc-appt-time">@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</div>
                         </div>
-                        <span class="mc-status-pill @statusClass">@appointment.Status</span>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            @if (isHighPriority)
+                            {
+                                <span class="badge bg-danger" style="border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+                                    ⚠️ High Priority Support
+                                </span>
+                            }
+                            <span class="mc-status-pill @statusClass">@appointment.Status</span>
+                        </div>
                     </div>
                     <div class="mc-appt-user">
                         <div>User: @appointment.User.Name</div>
                         <div>Email: @appointment.User.Email</div>
+                        @if (isHighPriority)
+                        {
+                            <div class="text-danger fw-semibold mt-1">
+                                Priority Case: High-risk user assessment
+                            </div>
+                        }
                     </div>
                     @if (CanOpenChat(appointment))
                     {

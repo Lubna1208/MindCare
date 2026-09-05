@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MindCare.Models;
 
@@ -34,6 +35,32 @@ public class Appointment
     [StringLength(20)]
     public string PaymentStatus { get; set; } = PaymentStatuses.Pending;
 
+    public bool IsHighRisk { get; set; }
+
+    [StringLength(20)]
+    public string? RiskLevel { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    public string Priority { get; set; } = AppointmentPriorities.Normal;
+
+    [NotMapped]
+    public bool IsHighPriority
+    {
+        get => IsHighRisk ||
+               string.Equals(Priority, AppointmentPriorities.High, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(RiskLevel, "High", StringComparison.OrdinalIgnoreCase);
+        set
+        {
+            IsHighRisk = value;
+            if (value)
+            {
+                Priority = AppointmentPriorities.High;
+                RiskLevel = "High";
+            }
+        }
+    }
+
     [StringLength(255)]
     public string? StripeSessionId { get; set; }
 
@@ -48,6 +75,12 @@ public class Appointment
     public DateTime CreatedAt { get; set; }
 
     public ICollection<Message> Messages { get; set; } = new List<Message>();
+}
+
+public static class AppointmentPriorities
+{
+    public const string Normal = "Normal";
+    public const string High = "High";
 }
 
 public static class AppointmentStatuses

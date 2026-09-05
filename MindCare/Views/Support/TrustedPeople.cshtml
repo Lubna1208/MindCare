@@ -1,0 +1,55 @@
+@model IReadOnlyList<MindCare.Models.TrustedContact>
+
+@{
+    ViewData["Title"] = "Trusted People";
+}
+
+<div class="mc-trusted-people-page">
+    <header class="mc-trusted-header mb-4">
+        <p class="mc-eyebrow mb-1">Your support circle</p>
+        <h1 class="mc-page-title mb-2">Trusted People</h1>
+        <p class="mb-0">Save the people you may want to reach when you need support. Only you can see and manage this list.</p>
+    </header>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert mc-success-message" role="status">@successMessage</div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <h2 class="mc-section-title mb-0">Saved contacts</h2>
+        <a asp-action="AddTrustedPerson" class="btn mc-btn-primary">Add Trusted Person</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <section class="mc-trusted-empty-state" aria-label="No trusted people saved">
+            <h2 class="h5 mc-section-title">No trusted people saved yet</h2>
+            <p class="mb-0">You can add someone now, so their details are easy to find later.</p>
+        </section>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var contact in Model)
+            {
+                <div class="col-12 col-md-6">
+                    <article class="mc-trusted-contact-card h-100">
+                        <p class="mc-eyebrow mb-1">@contact.Relationship</p>
+                        <h3 class="h4 mc-action-card-title mb-1">@contact.Name</h3>
+                        <p class="mc-contact-phone mb-3">@contact.PhoneNumber</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="tel:@contact.PhoneNumber" class="btn mc-btn-primary">Call</a>
+                            <a asp-action="EditTrustedPerson" asp-route-id="@contact.Id" class="btn mc-btn-outline">Edit</a>
+                            <form asp-action="DeleteTrustedPerson" asp-route-id="@contact.Id" method="post" onsubmit="return confirm('Remove this trusted person?');">
+                                <button type="submit" class="btn mc-btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-4"><a asp-action="Immediate" class="mc-text-link">Back to Immediate Support</a></div>
+</div>
