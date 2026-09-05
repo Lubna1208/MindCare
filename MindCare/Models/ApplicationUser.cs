@@ -17,4 +17,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 
     public ICollection<TrustedContact> TrustedContacts { get; set; } = new List<TrustedContact>();
+
+    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public NotificationPreference? NotificationPreference { get; set; }
 }

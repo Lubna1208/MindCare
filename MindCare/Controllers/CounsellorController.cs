@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.ViewModels;
+using MindCare.Services;
 
 namespace MindCare.Controllers;
 
@@ -13,11 +14,13 @@ public class CounsellorController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly NotificationService _notificationService;
 
-    public CounsellorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public CounsellorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     public async Task<IActionResult> Index()
@@ -27,6 +30,8 @@ public class CounsellorController : Controller
         {
             return Challenge();
         }
+
+        await _notificationService.EnsureChatAvailableNotificationsAsync();
 
         var profile = await _context.CounsellorProfiles
             .Include(item => item.ApplicationUser)
@@ -150,6 +155,8 @@ public class CounsellorController : Controller
         {
             return Challenge();
         }
+
+        await _notificationService.EnsureChatAvailableNotificationsAsync();
 
         var today = DateTime.Today;
         var now = DateTime.Now.TimeOfDay;

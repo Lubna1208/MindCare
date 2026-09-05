@@ -69,6 +69,18 @@
                                     <a class="nav-link mc-nav-link" asp-controller="Counsellor" asp-action="BookedAppointments">Booked Appointments</a>
                                 </li>
                             }
+                            @if (User.IsInRole("User") || User.IsInRole("Counsellor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link mc-nav-link" asp-controller="Notification" asp-action="Index">@await Component.InvokeAsync("NotificationCount")</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("User"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link mc-nav-link" asp-controller="Notification" asp-action="Settings">Notification Settings</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link mc-nav-link" asp-controller="Resources" asp-action="Index">Resources</a>
                             </li>

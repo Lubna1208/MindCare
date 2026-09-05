@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
+using MindCare.Services;
 using MindCare.ViewModels;
 using Stripe;
 using Stripe.Checkout;
@@ -17,15 +18,18 @@ public class BookingController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _configuration;
+    private readonly NotificationService _notificationService;
 
     public BookingController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        NotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
         _configuration = configuration;
+        _notificationService = notificationService;
     }
 
     private long AppointmentFeeCents =>
@@ -188,6 +192,7 @@ public class BookingController : Controller
 
         if (existingAppointment is not null)
         {
+            await _notificationService.CreateAppointmentBookedNotificationsAsync(existingAppointment.Id);
             return RedirectToAction(nameof(Confirmation), new { id = existingAppointment.Id });
         }
 
@@ -270,6 +275,8 @@ public class BookingController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        await _notificationService.CreateAppointmentBookedNotificationsAsync(appointmentId.Value);
+
         return RedirectToAction(nameof(Confirmation), new { id = appointmentId });
     }
 
@@ -310,6 +317,8 @@ public class BookingController : Controller
         {
             return Challenge();
         }
+
+        await _notificationService.EnsureChatAvailableNotificationsAsync();
 
         var today = DateTime.Today;
         var now = DateTime.Now.TimeOfDay;

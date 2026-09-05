@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MindCare.Models;
+using MindCare.Services;
 
 namespace MindCare.Controllers;
 
@@ -10,10 +11,12 @@ namespace MindCare.Controllers;
 public class DashboardController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly NotificationService _notificationService;
 
-    public DashboardController(UserManager<ApplicationUser> userManager)
+    public DashboardController(UserManager<ApplicationUser> userManager, NotificationService notificationService)
     {
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     public async Task<IActionResult> Index()
@@ -23,6 +26,9 @@ public class DashboardController : Controller
         {
             return Challenge();
         }
+
+        await _notificationService.EnsureDailyMoodReminderAsync(user.Id);
+        await _notificationService.EnsureChatAvailableNotificationsAsync();
 
         return View(user);
     }

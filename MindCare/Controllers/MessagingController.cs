@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.ViewModels;
+using MindCare.Services;
 
 namespace MindCare.Controllers;
 
@@ -14,16 +15,19 @@ public class MessagingController : Controller
     private const int MaxMessageLength = 2000;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly NotificationService _notificationService;
 
-    public MessagingController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public MessagingController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Chat(int appointmentId)
     {
+        await _notificationService.EnsureChatAvailableNotificationsAsync();
         var access = await GetChatAccessAsync(appointmentId);
         if (!access.CanOpenChat)
         {

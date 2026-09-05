@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.ViewModels;
+using MindCare.Services;
 
 namespace MindCare.Controllers;
 
@@ -13,16 +14,21 @@ public class MoodController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly NotificationService _notificationService;
 
-    public MoodController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public MoodController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        await _notificationService.EnsureDailyMoodReminderAsync(user.Id);
         return View(new MoodLogViewModel());
     }
 

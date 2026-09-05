@@ -29,6 +29,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<TrustedContact> TrustedContacts => Set<TrustedContact>();
 
+    public DbSet<Notification> Notifications => Set<Notification>();
+
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -116,5 +120,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<TrustedContact>()
             .HasIndex(contact => new { contact.UserId, contact.Name });
+
+        builder.Entity<Notification>()
+            .HasOne(notification => notification.User)
+            .WithMany(user => user.Notifications)
+            .HasForeignKey(notification => notification.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Notification>()
+            .HasIndex(notification => new { notification.UserId, notification.EventKey })
+            .IsUnique()
+            .HasFilter("[EventKey] IS NOT NULL");
+
+        builder.Entity<NotificationPreference>()
+            .HasOne(preference => preference.User)
+            .WithOne(user => user.NotificationPreference)
+            .HasForeignKey<NotificationPreference>(preference => preference.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<NotificationPreference>()
+            .HasIndex(preference => preference.UserId)
+            .IsUnique();
     }
 }
