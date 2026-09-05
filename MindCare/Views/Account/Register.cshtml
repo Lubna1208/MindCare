@@ -4,9 +4,74 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <h1 class="h3 mb-3">Register</h1>
+<style>
+    .mc-auth-wrap {
+        max-width: 460px;
+        margin: 1.5rem auto 0;
+    }
+    .mc-auth-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
+    }
+    .mc-auth-card h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+        margin-bottom: 0.3rem;
+    }
+    .mc-auth-subtitle {
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.7;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+    .mc-auth-card .form-label {
+        color: var(--mc-deep, #2F5D57);
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .mc-auth-card .form-control {
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 12px;
+        padding: 0.65rem 0.9rem;
+        background: var(--mc-mist, #F7FFFD);
+    }
+    .mc-auth-card .form-control:focus {
+        border-color: var(--mc-teal, #5BB9A6);
+        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
+        background: #fff;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.7rem 1rem;
+        font-weight: 600;
+        width: 100%;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-auth-footer {
+        margin-top: 1.25rem;
+        text-align: center;
+        color: var(--mc-deep, #2F5D57);
+        font-size: 0.95rem;
+    }
+    .mc-auth-footer a {
+        color: var(--mc-teal, #5BB9A6);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .mc-auth-footer a:hover { color: var(--mc-deep, #2F5D57); text-decoration: underline; }
+</style>
+
+<div class="mc-auth-wrap">
+    <div class="mc-auth-card">
+        <h1 class="h3">Register</h1>
+        <p class="mc-auth-subtitle">Create your MindCare account to start tracking your wellbeing.</p>
 
         <form asp-action="Register" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -35,10 +100,10 @@
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+            <button type="submit" class="mc-btn-primary">Register</button>
         </form>
 
-        <p class="mt-3">
+        <p class="mc-auth-footer">
             Already have an account?
             <a asp-controller="Account" asp-action="Login">Login</a>
         </p>

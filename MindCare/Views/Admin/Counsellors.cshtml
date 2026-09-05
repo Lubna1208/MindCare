@@ -4,54 +4,133 @@
     ViewData["Title"] = "Counsellors";
 }
 
-<h1 class="h3 mb-3">Counsellors</h1>
+<style>
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-alert-success {
+        background: var(--mc-pale, #D9F5EF);
+        border: 1px solid var(--mc-soft, #A7E3D4);
+        border-left: 4px solid var(--mc-teal, #5BB9A6);
+        color: var(--mc-deep, #2F5D57);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-alert-danger {
+        background: #FBEAEA;
+        border: 1px solid #E7B3B3;
+        border-left: 4px solid #C96A6A;
+        color: #7A3535;
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.55rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-btn-delete {
+        border: 1px solid #C96A6A;
+        color: #C96A6A;
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.35rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-delete:hover { background: #FBEAEA; color: #C96A6A; }
+    .mc-table-wrap {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 18px;
+        overflow-x: auto;
+    }
+    .mc-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+    }
+    .mc-table thead th {
+        background: var(--mc-pale, #D9F5EF);
+        color: var(--mc-deep, #2F5D57);
+        text-align: left;
+        padding: 0.85rem 1rem;
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+    .mc-table tbody td {
+        padding: 0.85rem 1rem;
+        border-top: 1px solid var(--mc-mist, #F7FFFD);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-table tbody tr:hover { background: var(--mc-mist, #F7FFFD); }
+</style>
 
-@if (TempData["SuccessMessage"] is string message)
-{
-    <div class="alert alert-success">@message</div>
-}
+<div class="mc-page">
+    <h1 class="h3 mb-3">Counsellors</h1>
 
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
+    @if (TempData["SuccessMessage"] is string message)
+    {
+        <div class="mc-alert-success">@message</div>
+    }
 
-<p>
-    <a asp-controller="Admin" asp-action="AddCounsellor" class="btn btn-primary">Add Counsellor</a>
-</p>
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="mc-alert-danger">@errorMessage</div>
+    }
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Specialization</th>
-            <th>Qualification</th>
-            <th>Experience</th>
-            <th class="text-end">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.ApplicationUser.Name</td>
-                <td>@item.ApplicationUser.Email</td>
-                <td>@item.Phone</td>
-                <td>@item.Specialization</td>
-                <td>@item.Qualification</td>
-                <td>@item.Experience</td>
-                <td class="text-end">
-                    <form asp-controller="Admin"
-                          asp-action="DeleteCounsellor"
-                          asp-route-id="@item.Id"
-                          method="post"
-                          onsubmit="return confirm('Delete this counsellor?');">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <p>
+        <a asp-controller="Admin" asp-action="AddCounsellor" class="mc-btn-primary">Add Counsellor</a>
+    </p>
+
+    <div class="mc-table-wrap">
+        <table class="mc-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Specialization</th>
+                    <th>Qualification</th>
+                    <th>Experience</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ApplicationUser.Name</td>
+                        <td>@item.ApplicationUser.Email</td>
+                        <td>@item.Phone</td>
+                        <td>@item.Specialization</td>
+                        <td>@item.Qualification</td>
+                        <td>@item.Experience</td>
+                        <td class="text-end">
+                            <form asp-controller="Admin"
+                                  asp-action="DeleteCounsellor"
+                                  asp-route-id="@item.Id"
+                                  method="post"
+                                  onsubmit="return confirm('Delete this counsellor?');">
+                                <button type="submit" class="mc-btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

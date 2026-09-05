@@ -1,0 +1,27 @@
+@model MindCare.ViewModels.TrustedContactViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="mb-3">
+    <label asp-for="Name" class="form-label mc-field-label"></label>
+    <input asp-for="Name" class="form-control mc-trusted-input" autocomplete="name" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Relationship" class="form-label mc-field-label"></label>
+    <select asp-for="Relationship" class="form-select mc-trusted-input">
+        <option value="">Choose a relationship</option>
+        <option>Mother</option>
+        <option>Father</option>
+        <option>Brother/Sister</option>
+        <option>Friend</option>
+        <option>Partner</option>
+        <option>Relative</option>
+        <option>Other</option>
+    </select>
+    <span asp-validation-for="Relationship" class="text-danger"></span>
+</div>
+<div class="mb-4">
+    <label asp-for="PhoneNumber" class="form-label mc-field-label"></label>
+    <input asp-for="PhoneNumber" type="tel" class="form-control mc-trusted-input" autocomplete="tel" />
+    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+</div>

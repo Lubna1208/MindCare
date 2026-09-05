@@ -1,0 +1,11 @@
+@model MindCare.ViewModels.NotificationPreferenceViewModel
+@{ ViewData["Title"] = "Notification Settings"; }
+<div class="mx-auto" style="max-width: 600px;">
+    <h1 class="h3 mb-3">Notification Settings</h1>
+    @if (TempData["SuccessMessage"] is string successMessage) { <div class="alert alert-success">@successMessage</div> }
+    <form asp-action="Settings" method="post" class="card card-body">
+        <div class="form-check mb-3"><input asp-for="DailyMoodReminderEnabled" class="form-check-input" /><label asp-for="DailyMoodReminderEnabled" class="form-check-label">Enable Daily Mood Reminder</label></div>
+        <div class="mb-3"><label asp-for="DailyMoodReminderTime" class="form-label"></label><input asp-for="DailyMoodReminderTime" type="time" class="form-control" /><span asp-validation-for="DailyMoodReminderTime" class="text-danger"></span></div>
+        <button type="submit" class="btn btn-primary align-self-start">Save</button>
+    </form>
+</div>

@@ -4,31 +4,34 @@
     ViewData["Title"] = Model.Title;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">@Model.Title</h1>
-    <a asp-action="Index" class="btn btn-outline-secondary">Back to Resources</a>
-</div>
+<div class="mc-resource-details-page">
+    <a asp-action="Index" class="mc-back-link">Back to Resources</a>
 
-<article class="card shadow-sm">
-    <div class="card-body">
-        <p><span class="badge text-bg-light border">@Model.Category</span></p>
-        <p class="lead">@Model.Description</p>
+    <article class="mc-resource-details-card">
+        <span class="mc-resource-badge">@Model.Category</span>
+        <h1 class="mc-page-title mt-3 mb-3">@Model.Title</h1>
+        <p class="mc-resource-details-summary">@Model.Description</p>
 
         @if (!string.IsNullOrWhiteSpace(Model.Content))
         {
-            <section class="mb-4">
-                <h2 class="h5">Resource</h2>
-                <p class="mb-0" style="white-space: pre-line">@Model.Content</p>
+            <section class="mc-resource-reading" aria-labelledby="resource-content-title">
+                <h2 id="resource-content-title" class="mc-section-title">Resource</h2>
+                <div>@Model.Content</div>
             </section>
         }
 
         @if (Resource.IsSafeExternalUrl(Model.Url))
         {
-            <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open External Resource</a>
+            <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="btn mc-btn-primary">Open External Resource</a>
         }
+<<<<<<< HEAD
 
         <p class="text-muted small mt-4 mb-0">Added @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</p>
     </div>
 </article>
 
 @* Resource page branch update - no functional changes *@
+=======
+    </article>
+</div>
+>>>>>>> c171c654238d4d05f2b0737683283e3312cce8d7

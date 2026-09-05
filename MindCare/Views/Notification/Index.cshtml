@@ -1,0 +1,34 @@
+@model IReadOnlyList<MindCare.Models.Notification>
+@using MindCare.Models
+@{
+    ViewData["Title"] = "Notifications";
+}
+<div class="mx-auto" style="max-width: 850px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Notifications</h1>
+        @if (User.IsInRole(RoleNames.User)) { <a asp-action="Settings" class="btn btn-outline-secondary">Notification Settings</a> }
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">You do not have any notifications yet.</div>
+    }
+    else
+    {
+        <div class="list-group">
+        @foreach (var notification in Model)
+        {
+            <div class="list-group-item @(notification.IsRead ? "" : "list-group-item-light")">
+                <div class="d-flex justify-content-between gap-3"><div><p class="mb-1 @(notification.IsRead ? "" : "fw-bold")">@notification.Message</p><small class="text-muted">@notification.CreatedAt.ToString("dd MMM yyyy, h:mm tt") · @(notification.IsRead ? "Read" : "Unread")</small></div>
+                    <div class="text-end flex-shrink-0">
+                    @if (notification.NotificationType == NotificationTypes.DailyMoodReminder) { <a asp-controller="Mood" asp-action="Index" class="btn btn-sm btn-primary mb-1">Log Mood</a> }
+                    else if (notification.NotificationType == NotificationTypes.ChatAvailable && notification.AppointmentId.HasValue) { <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@notification.AppointmentId" class="btn btn-sm btn-primary mb-1">Open Chat</a> }
+                    else if (notification.AppointmentId.HasValue && User.IsInRole(RoleNames.Counsellor)) { <a asp-controller="Counsellor" asp-action="BookedAppointments" class="btn btn-sm btn-outline-primary mb-1">View Appointment</a> }
+                    else if (notification.AppointmentId.HasValue) { <a asp-controller="Booking" asp-action="MyAppointments" class="btn btn-sm btn-outline-primary mb-1">View Appointment</a> }
+                    @if (!notification.IsRead) { <form asp-action="MarkRead" method="post"><input type="hidden" name="id" value="@notification.Id" /><button type="submit" class="btn btn-sm btn-outline-secondary">Mark read</button></form> }
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    }
+</div>

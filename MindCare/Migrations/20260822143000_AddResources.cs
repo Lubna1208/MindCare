@@ -22,7 +22,7 @@ public partial class AddResources : Migration
                 Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                 Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                 Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                Content = table.Column<string>(type: "nvarchar(5000)", maxLength: 5000, nullable: true),
                 Url = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: true),
                 CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
             },

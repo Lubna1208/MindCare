@@ -4,8 +4,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -33,15 +36,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<RoleRedirectService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
-}
 
 await IdentitySeeder.SeedAsync(app.Services, app.Configuration);
 await ResourceSeeder.SeedAsync(app.Services);

@@ -1,0 +1,216 @@
+@model MindCare.ViewModels.AppointmentChatViewModel
+
+@{
+    ViewData["Title"] = "Appointment Chat";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+}
+
+<style>
+    .mc-page { max-width: 900px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-alert-danger {
+        background: #FBEAEA;
+        border: 1px solid #E7B3B3;
+        border-left: 4px solid #C96A6A;
+        color: #7A3535;
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-chat-summary,
+    .mc-message-panel {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.2rem;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+        margin-bottom: 1rem;
+    }
+    .mc-chat-summary {
+        color: var(--mc-deep, #2F5D57);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 0.75rem;
+    }
+    .mc-label {
+        display: block;
+        font-weight: 700;
+        font-size: 0.86rem;
+        margin-bottom: 0.15rem;
+    }
+    .mc-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        min-height: 220px;
+        max-height: 520px;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+    .mc-message {
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        background: var(--mc-mist, #F7FFFD);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-message-own {
+        background: var(--mc-pale, #D9F5EF);
+        border-color: var(--mc-soft, #A7E3D4);
+    }
+    .mc-message-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        margin-bottom: 0.35rem;
+    }
+    .mc-sender { font-weight: 700; }
+    .mc-time { opacity: 0.72; }
+    .mc-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+    .mc-empty-state {
+        background: var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-message-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .mc-message-form textarea {
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 12px;
+        padding: 0.85rem;
+        background: var(--mc-mist, #F7FFFD);
+        min-height: 110px;
+        resize: vertical;
+    }
+    .mc-message-form textarea:focus {
+        border-color: var(--mc-teal, #5BB9A6);
+        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
+        outline: none;
+        background: #fff;
+    }
+    .mc-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-deep, #2F5D57);
+        color: var(--mc-deep, #2F5D57);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+</style>
+
+<div class="mc-page">
+    <h1 class="h3 mb-3">Appointment Chat</h1>
+
+    @if (TempData["ErrorMessage"] is string tempErrorMessage)
+    {
+        <div class="mc-alert-danger">@tempErrorMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="mc-alert-danger">@Model.ErrorMessage</div>
+        <a asp-controller="@Model.ReturnController" asp-action="@Model.ReturnAction" class="mc-btn-outline">Back to Appointments</a>
+    }
+    else if (Model.Appointment is not null)
+    {
+        <div class="mc-chat-summary">
+            <div>
+                <span class="mc-label">Counsellor</span>
+                <span>@Model.Appointment.CounsellorProfile.ApplicationUser.Name</span>
+            </div>
+            <div>
+                <span class="mc-label">User</span>
+                <span>@Model.Appointment.User.Name</span>
+            </div>
+            <div>
+                <span class="mc-label">Appointment Date</span>
+                <span>@Model.Appointment.Date.ToString("dd MMM yyyy")</span>
+            </div>
+            <div>
+                <span class="mc-label">Time</span>
+                <span>@FormatTime(Model.Appointment.StartTime) - @FormatTime(Model.Appointment.EndTime)</span>
+            </div>
+        </div>
+
+        <div class="mc-message-panel">
+            @if (!Model.Messages.Any())
+            {
+                <div class="mc-empty-state">
+                    <p class="mb-0">No messages have been sent yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="mc-messages">
+                    @foreach (var message in Model.Messages)
+                    {
+                        var senderLabel = message.SenderUserId == Model.Appointment.UserId ? "User" : "Counsellor";
+                        var ownClass = message.SenderUserId == Model.CurrentUserId ? "mc-message-own" : string.Empty;
+                        <div class="mc-message @ownClass">
+                            <div class="mc-message-meta">
+                                <span class="mc-sender">@senderLabel: @message.SenderUser.Name</span>
+                                <span class="mc-time">@message.SentAt.ToString("dd MMM yyyy, h:mm tt")</span>
+                            </div>
+                            <p class="mc-text">@message.MessageText</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <form asp-action="SendMessage" method="post" class="mc-message-panel mc-message-form">
+            <input type="hidden" name="appointmentId" value="@Model.Appointment.Id" />
+            <textarea id="messageText" name="messageText" maxlength="2000" required placeholder="Type your message..."></textarea>
+            <div class="mc-actions">
+                <button type="submit" class="mc-btn-primary">Send</button>
+                <a asp-controller="@Model.ReturnController" asp-action="@Model.ReturnAction" class="mc-btn-outline">Back to Appointments</a>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    @if (string.IsNullOrWhiteSpace(Model.ErrorMessage) && Model.Appointment is not null)
+    {
+        <script>
+            window.setTimeout(function () {
+                const messageBox = document.getElementById('messageText');
+                if (!messageBox || messageBox.value.trim().length === 0) {
+                    window.location.reload();
+                }
+            }, 10000);
+        </script>
+    }
+}

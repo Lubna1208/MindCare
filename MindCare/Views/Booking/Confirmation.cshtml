@@ -1,0 +1,131 @@
+@model MindCare.Models.Appointment
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+    string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    var counsellor = Model.CounsellorProfile.ApplicationUser;
+    var amountDisplay = Model.AmountPaidCents.HasValue ? (Model.AmountPaidCents.Value / 100.0).ToString("0.00") : null;
+}
+
+<style>
+    .mc-page { max-width: 640px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-success-banner {
+        background: var(--mc-pale, #D9F5EF);
+        border: 1px solid var(--mc-soft, #A7E3D4);
+        border-left: 4px solid var(--mc-teal, #5BB9A6);
+        color: var(--mc-deep, #2F5D57);
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .mc-summary-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 20px;
+        padding: 1.75rem;
+        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
+        margin-bottom: 1.5rem;
+    }
+    .mc-detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.55rem 0;
+        color: var(--mc-deep, #2F5D57);
+        border-bottom: 1px solid var(--mc-mist, #F7FFFD);
+    }
+    .mc-detail-row:last-child { border-bottom: none; }
+    .mc-detail-label { font-weight: 600; opacity: 0.75; }
+    .mc-detail-value { text-align: right; }
+    .mc-status-pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.25rem 0.8rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        background: var(--mc-soft, #A7E3D4);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-payment-pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.25rem 0.8rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        background: var(--mc-pale, #D9F5EF);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-deep, #2F5D57);
+        color: var(--mc-deep, #2F5D57);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 0.6rem;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+</style>
+
+<div class="mc-page">
+    <h1 class="h3 mb-3">Booking Confirmed</h1>
+
+    <div class="mc-success-banner">
+        <span aria-hidden="true">✅</span>
+        <span>Your payment was successful and the appointment has been booked.</span>
+    </div>
+
+    <div class="mc-summary-card">
+        <div class="mc-detail-row">
+            <span class="mc-detail-label">Counsellor</span>
+            <span class="mc-detail-value">@counsellor.Name</span>
+        </div>
+        <div class="mc-detail-row">
+            <span class="mc-detail-label">Date</span>
+            <span class="mc-detail-value">@Model.Date.ToString("dd MMMM yyyy")</span>
+        </div>
+        <div class="mc-detail-row">
+            <span class="mc-detail-label">Time</span>
+            <span class="mc-detail-value">@FormatTime(Model.StartTime) - @FormatTime(Model.EndTime)</span>
+        </div>
+        <div class="mc-detail-row">
+            <span class="mc-detail-label">Status</span>
+            <span class="mc-detail-value"><span class="mc-status-pill">@Model.Status</span></span>
+        </div>
+        <div class="mc-detail-row">
+            <span class="mc-detail-label">Payment</span>
+            <span class="mc-detail-value">
+                <span class="mc-payment-pill">@Model.PaymentStatus</span>
+                @if (amountDisplay is not null)
+                {
+                    <span> &nbsp;@Model.Currency?.ToUpperInvariant() @amountDisplay</span>
+                }
+            </span>
+        </div>
+    </div>
+
+    <a asp-action="MyAppointments" class="mc-btn-primary">My Appointments</a>
+    <a asp-controller="Dashboard" asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
+</div>

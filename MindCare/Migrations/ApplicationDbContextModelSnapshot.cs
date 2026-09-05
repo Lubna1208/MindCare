@@ -224,6 +224,85 @@ namespace MindCare.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("MindCare.Models.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long?>("AmountPaidCents")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("AvailabilitySlotId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CounsellorProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsHighRisk")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("RiskLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeSessionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvailabilitySlotId")
+                        .IsUnique();
+
+                    b.HasIndex("CounsellorProfileId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Appointments");
+                });
+
             modelBuilder.Entity("MindCare.Models.Assessment", b =>
                 {
                     b.Property<int>("Id")
@@ -283,6 +362,37 @@ namespace MindCare.Migrations
                     b.ToTable("AssessmentAnswers");
                 });
 
+            modelBuilder.Entity("MindCare.Models.AvailabilitySlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CounsellorProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsBooked")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CounsellorProfileId", "Date", "StartTime", "EndTime")
+                        .IsUnique();
+
+                    b.ToTable("AvailabilitySlots");
+                });
+
             modelBuilder.Entity("MindCare.Models.CounsellorProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -321,6 +431,44 @@ namespace MindCare.Migrations
                     b.ToTable("CounsellorProfiles");
                 });
 
+            modelBuilder.Entity("MindCare.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MessageText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("ReceiverUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SenderUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverUserId");
+
+                    b.HasIndex("SenderUserId");
+
+                    b.HasIndex("AppointmentId", "SentAt");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("MindCare.Models.MoodLog", b =>
                 {
                     b.Property<int>("Id")
@@ -350,6 +498,75 @@ namespace MindCare.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("MoodLogs");
+                });
+
+            modelBuilder.Entity("MindCare.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EventKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("NotificationType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "EventKey")
+                        .IsUnique()
+                        .HasFilter("[EventKey] IS NOT NULL");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("MindCare.Models.NotificationPreference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("DailyMoodReminderEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeOnly>("DailyMoodReminderTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("NotificationPreferences");
                 });
 
             modelBuilder.Entity("MindCare.Models.Resource", b =>
@@ -388,6 +605,43 @@ namespace MindCare.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Resources");
+                });
+
+            modelBuilder.Entity("MindCare.Models.TrustedContact", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Relationship")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Name");
+
+                    b.ToTable("TrustedContacts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -441,6 +695,33 @@ namespace MindCare.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MindCare.Models.Appointment", b =>
+                {
+                    b.HasOne("MindCare.Models.AvailabilitySlot", "AvailabilitySlot")
+                        .WithOne("Appointment")
+                        .HasForeignKey("MindCare.Models.Appointment", "AvailabilitySlotId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("MindCare.Models.CounsellorProfile", "CounsellorProfile")
+                        .WithMany("Appointments")
+                        .HasForeignKey("CounsellorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithMany("Appointments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AvailabilitySlot");
+
+                    b.Navigation("CounsellorProfile");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MindCare.Models.Assessment", b =>
                 {
                     b.HasOne("MindCare.Models.ApplicationUser", "User")
@@ -463,6 +744,17 @@ namespace MindCare.Migrations
                     b.Navigation("Assessment");
                 });
 
+            modelBuilder.Entity("MindCare.Models.AvailabilitySlot", b =>
+                {
+                    b.HasOne("MindCare.Models.CounsellorProfile", "CounsellorProfile")
+                        .WithMany("AvailabilitySlots")
+                        .HasForeignKey("CounsellorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CounsellorProfile");
+                });
+
             modelBuilder.Entity("MindCare.Models.CounsellorProfile", b =>
                 {
                     b.HasOne("MindCare.Models.ApplicationUser", "ApplicationUser")
@@ -472,6 +764,33 @@ namespace MindCare.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("MindCare.Models.Message", b =>
+                {
+                    b.HasOne("MindCare.Models.Appointment", "Appointment")
+                        .WithMany("Messages")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MindCare.Models.ApplicationUser", "ReceiverUser")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MindCare.Models.ApplicationUser", "SenderUser")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("ReceiverUser");
+
+                    b.Navigation("SenderUser");
                 });
 
             modelBuilder.Entity("MindCare.Models.MoodLog", b =>
@@ -485,16 +804,78 @@ namespace MindCare.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MindCare.Models.Notification", b =>
+                {
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MindCare.Models.NotificationPreference", b =>
+                {
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithOne("NotificationPreference")
+                        .HasForeignKey("MindCare.Models.NotificationPreference", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MindCare.Models.TrustedContact", b =>
+                {
+                    b.HasOne("MindCare.Models.ApplicationUser", "User")
+                        .WithMany("TrustedContacts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MindCare.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Appointments");
+
                     b.Navigation("Assessments");
 
                     b.Navigation("MoodLogs");
+
+                    b.Navigation("NotificationPreference");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SentMessages");
+
+                    b.Navigation("TrustedContacts");
+                });
+
+            modelBuilder.Entity("MindCare.Models.Appointment", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("MindCare.Models.Assessment", b =>
                 {
                     b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("MindCare.Models.AvailabilitySlot", b =>
+                {
+                    b.Navigation("Appointment");
+                });
+
+            modelBuilder.Entity("MindCare.Models.CounsellorProfile", b =>
+                {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("AvailabilitySlots");
                 });
 #pragma warning restore 612, 618
         }

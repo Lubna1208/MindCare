@@ -1,0 +1,19 @@
+@model MindCare.ViewModels.TrustedContactViewModel
+
+@{
+    ViewData["Title"] = "Edit Trusted Person";
+}
+
+<div class="mc-trusted-form-page">
+    <a asp-action="TrustedPeople" class="mc-back-link">Back to Trusted People</a>
+    <section class="mc-trusted-form-card" aria-labelledby="edit-trusted-person-title">
+        <p class="mc-eyebrow mb-1">Your support circle</p>
+        <h1 id="edit-trusted-person-title" class="mc-page-title mb-3">Edit Trusted Person</h1>
+        <form method="post">
+            <partial name="_TrustedPersonForm" model="Model" />
+            <button type="submit" class="btn mc-btn-primary">Save Changes</button>
+        </form>
+    </section>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

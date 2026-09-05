@@ -1,0 +1,86 @@
+@{
+    ViewData["Title"] = "Immediate Support";
+    var isSignedInUser = User.Identity?.IsAuthenticated == true && User.IsInRole(MindCare.Models.RoleNames.User);
+}
+
+<div class="mc-immediate-page">
+    <header class="mc-immediate-hero" aria-labelledby="immediate-support-title">
+        <p class="mc-eyebrow mb-1">Support at your pace</p>
+        <h1 id="immediate-support-title" class="mc-page-title mb-2"><span aria-hidden="true">&#9888;</span> Immediate Support</h1>
+        <p class="mc-immediate-lead mb-1">It looks like you may be going through a difficult moment.</p>
+        <p class="mb-0">You don't have to face a difficult moment alone. If you need someone to talk to or professional mental-health support, consider reaching out to one of these services.</p>
+    </header>
+
+    <section class="mc-mental-health-section mb-4" aria-labelledby="mental-health-support-title">
+        <div class="mb-3">
+            <p class="mc-eyebrow mb-1">Get mental health support</p>
+            <h2 id="mental-health-support-title" class="mc-section-title mb-0">Talk to someone who can help</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-md-4">
+                <article class="mc-card mc-mental-health-card h-100">
+                    <p class="mc-service-type mb-2">Psychological crisis hotline</p>
+                    <h3 class="h4 mc-action-card-title">Mindspace VENT</h3>
+                    <p>Psychological crisis hotline with trained volunteers who provide emotional support and listen without judgment.</p>
+                    <dl class="mc-service-details">
+                        <div><dt>Phone</dt><dd>09678-678-778</dd></div>
+                        <div><dt>Available</dt><dd>Every day, 6:00 PM – 6:00 AM</dd></div>
+                    </dl>
+                    <a href="tel:09678678778" class="btn mc-btn-primary mt-auto w-100" aria-label="Call Mindspace VENT at 09678-678-778">Call Now</a>
+                </article>
+            </div>
+            <div class="col-12 col-md-4">
+                <article class="mc-card mc-mental-health-card h-100">
+                    <p class="mc-service-type mb-2">Emotional support</p>
+                    <h3 class="h4 mc-action-card-title">Kaan Pete Roi</h3>
+                    <p>Emotional support and suicide-prevention helpline for people who need someone to talk to.</p>
+                    <dl class="mc-service-details"><div><dt>Phone</dt><dd>+880 9612-119911</dd></div></dl>
+                    <a href="tel:+8809612119911" class="btn mc-btn-primary mt-auto w-100" aria-label="Call Kaan Pete Roi at +880 9612-119911">Call Now</a>
+                </article>
+            </div>
+            <div class="col-12 col-md-4">
+                <article class="mc-card mc-mental-health-card h-100">
+                    <p class="mc-service-type mb-2">Professional government service</p>
+                    <h3 class="h4 mc-action-card-title">National Institute of Mental Health (NIMH)</h3>
+                    <p>Government mental-health service provider in Bangladesh.</p>
+                    <dl class="mc-service-details"><div><dt>Phone</dt><dd>+880 2-223374409</dd></div></dl>
+                    <a href="tel:+8802223374409" class="btn mc-btn-primary mt-auto w-100" aria-label="Call National Institute of Mental Health at +880 2-223374409">Call NIMH</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4 mb-4" aria-label="Additional support options">
+        <div class="col-12 col-md-6">
+            <article class="mc-card mc-support-option h-100">
+                <span class="mc-support-icon" aria-hidden="true">&#9825;</span>
+                <h2 class="h4 mc-action-card-title">Trusted Person</h2>
+                <p>Reach out to someone you trust and let them know you need support.</p>
+                @if (isSignedInUser)
+                {
+                    <a asp-action="TrustedPeople" class="btn mc-btn-outline mt-auto align-self-start">Contact Trusted Person</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Support/TrustedPeople" class="btn mc-btn-outline mt-auto align-self-start">Contact Trusted Person</a>
+                }
+            </article>
+        </div>
+        <div class="col-12 col-md-6">
+            <article class="mc-card mc-support-option h-100">
+                <span class="mc-support-icon" aria-hidden="true">+</span>
+                <h2 class="h4 mc-action-card-title">Mental Health Resources</h2>
+                <p>Explore practical crisis-support resources at a pace that feels right for you.</p>
+                <a asp-controller="Resources" asp-action="Index" asp-route-category="Crisis Support" class="btn mc-btn-outline mt-auto align-self-start">View Support Resources</a>
+            </article>
+        </div>
+    </section>
+
+    <div class="mc-immediate-actions">
+        @if (isSignedInUser)
+        {
+            <a asp-action="TrustedPeople" class="mc-text-link">Manage Trusted People</a>
+        }
+        <a asp-controller="Dashboard" asp-action="Index" class="btn mc-btn-outline">Return to Dashboard</a>
+    </div>
+</div>
