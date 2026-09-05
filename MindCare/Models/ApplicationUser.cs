@@ -11,4 +11,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
 
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+
+    public ICollection<Message> SentMessages { get; set; } = new List<Message>();
+
+    public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 }
