@@ -1,0 +1,53 @@
+@model MindCare.ViewModels.CreateForumPostViewModel
+
+@{
+    ViewData["Title"] = "Create Forum Post";
+}
+
+<style>
+    .mc-page { max-width: 720px; margin: 0 auto; }
+    .mc-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-form-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.4rem;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.55rem 1.15rem;
+        font-weight: 600;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; }
+</style>
+
+<div class="mc-page">
+    <h1 class="h3 mb-3">Create Forum Post</h1>
+
+    <form asp-action="Create" method="post" class="mc-form-card">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" maxlength="120" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label"></label>
+            <textarea asp-for="Content" class="form-control" rows="8" maxlength="3000"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+        <button type="submit" class="mc-btn-primary">Create Post</button>
+        <a asp-action="Index" class="btn btn-link">Back to Forum</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,158 @@
+@model IReadOnlyList<MindCare.Models.ForumPost>
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Community Forum";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<style>
+    .mc-forum-page { max-width: 880px; margin: 0 auto; }
+    .mc-forum-page h1, .mc-forum-title {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-forum-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .mc-forum-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.2rem 1.35rem;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+        margin-bottom: 1rem;
+    }
+    .mc-forum-meta, .mc-forum-comment-meta {
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.68;
+        font-size: 0.9rem;
+    }
+    .mc-forum-content {
+        color: var(--mc-deep, #2F5D57);
+        white-space: pre-wrap;
+    }
+    .mc-forum-comments {
+        margin-top: 1rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--mc-mist, #F7FFFD);
+    }
+    .mc-forum-comment {
+        background: var(--mc-mist, #F7FFFD);
+        border-radius: 12px;
+        padding: 0.75rem 0.9rem;
+        margin-top: 0.6rem;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.55rem 1.15rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; }
+    .mc-btn-outline {
+        border: 1px solid var(--mc-teal, #5BB9A6);
+        color: var(--mc-teal, #5BB9A6);
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.45rem 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .mc-btn-outline:hover { background: var(--mc-teal, #5BB9A6); color: #fff; }
+    .mc-btn-danger {
+        border: 1px solid #C96A6A;
+        color: #C96A6A;
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-weight: 600;
+    }
+    .mc-empty-state {
+        background: var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.5rem;
+        color: var(--mc-deep, #2F5D57);
+    }
+</style>
+
+<div class="mc-forum-page">
+    <div class="mc-forum-toolbar">
+        <div>
+            <h1 class="h3 mb-1">Community Forum</h1>
+            <p class="mc-forum-meta mb-0">Posts and comments are shown anonymously.</p>
+        </div>
+        <a asp-action="Create" class="mc-btn-primary">Create Post</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="mc-empty-state">No forum posts yet.</div>
+    }
+    else
+    {
+        foreach (var post in Model)
+        {
+            <article class="mc-forum-card">
+                <div class="d-flex justify-content-between gap-2 flex-wrap">
+                    <div>
+                        <h2 class="h5 mc-forum-title mb-1">@post.Title</h2>
+                        <div class="mc-forum-meta">Anonymous User · @post.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</div>
+                    </div>
+                    @if (post.UserId == currentUserId)
+                    {
+                        <form asp-action="DeletePost" asp-route-id="@post.Id" method="post">
+                            <button type="submit" class="mc-btn-danger">Delete</button>
+                        </form>
+                    }
+                </div>
+                <p class="mc-forum-content mt-3">@post.Content</p>
+                <a asp-action="Details" asp-route-id="@post.Id" class="mc-btn-outline">View Post</a>
+
+                <div class="mc-forum-comments">
+                    <strong>Comments</strong>
+                    @if (!post.Comments.Any())
+                    {
+                        <p class="mc-forum-meta mb-0 mt-2">No comments yet.</p>
+                    }
+                    else
+                    {
+                        foreach (var comment in post.Comments)
+                        {
+                            <div class="mc-forum-comment">
+                                <div class="d-flex justify-content-between gap-2 flex-wrap">
+                                    <div class="mc-forum-comment-meta">Anonymous User · @comment.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</div>
+                                    @if (comment.UserId == currentUserId)
+                                    {
+                                        <form asp-action="DeleteComment" asp-route-id="@comment.Id" method="post">
+                                            <button type="submit" class="mc-btn-danger">Delete</button>
+                                        </form>
+                                    }
+                                </div>
+                                <div class="mc-forum-content mt-1">@comment.Content</div>
+                            </div>
+                        }
+                    }
+                </div>
+            </article>
+        }
+    }
+</div>

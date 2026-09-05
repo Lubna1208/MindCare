@@ -33,6 +33,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
+    public DbSet<ForumPost> ForumPosts => Set<ForumPost>();
+
+    public DbSet<ForumComment> ForumComments => Set<ForumComment>();
+
+    public DbSet<ForumReport> ForumReports => Set<ForumReport>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -141,5 +147,51 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<NotificationPreference>()
             .HasIndex(preference => preference.UserId)
             .IsUnique();
+
+        builder.Entity<ForumPost>()
+            .HasOne(post => post.User)
+            .WithMany(user => user.ForumPosts)
+            .HasForeignKey(post => post.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ForumPost>()
+            .HasIndex(post => post.CreatedAt);
+
+        builder.Entity<ForumComment>()
+            .HasOne(comment => comment.ForumPost)
+            .WithMany(post => post.Comments)
+            .HasForeignKey(comment => comment.ForumPostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ForumComment>()
+            .HasOne(comment => comment.User)
+            .WithMany(user => user.ForumComments)
+            .HasForeignKey(comment => comment.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<ForumComment>()
+            .HasIndex(comment => new { comment.ForumPostId, comment.CreatedAt });
+
+        builder.Entity<ForumReport>()
+            .HasOne(report => report.Post)
+            .WithMany(post => post.Reports)
+            .HasForeignKey(report => report.PostId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<ForumReport>()
+            .HasOne(report => report.Comment)
+            .WithMany(comment => comment.Reports)
+            .HasForeignKey(report => report.CommentId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<ForumReport>()
+            .HasIndex(report => new { report.ReporterUserId, report.PostId, report.Status })
+            .IsUnique()
+            .HasFilter("[PostId] IS NOT NULL AND [Status] = 'Pending'");
+
+        builder.Entity<ForumReport>()
+            .HasIndex(report => new { report.ReporterUserId, report.CommentId, report.Status })
+            .IsUnique()
+            .HasFilter("[CommentId] IS NOT NULL AND [Status] = 'Pending'");
     }
 }

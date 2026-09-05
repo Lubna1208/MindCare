@@ -21,4 +21,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public NotificationPreference? NotificationPreference { get; set; }
+
+    public ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
+
+    public ICollection<ForumComment> ForumComments { get; set; } = new List<ForumComment>();
 }

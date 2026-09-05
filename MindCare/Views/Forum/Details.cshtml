@@ -1,0 +1,161 @@
+@model MindCare.ViewModels.ForumPostDetailsViewModel
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = Model.Post.Title;
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<style>
+    .mc-forum-page { max-width: 820px; margin: 0 auto; }
+    .mc-forum-page h1 {
+        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
+        color: var(--mc-deep, #2F5D57);
+    }
+    .mc-card {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 16px;
+        padding: 1.2rem 1.35rem;
+        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
+        margin-bottom: 1rem;
+    }
+    .mc-meta {
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.68;
+        font-size: 0.9rem;
+    }
+    .mc-content {
+        color: var(--mc-deep, #2F5D57);
+        white-space: pre-wrap;
+    }
+    .mc-comment {
+        background: var(--mc-mist, #F7FFFD);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .mc-report-box {
+        background: #fff;
+        border: 1px solid var(--mc-pale, #D9F5EF);
+        border-radius: 12px;
+        padding: 0.85rem;
+        margin-top: 0.9rem;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; }
+    .mc-btn-danger {
+        border: 1px solid #C96A6A;
+        color: #C96A6A;
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-weight: 600;
+    }
+    .mc-btn-report {
+        border: 1px solid #8A5A2B;
+        color: #8A5A2B;
+        background: transparent;
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="mc-forum-page">
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <article class="mc-card">
+        <div class="d-flex justify-content-between gap-2 flex-wrap">
+            <div>
+                <h1 class="h3 mb-1">@Model.Post.Title</h1>
+                <div class="mc-meta">Anonymous User · @Model.Post.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</div>
+            </div>
+            @if (Model.Post.UserId == currentUserId)
+            {
+                <form asp-action="DeletePost" asp-route-id="@Model.Post.Id" method="post">
+                    <button type="submit" class="mc-btn-danger">Delete</button>
+                </form>
+            }
+        </div>
+        <p class="mc-content mt-3">@Model.Post.Content</p>
+
+        @if (Model.Post.UserId != currentUserId)
+        {
+            <form asp-action="Report" method="post" class="mc-report-box">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" name="PostId" value="@Model.Post.Id" />
+                <label for="post-report-reason" class="form-label">Report post</label>
+                <textarea id="post-report-reason" name="Reason" class="form-control mb-2" rows="2" maxlength="500" required></textarea>
+                <button type="submit" class="mc-btn-report">Report</button>
+            </form>
+        }
+    </article>
+
+    <section class="mc-card">
+        <h2 class="h5 mb-3">Comments</h2>
+        @if (!Model.Post.Comments.Any())
+        {
+            <p class="mc-meta">No comments yet.</p>
+        }
+        else
+        {
+            foreach (var comment in Model.Post.Comments)
+            {
+                <div class="mc-comment">
+                    <div class="d-flex justify-content-between gap-2 flex-wrap">
+                        <div class="mc-meta">Anonymous User · @comment.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</div>
+                        @if (comment.UserId == currentUserId)
+                        {
+                            <form asp-action="DeleteComment" asp-route-id="@comment.Id" method="post">
+                                <button type="submit" class="mc-btn-danger">Delete</button>
+                            </form>
+                        }
+                    </div>
+                    <div class="mc-content mt-2">@comment.Content</div>
+
+                    @if (comment.UserId != currentUserId)
+                    {
+                        <form asp-action="Report" method="post" class="mc-report-box">
+                            <input type="hidden" name="CommentId" value="@comment.Id" />
+                            <label for="comment-report-reason-@comment.Id" class="form-label">Report comment</label>
+                            <textarea id="comment-report-reason-@comment.Id" name="Reason" class="form-control mb-2" rows="2" maxlength="500" required></textarea>
+                            <button type="submit" class="mc-btn-report">Report</button>
+                        </form>
+                    }
+                </div>
+            }
+        }
+    </section>
+
+    <section class="mc-card">
+        <h2 class="h5 mb-3">Add Comment</h2>
+        <form asp-action="AddComment" asp-route-postId="@Model.Post.Id" method="post">
+            <div class="mb-3">
+                <label asp-for="CommentForm.Content" class="form-label">Comment</label>
+                <textarea asp-for="CommentForm.Content" name="Content" class="form-control" rows="4" maxlength="1000"></textarea>
+                <span asp-validation-for="CommentForm.Content" class="text-danger"></span>
+            </div>
+            <button type="submit" class="mc-btn-primary">Post Comment</button>
+            <a asp-action="Index" class="btn btn-link">Back to Forum</a>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
