@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Booked Appointments";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    bool HasStarted(Appointment appointment) => DateTime.Now >= appointment.Date.Date.Add(appointment.StartTime);
+    bool CanOpenChat(Appointment appointment) =>
+        (appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) &&
+        (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed) &&
+        HasStarted(appointment);
 }
 
 <style>
@@ -77,6 +82,24 @@
         transition: background 0.2s ease, color 0.2s ease;
     }
     .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+    .mc-chat-note {
+        margin-top: 0.75rem;
+        color: var(--mc-deep, #2F5D57);
+        opacity: 0.72;
+        font-size: 0.9rem;
+    }
+    .mc-btn-primary {
+        background: var(--mc-teal, #5BB9A6);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
 </style>
 
 <div class="mc-page">
@@ -112,6 +135,17 @@
                         <div>User: @appointment.User.Name</div>
                         <div>Email: @appointment.User.Email</div>
                     </div>
+                    @if (CanOpenChat(appointment))
+                    {
+                        <div class="mt-3">
+                            <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@appointment.Id" class="mc-btn-primary">Open Chat</a>
+                        </div>
+                    }
+                    else if ((appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) &&
+                        (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed))
+                    {
+                        <div class="mc-chat-note">Messaging will be available when your appointment starts.</div>
+                    }
                 </div>
             }
         </div>

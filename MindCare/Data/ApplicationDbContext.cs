@@ -25,6 +25,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Appointment> Appointments => Set<Appointment>();
 
+    public DbSet<Message> Messages => Set<Message>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -82,5 +84,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Appointment>()
             .HasIndex(appointment => appointment.AvailabilitySlotId)
             .IsUnique();
+
+        builder.Entity<Message>()
+            .HasOne(message => message.Appointment)
+            .WithMany(appointment => appointment.Messages)
+            .HasForeignKey(message => message.AppointmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Message>()
+            .HasOne(message => message.SenderUser)
+            .WithMany(user => user.SentMessages)
+            .HasForeignKey(message => message.SenderUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Message>()
+            .HasOne(message => message.ReceiverUser)
+            .WithMany(user => user.ReceivedMessages)
+            .HasForeignKey(message => message.ReceiverUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Message>()
+            .HasIndex(message => new { message.AppointmentId, message.SentAt });
     }
 }

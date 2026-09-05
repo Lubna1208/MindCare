@@ -46,11 +46,14 @@ public class Appointment
     public string? Currency { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public ICollection<Message> Messages { get; set; } = new List<Message>();
 }
 
 public static class AppointmentStatuses
 {
     public const string Booked = "Booked";
+    public const string Confirmed = "Confirmed";
     public const string Completed = "Completed";
     public const string Cancelled = "Cancelled";
 }
@@ -59,5 +62,6 @@ public static class PaymentStatuses
 {
     public const string Pending = "Pending";
     public const string Paid = "Paid";
+    public const string Confirmed = "Confirmed";
     public const string Failed = "Failed";
 }
