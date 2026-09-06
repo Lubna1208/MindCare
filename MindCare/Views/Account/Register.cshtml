@@ -4,109 +4,59 @@
     ViewData["Title"] = "Register";
 }
 
-<style>
-    .mc-auth-wrap {
-        max-width: 460px;
-        margin: 1.5rem auto 0;
-    }
-    .mc-auth-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
-    }
-    .mc-auth-card h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-        margin-bottom: 0.3rem;
-    }
-    .mc-auth-subtitle {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.7;
-        margin-bottom: 1.5rem;
-        font-size: 0.95rem;
-    }
-    .mc-auth-card .form-label {
-        color: var(--mc-deep, #2F5D57);
-        font-weight: 600;
-        font-size: 0.92rem;
-    }
-    .mc-auth-card .form-control {
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 12px;
-        padding: 0.65rem 0.9rem;
-        background: var(--mc-mist, #F7FFFD);
-    }
-    .mc-auth-card .form-control:focus {
-        border-color: var(--mc-teal, #5BB9A6);
-        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
-        background: #fff;
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.7rem 1rem;
-        font-weight: 600;
-        width: 100%;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-auth-footer {
-        margin-top: 1.25rem;
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-        font-size: 0.95rem;
-    }
-    .mc-auth-footer a {
-        color: var(--mc-teal, #5BB9A6);
-        font-weight: 600;
-        text-decoration: none;
-    }
-    .mc-auth-footer a:hover { color: var(--mc-deep, #2F5D57); text-decoration: underline; }
-</style>
+<div class="mc-auth-page">
+    <div class="mc-auth-container mc-register-container">
+        <section class="mc-login-card" aria-labelledby="register-title">
+            <header class="mc-auth-header">
+                <span class="mc-auth-accent" aria-hidden="true"></span>
+                <h1 id="register-title">Register</h1>
+                <p>Create your MindCare account to start tracking your wellbeing.</p>
+            </header>
 
-<div class="mc-auth-wrap">
-    <div class="mc-auth-card">
-        <h1 class="h3">Register</h1>
-        <p class="mc-auth-subtitle">Create your MindCare account to start tracking your wellbeing.</p>
+            <form asp-action="Register" method="post" class="mc-auth-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger mc-auth-validation" role="alert"></div>
 
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mc-form-group">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" autocomplete="name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" autocomplete="name" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
+                <div class="mc-form-group">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" type="email" class="form-control" maxlength="254" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" autocomplete="email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+                <div class="mc-form-group">
+                    <label asp-for="Password" class="form-label"></label>
+                    <div class="mc-password-wrap">
+                        <input asp-for="Password" id="mc-register-password" type="password" class="form-control" autocomplete="new-password" />
+                        <button type="button" class="mc-password-toggle" data-password-toggle data-show-label="Show password" data-hide-label="Hide password" aria-controls="mc-register-password" aria-label="Show password" aria-pressed="false" title="Show password">
+                            <span class="mc-icon-show"><svg class="mc-eye-icon mc-eye-show" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg></span>
+                            <span class="mc-icon-hide" hidden><svg class="mc-eye-icon mc-eye-hide" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 2 20 20" /><path d="M6.71 6.71A10.43 10.43 0 0 0 2.06 11.65a1 1 0 0 0 0 .7 10.75 10.75 0 0 0 15.23 5.94" /><path d="M10.73 5.08A10.8 10.8 0 0 1 12 5c4.4 0 8.17 2.65 9.94 6.65a1 1 0 0 1 0 .7 10.5 10.5 0 0 1-2.21 3.31" /><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" /></svg></span>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+                <div class="mc-form-group">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <div class="mc-password-wrap">
+                        <input asp-for="ConfirmPassword" id="mc-register-confirm-password" type="password" class="form-control" autocomplete="new-password" />
+                        <button type="button" class="mc-password-toggle" data-password-toggle data-show-label="Show confirm password" data-hide-label="Hide confirm password" aria-controls="mc-register-confirm-password" aria-label="Show confirm password" aria-pressed="false" title="Show confirm password">
+                            <span class="mc-icon-show"><svg class="mc-eye-icon mc-eye-show" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg></span>
+                            <span class="mc-icon-hide" hidden><svg class="mc-eye-icon mc-eye-hide" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 2 20 20" /><path d="M6.71 6.71A10.43 10.43 0 0 0 2.06 11.65a1 1 0 0 0 0 .7 10.75 10.75 0 0 0 15.23 5.94" /><path d="M10.73 5.08A10.8 10.8 0 0 1 12 5c4.4 0 8.17 2.65 9.94 6.65a1 1 0 0 1 0 .7 10.5 10.5 0 0 1-2.21 3.31" /><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" /></svg></span>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
+                <button type="submit" class="btn mc-auth-submit">Register</button>
+            </form>
 
-            <button type="submit" class="mc-btn-primary">Register</button>
-        </form>
-
-        <p class="mc-auth-footer">
-            Already have an account?
-            <a asp-controller="Account" asp-action="Login">Login</a>
-        </p>
+            <p class="mc-auth-switch">Already have an account? <a asp-controller="Account" asp-action="Login">Login</a></p>
+        </section>
     </div>
 </div>
 

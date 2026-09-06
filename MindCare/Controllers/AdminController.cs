@@ -285,15 +285,58 @@ public class AdminController : Controller
             return RedirectToAction(nameof(Counsellors));
         }
 
-        var user = profile.ApplicationUser;
-        var deleteResult = await _userManager.DeleteAsync(user);
-        if (!deleteResult.Succeeded)
+        var hasAppointments = await _context.Appointments
+            .AnyAsync(appointment => appointment.CounsellorProfileId == profile.Id);
+        if (hasAppointments)
         {
-            TempData["ErrorMessage"] = "Counsellor could not be deleted.";
+            TempData["ErrorMessage"] = "This counsellor cannot be deleted because related appointments exist.";
             return RedirectToAction(nameof(Counsellors));
         }
 
-        TempData["SuccessMessage"] = "Counsellor deleted.";
+        var user = profile.ApplicationUser;
+        var hasMessages = await _context.Messages
+            .AnyAsync(message => message.SenderUserId == user.Id || message.ReceiverUserId == user.Id);
+        if (hasMessages)
+        {
+            TempData["ErrorMessage"] = "This counsellor cannot be deleted because related appointment messages exist.";
+            return RedirectToAction(nameof(Counsellors));
+        }
+
+        try
+        {
+            var executionStrategy = _context.Database.CreateExecutionStrategy();
+            IdentityResult? deleteResult = null;
+
+            await executionStrategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                _context.CounsellorProfiles.Remove(profile);
+                await _context.SaveChangesAsync();
+
+                deleteResult = await _userManager.DeleteAsync(user);
+                if (!deleteResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return;
+                }
+
+                await transaction.CommitAsync();
+            });
+
+            if (deleteResult is null || !deleteResult.Succeeded)
+            {
+                TempData["ErrorMessage"] = "Counsellor account could not be deleted.";
+                return RedirectToAction(nameof(Counsellors));
+            }
+        }
+        catch (DbUpdateException)
+        {
+            TempData["ErrorMessage"] = "This counsellor could not be deleted because related records still exist.";
+            return RedirectToAction(nameof(Counsellors));
+        }
+
+        TempData["SuccessMessage"] = "Counsellor deleted successfully.";
         return RedirectToAction(nameof(Counsellors));
     }
 

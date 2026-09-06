@@ -2,79 +2,39 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<style>
-    .mc-page { max-width: 700px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-subtitle {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.75;
-        margin-bottom: 1.5rem;
-    }
-    .mc-menu-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1.75rem;
-    }
-    .mc-menu-item {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.1rem 1.4rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: var(--mc-deep, #2F5D57);
-        text-decoration: none;
-        font-weight: 600;
-        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
-        transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
-    }
-    .mc-menu-item:hover {
-        box-shadow: 0 8px 22px rgba(47, 93, 87, 0.1);
-        transform: translateY(-1px);
-        background: var(--mc-mist, #F7FFFD);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-menu-item .mc-arrow {
-        color: var(--mc-teal, #5BB9A6);
-        font-size: 1.1rem;
-    }
-    .mc-btn-logout {
-        border: 1px solid #C96A6A;
-        color: #C96A6A;
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.55rem 1.3rem;
-        font-weight: 600;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-logout:hover { background: #FBEAEA; color: #C96A6A; }
-</style>
+<section class="mc-admin-page" aria-labelledby="admin-dashboard-title">
+    <div class="mc-admin-container">
+        <header class="mc-admin-header">
+            <span class="mc-admin-eyebrow">Admin portal</span>
+            <h1 id="admin-dashboard-title">Admin Dashboard</h1>
+            <p>Manage counsellors and review community activity from one place.</p>
+        </header>
 
-<div class="mc-page">
-    <h1 class="h3 mb-2">Admin Dashboard</h1>
-    <p class="mc-subtitle">Welcome to the Admin Dashboard.</p>
+        <section class="mc-admin-actions-section" aria-labelledby="quick-actions-title">
+            <div class="mc-admin-section-heading">
+                <h2 id="quick-actions-title">Quick actions</h2>
+                <p>Choose an action to manage MindCare administration.</p>
+            </div>
 
-    <div class="mc-menu-list">
-        <a class="mc-menu-item" asp-controller="Admin" asp-action="AddCounsellor">
-            <span>Add Counsellor</span>
-            <span class="mc-arrow">&rarr;</span>
-        </a>
-        <a class="mc-menu-item" asp-controller="Admin" asp-action="Counsellors">
-            <span>View Counsellors</span>
-            <span class="mc-arrow">&rarr;</span>
-        </a>
-        <a class="mc-menu-item" asp-controller="Admin" asp-action="ForumReports">
-            <span>Forum Reports</span>
-            <span class="mc-arrow">&rarr;</span>
-        </a>
+            <div class="mc-admin-actions">
+                <a class="mc-admin-action-card" asp-controller="Admin" asp-action="AddCounsellor">
+                    <span class="mc-admin-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19a6 6 0 0 0-12 0" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M16 11h6" /></svg></span>
+                    <span class="mc-admin-action-content"><span class="mc-admin-action-title">Add Counsellor</span><span class="mc-admin-action-description">Create a new counsellor account and profile.</span></span>
+                    <span class="mc-admin-action-arrow">Open <span aria-hidden="true">&rarr;</span></span>
+                </a>
+
+                <a class="mc-admin-action-card" asp-controller="Admin" asp-action="Counsellors">
+                    <span class="mc-admin-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg></span>
+                    <span class="mc-admin-action-content"><span class="mc-admin-action-title">View Counsellors</span><span class="mc-admin-action-description">View and manage existing counsellor profiles.</span></span>
+                    <span class="mc-admin-action-arrow">View <span aria-hidden="true">&rarr;</span></span>
+                </a>
+
+                <a class="mc-admin-action-card" asp-controller="Admin" asp-action="ForumReports">
+                    <span class="mc-admin-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-16a2 2 0 0 1 2-2h11l3 3v15" /><path d="M8 12h8M8 16h5M17 3v4h4" /></svg></span>
+                    <span class="mc-admin-action-content"><span class="mc-admin-action-title">Forum Reports</span><span class="mc-admin-action-description">Review reported community content.</span></span>
+                    <span class="mc-admin-action-arrow">Review <span aria-hidden="true">&rarr;</span></span>
+                </a>
+            </div>
+        </section>
     </div>
-
-    <form asp-controller="Account" asp-action="Logout" method="post">
-        <button type="submit" class="mc-btn-logout">Logout</button>
-    </form>
-</div>
+</section>
