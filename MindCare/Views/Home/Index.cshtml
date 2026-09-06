@@ -1,52 +1,90 @@
-﻿@{
+@{
     ViewData["Title"] = "Welcome";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
 }
 
-<style>
-    .mc-home { max-width: 1120px; padding: 2rem 0 3rem; margin: 0 auto; }
-    .mc-home-hero { align-items: center; padding: clamp(1.5rem, 4vw, 3rem); background: linear-gradient(120deg, var(--mc-pale), #fff); border: 1px solid rgba(91, 185, 166, .18); border-radius: 1.25rem; box-shadow: 0 10px 28px rgba(47, 93, 87, .08); }
-    .mc-home-title { max-width: 650px; color: var(--mc-deep); font-family: "Lora", serif; font-size: clamp(2rem, 5vw, 3.6rem); font-weight: 700; line-height: 1.25; }
-    .mc-home-copy { max-width: 570px; color: #426f68; font-size: 1.08rem; }
-    .mc-home-art { display: block; width: min(100%, 420px); max-height: 420px; margin: 0 auto; object-fit: contain; }
-    .mc-home-primary, .mc-home-secondary { min-height: 2.85rem; padding: .6rem 1.2rem; border-radius: .65rem; font-weight: 700; transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
-    .mc-home-primary { color: #fff; background: var(--mc-teal); border-color: var(--mc-teal); }
-    .mc-home-primary:hover, .mc-home-primary:focus { color: #fff; background: var(--mc-deep); border-color: var(--mc-deep); box-shadow: 0 4px 12px rgba(47, 93, 87, .16); }
-    .mc-home-secondary { color: var(--mc-deep); background: transparent; border-color: var(--mc-deep); }
-    .mc-home-secondary:hover, .mc-home-secondary:focus { color: var(--mc-deep); background: var(--mc-pale); border-color: var(--mc-deep); }
-    .mc-home-feature { height: 100%; padding: 1.35rem; background: #fff; border: 1px solid rgba(91, 185, 166, .15); border-radius: 1rem; box-shadow: 0 8px 24px rgba(47, 93, 87, .07); }
-    .mc-home-feature-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; margin-bottom: .85rem; color: var(--mc-deep); background: var(--mc-soft); border-radius: 50%; font-size: 1.1rem; }
-    .mc-home-feature h2 { color: var(--mc-deep); font-family: "Lora", serif; font-size: 1.15rem; font-weight: 700; }
-    .mc-home-feature p { margin-bottom: 0; color: #537a74; }
-    @@media (max-width: 767.98px) { .mc-home { padding-top: 1rem; } .mc-home-hero { text-align: center; } .mc-home-copy { margin-right: auto; margin-left: auto; } .mc-home-art { width: min(100%, 330px); margin-top: 1rem; } }
-</style>
+<div class="mc-home-page">
+    <section class="mc-home-hero-section" aria-labelledby="home-title">
+        <div class="mc-home-container">
+            <div class="mc-home-hero">
+                <div class="mc-home-hero-content">
+                    <p class="mc-home-eyebrow">A gentler way forward</p>
+                    <h1 id="home-title" class="mc-home-title">Caring for your mind, one day at a time.</h1>
+                    <p class="mc-home-copy">MindCare gives you a calm space to notice how you feel, reflect on your wellbeing, and find supportive resources whenever you need them.</p>
 
-<div class="mc-home">
-    <section class="mc-home-hero row g-4" aria-labelledby="home-title">
-        <div class="col-md-7">
-            <p class="mc-eyebrow mb-2">A gentler way forward</p>
-            <h1 id="home-title" class="mc-home-title mb-3">Caring for your mind, one day at a time.</h1>
-            <p class="mc-home-copy mb-4">MindCare gives you a calm space to notice how you feel, reflect on your wellbeing, and find supportive resources whenever you need them.</p>
-            <div class="d-flex flex-wrap gap-2 justify-content-md-start justify-content-center">
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Dashboard" asp-action="Index" class="btn mc-home-primary">Go to Dashboard</a>
-                }
-                else
-                {
-                    <a asp-controller="Account" asp-action="Register" class="btn mc-home-primary">Get Started</a>
-                    <a asp-controller="Account" asp-action="Login" class="btn mc-home-secondary">Login</a>
-                }
+                    <div class="mc-home-actions">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn mc-home-primary">Go to Dashboard</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Register" class="btn mc-home-primary">Get Started</a>
+                            <a asp-controller="Account" asp-action="Login" class="btn mc-home-secondary">Login</a>
+                        }
+                    </div>
+
+                    <a asp-controller="Support" asp-action="Immediate" class="mc-home-help-callout">
+                        <span>Need immediate help?</span> Talk to someone now <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+
+                <div class="mc-home-art-wrap">
+                    <img src="~/images/mindcare-brain-flowers.png" class="mc-home-art" alt="Illustration of a mind blooming with flowers, representing mental wellbeing" />
+                </div>
             </div>
-            <div class="mt-3"><a asp-controller="Support" asp-action="Immediate" class="link-success fw-semibold">Need immediate help? Talk to someone now</a></div>
-        </div>
-        <div class="col-md-5 d-flex align-items-center justify-content-center">
-            <img src="~/images/mindcare-brain-flowers.png" class="mc-home-art" alt="Illustration of a mind blooming with flowers, representing mental wellbeing" />
         </div>
     </section>
 
-    <section class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mt-2" aria-label="MindCare features">
-        <div class="col"><article class="mc-home-feature"><span class="mc-home-feature-icon" aria-hidden="true">☼</span><h2>Mood Tracking</h2><p>Pause for a simple daily check-in and notice patterns over time.</p></article></div>
-        <div class="col"><article class="mc-home-feature"><span class="mc-home-feature-icon" aria-hidden="true">✦</span><h2>Wellbeing Assessment</h2><p>Take a thoughtful moment to reflect on how you have been feeling.</p></article></div>
-        <div class="col"><article class="mc-home-feature"><span class="mc-home-feature-icon" aria-hidden="true">❋</span><h2>Helpful Resources</h2><p>Explore practical guidance and support at a pace that feels right.</p></article></div>
+    <section class="mc-home-features-section" aria-labelledby="wellbeing-tools-title">
+        <div class="mc-home-container">
+            <header class="mc-home-section-heading">
+                <h2 id="wellbeing-tools-title">Support for your everyday wellbeing</h2>
+                <p>Simple tools to help you reflect, understand and take care of yourself.</p>
+            </header>
+
+            <div class="mc-home-feature-grid">
+                @if (isAuthenticated)
+                {
+                    <article class="mc-home-feature mc-feature-card--interactive"><a asp-controller="Mood" asp-action="Index" class="mc-home-feature-link"><span class="mc-home-feature-icon" aria-hidden="true">&#9788;</span><h3>Mood Tracking</h3><p>Pause for a simple daily check-in and notice patterns over time.</p><span class="mc-home-feature-action">Check in <span aria-hidden="true">&rarr;</span></span></a></article>
+                    <article class="mc-home-feature mc-feature-card--interactive"><a asp-controller="Assessment" asp-action="Index" class="mc-home-feature-link"><span class="mc-home-feature-icon" aria-hidden="true">&#10022;</span><h3>Wellbeing Assessment</h3><p>Take a thoughtful moment to reflect on how you have been feeling.</p><span class="mc-home-feature-action">Start assessment <span aria-hidden="true">&rarr;</span></span></a></article>
+                    <article class="mc-home-feature mc-feature-card--interactive"><a asp-controller="Resources" asp-action="Index" class="mc-home-feature-link"><span class="mc-home-feature-icon" aria-hidden="true">&#10059;</span><h3>Helpful Resources</h3><p>Explore practical guidance and support at a pace that feels right.</p><span class="mc-home-feature-action">Explore resources <span aria-hidden="true">&rarr;</span></span></a></article>
+                }
+                else
+                {
+                    <article class="mc-home-feature mc-feature-card--preview"><div class="mc-home-feature-preview"><span class="mc-home-feature-icon" aria-hidden="true">&#9788;</span><h3>Mood Tracking</h3><p>Pause for a simple daily check-in and notice patterns over time.</p><span class="mc-feature-access-status"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>Available after login</span></div></article>
+                    <article class="mc-home-feature mc-feature-card--preview"><div class="mc-home-feature-preview"><span class="mc-home-feature-icon" aria-hidden="true">&#10022;</span><h3>Wellbeing Assessment</h3><p>Take a thoughtful moment to reflect on how you have been feeling.</p><span class="mc-feature-access-status"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>Available after login</span></div></article>
+                    <article class="mc-home-feature mc-feature-card--preview"><div class="mc-home-feature-preview"><span class="mc-home-feature-icon" aria-hidden="true">&#10059;</span><h3>Helpful Resources</h3><p>Explore practical guidance and support at a pace that feels right.</p><span class="mc-feature-access-status"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>Available after login</span></div></article>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="mc-home-trust-section" aria-label="MindCare values">
+        <div class="mc-home-container">
+            <div class="mc-home-trust-grid">
+                <article class="mc-home-trust-item">
+                    <span class="mc-home-trust-icon" aria-hidden="true">&#10003;</span>
+                    <div>
+                        <h2>Private &amp; secure</h2>
+                        <p>Your wellbeing information is handled with care.</p>
+                    </div>
+                </article>
+                <article class="mc-home-trust-item">
+                    <span class="mc-home-trust-icon" aria-hidden="true">&#9825;</span>
+                    <div>
+                        <h2>Supportive space</h2>
+                        <p>A calm environment designed around mental wellbeing.</p>
+                    </div>
+                </article>
+                <article class="mc-home-trust-item">
+                    <span class="mc-home-trust-icon" aria-hidden="true">&#9719;</span>
+                    <div>
+                        <h2>Accessible anytime</h2>
+                        <p>Helpful tools and resources whenever you need them.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
     </section>
 </div>

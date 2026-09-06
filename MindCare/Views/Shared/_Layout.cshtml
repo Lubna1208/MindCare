@@ -10,31 +10,40 @@
     <link rel="stylesheet" href="~/MindCare.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var isAdmin = User.IsInRole("Admin");
+    }
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light mc-navbar mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand mc-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/mindcare-icon.png" alt="MindCare logo" class="mc-brand-mark" style="width: 2.25rem; height: 2.25rem; object-fit: contain;" />MindCare</a>
+        <nav class="navbar navbar-expand-md navbar-toggleable-md navbar-light mc-navbar @(isAdmin ? "mc-admin-navbar" : "") mb-3">
+            <div class="container-fluid mc-navbar-shell">
+                <a class="navbar-brand mc-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/mindcare-icon.png" alt="MindCare logo" class="mc-brand-mark" />MindCare</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link mc-nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link mc-nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link mc-nav-link" asp-controller="Support" asp-action="Immediate">Need immediate help?</a>
-                        </li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
+                @if (!isAdmin)
+                {
+                <ul class="navbar-nav navbar-collapse collapse mc-primary-nav">
+                    <li class="nav-item">
+                        <a class="nav-link mc-nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" && currentAction == "Index" ? "page" : null)">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mc-nav-link @(currentController == "Home" && currentAction == "Privacy" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Privacy" aria-current="@(currentController == "Home" && currentAction == "Privacy" ? "page" : null)">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mc-nav-link mc-nav-support @(currentController == "Support" && currentAction == "Immediate" ? "active" : "")" asp-controller="Support" asp-action="Immediate" aria-current="@(currentController == "Support" && currentAction == "Immediate" ? "page" : null)">Need immediate help?</a>
+                    </li>
+                </ul>
+                }
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav navbar-collapse collapse mc-member-nav">
                             <li class="nav-item">
-                                @if (User.IsInRole("Admin"))
+                                @if (isAdmin)
                                 {
-                                    <a class="nav-link mc-nav-link" asp-area="" asp-controller="Admin" asp-action="Index">Dashboard</a>
+                                    <a class="nav-link mc-nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index" aria-current="@(currentController == "Admin" && currentAction == "Index" ? "page" : null)">Dashboard</a>
                                 }
                                 else if (User.IsInRole("Counsellor"))
                                 {
@@ -85,42 +94,42 @@
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="nav-link mc-nav-link" asp-controller="Resources" asp-action="Index">Resources</a>
+                                <a class="nav-link mc-nav-link @(currentController == "Resources" && currentAction == "Index" ? "active" : "")" asp-controller="Resources" asp-action="Index" aria-current="@(currentController == "Resources" && currentAction == "Index" ? "page" : null)">Resources</a>
                             </li>
-                        }
-                    </ul>
-                    <ul class="navbar-nav">
+                        </ul>
+                    }
+                    <ul class="navbar-nav navbar-collapse collapse mc-account-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="nav-link btn btn-link mc-nav-link mc-nav-logout">Logout</button>
+                                    <button type="submit" class="nav-link btn btn-link mc-nav-link mc-nav-logout @(isAdmin ? "mc-admin-logout" : "")">Logout</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link mc-nav-link" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link mc-nav-link mc-nav-register @(currentController == "Account" && currentAction == "Register" ? "active" : "")" asp-area="" asp-controller="Account" asp-action="Register" aria-current="@(currentController == "Account" && currentAction == "Register" ? "page" : null)">Register</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link mc-nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link mc-nav-link mc-nav-login" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>
-                </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container mc-layout-content">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mc-footer">
-        <div class="container">
-            &copy; 2026 - MindCare - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="mc-footer">
+        <div class="container-fluid mc-footer-inner">
+            <span>&copy; 2026 MindCare</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

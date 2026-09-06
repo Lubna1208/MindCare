@@ -1,136 +1,73 @@
 @model IEnumerable<MindCare.Models.CounsellorProfile>
+@using System.Net
 
 @{
     ViewData["Title"] = "Counsellors";
+    var counsellorCount = Model.Count();
 }
 
-<style>
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-alert-success {
-        background: var(--mc-pale, #D9F5EF);
-        border: 1px solid var(--mc-soft, #A7E3D4);
-        border-left: 4px solid var(--mc-teal, #5BB9A6);
-        color: var(--mc-deep, #2F5D57);
-        border-radius: 12px;
-        padding: 0.9rem 1.1rem;
-        margin-bottom: 1.25rem;
-    }
-    .mc-alert-danger {
-        background: #FBEAEA;
-        border: 1px solid #E7B3B3;
-        border-left: 4px solid #C96A6A;
-        color: #7A3535;
-        border-radius: 12px;
-        padding: 0.9rem 1.1rem;
-        margin-bottom: 1.25rem;
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.55rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-btn-delete {
-        border: 1px solid #C96A6A;
-        color: #C96A6A;
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.35rem 1rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-delete:hover { background: #FBEAEA; color: #C96A6A; }
-    .mc-table-wrap {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 18px;
-        overflow-x: auto;
-    }
-    .mc-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 760px;
-    }
-    .mc-table thead th {
-        background: var(--mc-pale, #D9F5EF);
-        color: var(--mc-deep, #2F5D57);
-        text-align: left;
-        padding: 0.85rem 1rem;
-        font-size: 0.88rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        white-space: nowrap;
-    }
-    .mc-table tbody td {
-        padding: 0.85rem 1rem;
-        border-top: 1px solid var(--mc-mist, #F7FFFD);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-table tbody tr:hover { background: var(--mc-mist, #F7FFFD); }
-</style>
+<section class="mc-counsellors-page" aria-labelledby="counsellors-title">
+    <div class="mc-counsellors-container">
+        <header class="mc-counsellors-header">
+            <div>
+                <span class="mc-counsellors-eyebrow">Counsellor management</span>
+                <h1 id="counsellors-title">Counsellors</h1>
+                <p>Manage counsellor profiles and account information.</p>
+            </div>
+            <div class="mc-counsellors-header-actions">
+                <partial name="_AdminBackButton" />
+                <a asp-controller="Admin" asp-action="AddCounsellor" class="mc-counsellors-add"><span aria-hidden="true">+</span> Add Counsellor</a>
+            </div>
+        </header>
 
-<div class="mc-page">
-    <h1 class="h3 mb-3">Counsellors</h1>
+        @if (TempData["SuccessMessage"] is string message)
+        {
+            <div class="mc-counsellors-alert mc-counsellors-alert-success" role="status">@message</div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mc-counsellors-alert mc-counsellors-alert-error" role="alert">@errorMessage</div>
+        }
 
-    @if (TempData["SuccessMessage"] is string message)
-    {
-        <div class="mc-alert-success">@message</div>
-    }
+        @if (!Model.Any())
+        {
+            <section class="mc-counsellors-empty" aria-labelledby="empty-counsellors-title">
+                <h2 id="empty-counsellors-title">No counsellors added yet</h2>
+                <p>Create your first counsellor profile to get started.</p>
+                <a asp-controller="Admin" asp-action="AddCounsellor" class="mc-counsellors-add"><span aria-hidden="true">+</span> Add Counsellor</a>
+            </section>
+        }
+        else
+        {
+            <div class="mc-counsellors-toolbar">
+                <label class="visually-hidden" for="counsellor-search">Search counsellors</label>
+                <input id="counsellor-search" class="mc-counsellor-search" type="search" placeholder="Search counsellors..." data-counsellor-search />
+                <span class="mc-counsellors-count">@counsellorCount @(counsellorCount == 1 ? "counsellor" : "counsellors")</span>
+            </div>
 
-    @if (TempData["ErrorMessage"] is string errorMessage)
-    {
-        <div class="mc-alert-danger">@errorMessage</div>
-    }
-
-    <p>
-        <a asp-controller="Admin" asp-action="AddCounsellor" class="mc-btn-primary">Add Counsellor</a>
-    </p>
-
-    <div class="mc-table-wrap">
-        <table class="mc-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Specialization</th>
-                    <th>Qualification</th>
-                    <th>Experience</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.ApplicationUser.Name</td>
-                        <td>@item.ApplicationUser.Email</td>
-                        <td>@item.Phone</td>
-                        <td>@item.Specialization</td>
-                        <td>@item.Qualification</td>
-                        <td>@item.Experience</td>
-                        <td class="text-end">
-                            <form asp-controller="Admin"
-                                  asp-action="DeleteCounsellor"
-                                  asp-route-id="@item.Id"
-                                  method="post"
-                                  onsubmit="return confirm('Delete this counsellor?');">
-                                <button type="submit" class="mc-btn-delete">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+            <div class="mc-counsellors-panel">
+                <table class="mc-counsellors-table">
+                    <colgroup><col class="mc-counsellor-column-name" /><col class="mc-counsellor-column-email" /><col class="mc-counsellor-column-phone" /><col class="mc-counsellor-column-specialization" /><col class="mc-counsellor-column-qualification" /><col class="mc-counsellor-column-experience" /><col class="mc-counsellor-column-actions" /></colgroup>
+                    <thead>
+                        <tr><th>Name</th><th>Email</th><th>Phone</th><th>Specialization</th><th>Qualification</th><th>Experience</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody data-counsellor-list>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="mc-counsellor-row" data-counsellor-row>
+                                <td class="mc-counsellor-name-cell" data-label="Name"><span class="mc-counsellor-name"><span class="mc-counsellor-initial" aria-hidden="true">@(string.IsNullOrWhiteSpace(item.ApplicationUser.Name) ? "?" : item.ApplicationUser.Name[..1].ToUpperInvariant())</span><span>@item.ApplicationUser.Name</span></span></td>
+                                <td class="mc-counsellor-email" data-label="Email" title="@item.ApplicationUser.Email">@item.ApplicationUser.Email</td>
+                                <td class="mc-counsellor-phone" data-label="Phone">@item.Phone</td>
+                                <td data-label="Specialization"><span class="mc-specialization-badge">@WebUtility.HtmlDecode(item.Specialization)</span></td>
+                                <td class="mc-counsellor-qualification" data-label="Qualification">@item.Qualification</td>
+                                <td class="mc-counsellor-experience" data-label="Experience">@item.Experience</td>
+                                <td class="mc-counsellor-actions" data-label="Actions"><form asp-controller="Admin" asp-action="DeleteCounsellor" asp-route-id="@item.Id" method="post" data-counsellor-delete-form data-counsellor-name="@item.ApplicationUser.Name"><button type="submit" class="mc-counsellor-delete">Delete</button></form></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <section class="mc-counsellors-no-results" data-counsellor-no-results hidden><h2>No counsellors found</h2><p>Try a different search term.</p></section>
+            </div>
+        }
     </div>
-</div>
+</section>

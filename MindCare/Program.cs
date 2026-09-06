@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using MindCare.Data;
@@ -21,6 +22,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.ConfigureWarnings(warnings =>
         warnings.Log(RelationalEventId.PendingModelChangesWarning));
 });
+
+// Development sessions should not survive an application restart. The ephemeral
+// provider creates fresh in-memory keys for each process, so prior cookie tickets
+// can no longer be decrypted after the next development launch.
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDataProtection()
+        .UseEphemeralDataProtectionProvider();
+}
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {

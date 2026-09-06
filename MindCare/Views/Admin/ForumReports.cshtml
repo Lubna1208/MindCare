@@ -1,154 +1,112 @@
 @model IReadOnlyList<MindCare.Models.ForumReport>
-@using MindCare.Models
 
 @{
     ViewData["Title"] = "Forum Reports";
+    var pendingReportLabel = Model.Count == 1 ? "1 pending report" : $"{Model.Count} pending reports";
 }
 
-<style>
-    .mc-page { max-width: 980px; margin: 0 auto; }
-    .mc-page h1, .mc-report-title {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-report-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.2rem 1.35rem;
-        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
-        margin-bottom: 1rem;
-    }
-    .mc-meta {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.68;
-        font-size: 0.9rem;
-    }
-    .mc-content {
-        color: var(--mc-deep, #2F5D57);
-        white-space: pre-wrap;
-    }
-    .mc-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 1rem;
-    }
-    .mc-btn-danger {
-        border: 1px solid #C96A6A;
-        color: #C96A6A;
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.45rem 0.9rem;
-        font-weight: 600;
-    }
-    .mc-btn-outline {
-        border: 1px solid var(--mc-teal, #5BB9A6);
-        color: var(--mc-teal, #5BB9A6);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.45rem 0.9rem;
-        font-weight: 600;
-    }
-    .mc-empty-state {
-        background: var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.5rem;
-        color: var(--mc-deep, #2F5D57);
-    }
-</style>
+<section class="mc-forum-reports-page">
+    <div class="mc-forum-reports-container">
+        <header class="mc-forum-reports-header">
+            <div>
+                <p class="mc-eyebrow mb-2">Admin moderation</p>
+                <h1>Forum Reports</h1>
+                <p class="mc-forum-reports-intro">Review pending community reports and take appropriate moderation action.</p>
+                <p class="mc-forum-reports-count mb-0">@pendingReportLabel</p>
+            </div>
+            <a asp-action="Index" class="mc-forum-reports-back"><span aria-hidden="true">&larr;</span> Back to Admin Dashboard</a>
+        </header>
 
-<div class="mc-page">
-    <h1 class="h3 mb-3">Forum Reports</h1>
-
-    @if (TempData["SuccessMessage"] is string successMessage)
-    {
-        <div class="alert alert-success">@successMessage</div>
-    }
-    @if (TempData["ErrorMessage"] is string errorMessage)
-    {
-        <div class="alert alert-danger">@errorMessage</div>
-    }
-
-    @if (!Model.Any())
-    {
-        <div class="mc-empty-state">No pending forum reports.</div>
-    }
-    else
-    {
-        foreach (var report in Model)
+        @if (TempData["SuccessMessage"] is string successMessage)
         {
-            <article class="mc-report-card">
-                <div class="d-flex justify-content-between gap-2 flex-wrap">
-                    <div>
-                        <h2 class="h5 mc-report-title mb-1">Report #@report.Id</h2>
-                        <div class="mc-meta">@report.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") · @report.Status</div>
-                    </div>
-                    <span class="badge text-bg-warning align-self-start">Pending</span>
-                </div>
-
-                <div class="mt-3">
-                    <strong>Reason</strong>
-                    <p class="mc-content mb-0">@report.Reason</p>
-                </div>
-
-                <div class="mt-3">
-                    <strong>Reported content</strong>
-                    @if (report.Post is not null)
-                    {
-                        <div class="mt-2">
-                            <div class="mc-meta">Post by Anonymous User</div>
-                            <h3 class="h6 mb-1">@report.Post.Title</h3>
-                            <p class="mc-content mb-0">@report.Post.Content</p>
-                        </div>
-                    }
-                    else if (report.Comment is not null)
-                    {
-                        <div class="mt-2">
-                            <div class="mc-meta">Comment by Anonymous User</div>
-                            <p class="mc-content mb-2">@report.Comment.Content</p>
-                            @if (report.Comment.ForumPost is not null)
-                            {
-                                <div class="mc-meta">On post: @report.Comment.ForumPost.Title</div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="mc-meta mb-0 mt-2">The reported content has already been removed.</p>
-                    }
-                </div>
-
-                <div class="mc-actions">
-                    @if (report.Post is not null)
-                    {
-                        <form asp-action="DeleteReportedPost" method="post">
-                            <input type="hidden" name="reportId" value="@report.Id" />
-                            <button type="submit" class="mc-btn-danger">Remove Post</button>
-                        </form>
-                    }
-                    @if (report.Comment is not null)
-                    {
-                        <form asp-action="DeleteReportedComment" method="post">
-                            <input type="hidden" name="reportId" value="@report.Id" />
-                            <button type="submit" class="mc-btn-danger">Remove Comment</button>
-                        </form>
-                    }
-                    @if (report.Post is not null || report.Comment is not null)
-                    {
-                        <form asp-action="DeleteReportedUserAccount" method="post">
-                            <input type="hidden" name="reportId" value="@report.Id" />
-                            <button type="submit" class="mc-btn-danger">Delete Reported Account</button>
-                        </form>
-                    }
-                    <form asp-action="ResolveForumReport" method="post">
-                        <input type="hidden" name="reportId" value="@report.Id" />
-                        <button type="submit" class="mc-btn-outline">Dismiss Report</button>
-                    </form>
-                </div>
-            </article>
+            <div class="mc-forum-report-alert mc-forum-report-alert-success" role="status">@successMessage</div>
         }
-    }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mc-forum-report-alert mc-forum-report-alert-error" role="alert">@errorMessage</div>
+        }
 
-    <a asp-action="Index" class="btn btn-link">Back to Admin Dashboard</a>
-</div>
+        @if (!Model.Any())
+        {
+            <section class="mc-forum-reports-empty">
+                <h2>No pending forum reports</h2>
+                <p class="mb-0">There are currently no community reports waiting for review.</p>
+            </section>
+        }
+        else
+        {
+            foreach (var report in Model)
+            {
+                <article class="mc-forum-report-card">
+                    <header class="mc-report-header">
+                        <div>
+                            <h2>Report #@report.Id</h2>
+                            <p class="mc-report-meta mb-0">@report.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</p>
+                        </div>
+                        <span class="mc-report-status">@report.Status</span>
+                    </header>
+
+                    <section class="mc-report-reason" aria-label="Report reason">
+                        <h3>Report reason</h3>
+                        <p class="mb-0">@report.Reason</p>
+                    </section>
+
+                    <section class="mc-report-content" aria-label="Reported content">
+                        <h3>Reported content</h3>
+                        @if (report.Post is not null)
+                        {
+                            <div class="mc-report-content-copy">
+                                <p class="mc-report-meta">Post by Anonymous User</p>
+                                <h4>@report.Post.Title</h4>
+                                <p class="mb-0">@report.Post.Content</p>
+                            </div>
+                        }
+                        else if (report.Comment is not null)
+                        {
+                            <div class="mc-report-content-copy">
+                                <p class="mc-report-meta">Comment by Anonymous User</p>
+                                <p>@report.Comment.Content</p>
+                                @if (report.Comment.ForumPost is not null)
+                                {
+                                    <p class="mc-report-meta mb-0">On post: @report.Comment.ForumPost.Title</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="mc-report-removed mb-0">Reported content is no longer available.</p>
+                        }
+                    </section>
+
+                    <div class="mc-report-actions">
+                        @if (report.Post is not null)
+                        {
+                            <form asp-action="DeleteReportedPost" method="post" onsubmit="return confirm('Remove this reported post?');">
+                                <input type="hidden" name="reportId" value="@report.Id" />
+                                <button type="submit" class="mc-report-action mc-report-remove">Remove Post</button>
+                            </form>
+                        }
+                        @if (report.Comment is not null)
+                        {
+                            <form asp-action="DeleteReportedComment" method="post" onsubmit="return confirm('Remove this reported comment?');">
+                                <input type="hidden" name="reportId" value="@report.Id" />
+                                <button type="submit" class="mc-report-action mc-report-remove">Remove Comment</button>
+                            </form>
+                        }
+                        @if (report.Post is not null || report.Comment is not null)
+                        {
+                            <form asp-action="DeleteReportedUserAccount" method="post" onsubmit="return confirm('Delete this reported account? This action is more serious and cannot be undone.');">
+                                <input type="hidden" name="reportId" value="@report.Id" />
+                                <button type="submit" class="mc-report-action mc-report-delete-account">Delete Reported Account</button>
+                            </form>
+                        }
+                        <form asp-action="ResolveForumReport" method="post">
+                            <input type="hidden" name="reportId" value="@report.Id" />
+                            <button type="submit" class="mc-report-action mc-report-dismiss">Dismiss Report</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+</section>

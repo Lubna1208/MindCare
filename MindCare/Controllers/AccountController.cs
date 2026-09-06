@@ -79,7 +79,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Login()
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -90,15 +90,17 @@ public class AccountController : Controller
             }
         }
 
+        ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
         if (!ModelState.IsValid)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View(model);
         }
 
@@ -114,11 +116,17 @@ public class AccountController : Controller
             var user = await _userManager.FindByEmailAsync(email);
             if (user is not null)
             {
+                if (await IsSafeFeatureReturnUrlAsync(user, returnUrl))
+                {
+                    return LocalRedirect(returnUrl!);
+                }
+
                 return await _roleRedirectService.RedirectToDashboardAsync(user, Url);
             }
         }
 
         ModelState.AddModelError(string.Empty, "Invalid email or password.");
+        ViewData["ReturnUrl"] = returnUrl;
         return View(model);
     }
 
@@ -135,5 +143,27 @@ public class AccountController : Controller
     public IActionResult AccessDenied()
     {
         return View();
+    }
+
+    private async Task<bool> IsSafeFeatureReturnUrlAsync(ApplicationUser user, string? returnUrl)
+    {
+        if (!Url.IsLocalUrl(returnUrl))
+        {
+            return false;
+        }
+
+        var path = returnUrl!.Split('?', '#')[0];
+        if (path.Equals("/Resources", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (path.Equals("/Mood", StringComparison.OrdinalIgnoreCase) ||
+            path.Equals("/Assessment", StringComparison.OrdinalIgnoreCase))
+        {
+            return await _userManager.IsInRoleAsync(user, RoleNames.User);
+        }
+
+        return false;
     }
 }
