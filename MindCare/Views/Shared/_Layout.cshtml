@@ -14,16 +14,20 @@
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
         var isAdmin = User.IsInRole("Admin");
+        var isCounsellor = User.IsInRole("Counsellor");
+        var counsellorUser = isCounsellor ? await UserManager.GetUserAsync(User) : null;
+        var counsellorName = string.IsNullOrWhiteSpace(counsellorUser?.Name) ? "Counsellor" : counsellorUser.Name.Trim();
+        var counsellorInitial = string.IsNullOrWhiteSpace(counsellorName) ? "?" : counsellorName.Trim()[0].ToString().ToUpperInvariant();
     }
     <header>
-        <nav class="navbar navbar-expand-md navbar-toggleable-md navbar-light mc-navbar @(isAdmin ? "mc-admin-navbar" : "") mb-3">
+        <nav class="navbar navbar-expand-md navbar-toggleable-md navbar-light mc-navbar @(isAdmin ? "mc-admin-navbar" : "") @(isCounsellor ? "mc-counsellor-navbar" : "") mb-3">
             <div class="container-fluid mc-navbar-shell">
-                <a class="navbar-brand mc-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/mindcare-icon.png" alt="MindCare logo" class="mc-brand-mark" />MindCare</a>
+                <a class="navbar-brand mc-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/mindcare-navbar-logo.png" alt="MindCare logo" class="mc-brand-mark" />MindCare</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                @if (!isAdmin)
+                @if (!isAdmin && !isCounsellor)
                 {
                 <ul class="navbar-nav navbar-collapse collapse mc-primary-nav">
                     <li class="nav-item">
@@ -39,15 +43,15 @@
                 }
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <ul class="navbar-nav navbar-collapse collapse mc-member-nav">
+                        <ul class="navbar-nav navbar-collapse collapse mc-member-nav @(isCounsellor ? "mc-counsellor-workspace-nav" : "")">
                             <li class="nav-item">
                                 @if (isAdmin)
                                 {
                                     <a class="nav-link mc-nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")" asp-area="" asp-controller="Admin" asp-action="Index" aria-current="@(currentController == "Admin" && currentAction == "Index" ? "page" : null)">Dashboard</a>
                                 }
-                                else if (User.IsInRole("Counsellor"))
+                                else if (isCounsellor)
                                 {
-                                    <a class="nav-link mc-nav-link" asp-area="" asp-controller="Counsellor" asp-action="Index">Dashboard</a>
+                                    <a class="nav-link mc-nav-link @(currentController == "Counsellor" && currentAction == "Index" ? "active" : "")" asp-area="" asp-controller="Counsellor" asp-action="Index">Dashboard</a>
                                 }
                                 else
                                 {
@@ -72,19 +76,19 @@
                                     <a class="nav-link mc-nav-link" asp-controller="Forum" asp-action="Index">Community Forum</a>
                                 </li>
                             }
-                            @if (User.IsInRole("Counsellor"))
+                            @if (isCounsellor)
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link mc-nav-link" asp-controller="Counsellor" asp-action="Availability">Availability</a>
+                                    <a class="nav-link mc-nav-link @(currentController == "Counsellor" && currentAction == "Availability" ? "active" : "")" asp-controller="Counsellor" asp-action="Availability">My Availability</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link mc-nav-link" asp-controller="Counsellor" asp-action="BookedAppointments">Booked Appointments</a>
+                                    <a class="nav-link mc-nav-link @(currentController == "Counsellor" && currentAction == "BookedAppointments" ? "active" : "")" asp-controller="Counsellor" asp-action="BookedAppointments">Appointments</a>
                                 </li>
                             }
-                            @if (User.IsInRole("User") || User.IsInRole("Counsellor"))
+                            @if (User.IsInRole("User"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link mc-nav-link" asp-controller="Notification" asp-action="Index">@await Component.InvokeAsync("NotificationCount")</a>
+                                    <a class="nav-link mc-nav-link @(currentController == "Notification" && currentAction == "Index" ? "active" : "")" asp-controller="Notification" asp-action="Index">@await Component.InvokeAsync("NotificationCount")</a>
                                 </li>
                             }
                             @if (User.IsInRole("User"))
@@ -101,9 +105,18 @@
                     <ul class="navbar-nav navbar-collapse collapse mc-account-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            @if (isCounsellor)
+                            {
+                                <li class="nav-item mc-counsellor-notification-nav">
+                                    <a class="mc-counsellor-notification-link @(currentController == "Notification" && currentAction == "Index" ? "active" : "")" asp-controller="Notification" asp-action="Index" aria-label="Notifications" title="Notifications">@await Component.InvokeAsync("NotificationCount", new { iconOnly = true })</a>
+                                </li>
+                                <li class="nav-item mc-counsellor-identity">
+                                    <a class="mc-counsellor-navbar-avatar @(currentController == "Counsellor" && (currentAction == "Profile" || currentAction == "EditProfile") ? "active" : "")" asp-controller="Counsellor" asp-action="Profile" title="@counsellorName" aria-label="View @counsellorName's profile">@counsellorInitial</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="nav-link btn btn-link mc-nav-link mc-nav-logout @(isAdmin ? "mc-admin-logout" : "")">Logout</button>
+                                    <button type="submit" class="nav-link btn btn-link mc-nav-link mc-nav-logout @(isAdmin ? "mc-admin-logout" : "") @(isCounsellor ? "mc-counsellor-logout" : "")">Logout</button>
                                 </form>
                             </li>
                         }
@@ -128,7 +141,7 @@
 
     <footer class="mc-footer">
         <div class="container-fluid mc-footer-inner">
-            <span>&copy; 2026 MindCare</span>
+            <span>&copy; MindCare</span>
             <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
         </div>
     </footer>

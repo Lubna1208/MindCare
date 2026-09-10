@@ -8,166 +8,126 @@
         (appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) &&
         (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed) &&
         HasStarted(appointment);
+    var groupedAppointments = Model.GroupBy(appointment => appointment.Date.Date).ToList();
+    var focusedAppointmentId = ViewData["FocusedAppointmentId"] is int focusedId ? focusedId : (int?)null;
+    DateTime? defaultOpenDate = groupedAppointments.FirstOrDefault(group => group.Key >= DateTime.Today)?.Key;
+    var focusedGroup = focusedAppointmentId.HasValue ? groupedAppointments.FirstOrDefault(group => group.Any(appointment => appointment.Id == focusedAppointmentId.Value)) : null;
+    if (focusedGroup is not null)
+    {
+        defaultOpenDate = focusedGroup.Key;
+    }
+    if (defaultOpenDate is null && groupedAppointments.Count > 0)
+    {
+        defaultOpenDate = groupedAppointments[0].Key;
+    }
+    var fallbackUrl = Url.Action("Index", "Counsellor")!;
 }
 
-<style>
-    .mc-page { max-width: 900px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-empty-state {
-        background: var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.75rem;
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-        margin-bottom: 1.5rem;
-    }
-    .mc-appt-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-    .mc-appt-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.1rem 1.3rem;
-        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-    .mc-appt-card:hover {
-        box-shadow: 0 8px 22px rgba(47, 93, 87, 0.09);
-        transform: translateY(-1px);
-    }
-    .mc-appt-date {
-        color: var(--mc-deep, #2F5D57);
-        font-weight: 700;
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        font-size: 1.05rem;
-    }
-    .mc-appt-time {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.8;
-        font-size: 0.95rem;
-    }
-    .mc-appt-user {
-        margin-top: 0.6rem;
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.85;
-        font-size: 0.95rem;
-    }
-    .mc-status-pill {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 0.28rem 0.85rem;
-        font-weight: 600;
-        font-size: 0.82rem;
-        align-self: flex-start;
-    }
-    .mc-status-booked { background: var(--mc-soft, #A7E3D4); color: var(--mc-deep, #2F5D57); }
-    .mc-status-completed { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-status-cancelled { background: #F3E3D3; color: #8A5A2B; }
-    .mc-btn-outline {
-        border: 1px solid var(--mc-deep, #2F5D57);
-        color: var(--mc-deep, #2F5D57);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-chat-note {
-        margin-top: 0.75rem;
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.72;
-        font-size: 0.9rem;
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-</style>
-
-<div class="mc-page">
-    <h1 class="h3 mb-3">Booked Appointments</h1>
-
-    @if (!Model.Any())
-    {
-        <div class="mc-empty-state">
-            <p class="mb-0">No appointments have been booked yet.</p>
-        </div>
-    }
-    else
-    {
-        <div class="mc-appt-list">
-            @foreach (var appointment in Model)
-            {
-                var statusClass = appointment.Status switch
+<section class="mc-appointments-page" aria-labelledby="appointments-title">
+    <div class="mc-appointments-container">
+        <header class="mc-appointments-header">
+            <div>
+                <p class="mc-appointments-eyebrow">Counsellor appointments</p>
+                <h1 id="appointments-title">Booked Appointments</h1>
+                <p>View your scheduled counselling appointments and session details.</p>
+                @if (Model.Count > 0)
                 {
-                    MindCare.Models.AppointmentStatuses.Booked => "mc-status-booked",
-                    MindCare.Models.AppointmentStatuses.Completed => "mc-status-completed",
-                    MindCare.Models.AppointmentStatuses.Cancelled => "mc-status-cancelled",
-                    _ => "mc-status-booked"
-                };
-                var isHighPriority = appointment.IsHighPriority ||
-                    appointment.IsHighRisk ||
-                    appointment.Priority == MindCare.Models.AppointmentPriorities.High ||
-                    string.Equals(appointment.RiskLevel, "High", StringComparison.OrdinalIgnoreCase);
-                <div class="mc-appt-card" style="@(isHighPriority ? "border-left: 5px solid #dc3545;" : "")">
-                    <div class="d-flex justify-content-between flex-wrap gap-2">
-                        <div>
-                            <div class="mc-appt-date">@appointment.Date.ToString("dd MMM yyyy")</div>
-                            <div class="mc-appt-time">@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</div>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            @if (isHighPriority)
-                            {
-                                <span class="badge bg-danger" style="border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.82rem;">
-                                    ⚠️ High Priority Support
-                                </span>
-                            }
-                            <span class="mc-status-pill @statusClass">@appointment.Status</span>
-                        </div>
-                    </div>
-                    <div class="mc-appt-user">
-                        <div>User: @appointment.User.Name</div>
-                        <div>Email: @appointment.User.Email</div>
-                        @if (isHighPriority)
-                        {
-                            <div class="text-danger fw-semibold mt-1">
-                                Priority Case: High-risk user assessment
-                            </div>
-                        }
-                    </div>
-                    @if (CanOpenChat(appointment))
-                    {
-                        <div class="mt-3">
-                            <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@appointment.Id" class="mc-btn-primary">Open Chat</a>
-                        </div>
-                    }
-                    else if ((appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) &&
-                        (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed))
-                    {
-                        <div class="mc-chat-note">Messaging will be available when your appointment starts.</div>
-                    }
-                </div>
-            }
-        </div>
-    }
+                    <span class="mc-appointments-summary">@Model.Count booked appointment@(Model.Count == 1 ? "" : "s")</span>
+                }
+            </div>
+            <button type="button" class="mc-admin-back-button mc-appointments-back" id="mcAppointmentsBack"><span aria-hidden="true">&larr;</span> Back</button>
+        </header>
 
-    <a asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
-</div>
+        @if (!Model.Any())
+        {
+            <section class="mc-appointments-empty-state" aria-labelledby="empty-appointments-title">
+                <h2 id="empty-appointments-title">No booked appointments yet</h2>
+                <p>Your scheduled counselling appointments will appear here once a session is booked.</p>
+                <a asp-action="Availability" class="mc-appointments-empty-action">Manage Availability <span aria-hidden="true">&rarr;</span></a>
+            </section>
+        }
+        else
+        {
+            <div class="mc-appointments-list">
+                @foreach (var group in groupedAppointments)
+                {
+                    var isOpen = group.Key == defaultOpenDate;
+                    var dayId = $"appointment-day-{group.Key:yyyyMMdd}";
+                    <section class="mc-appointment-day">
+                        <button type="button" class="mc-appointment-day-toggle" aria-expanded="@isOpen.ToString().ToLowerInvariant()" aria-controls="@dayId">
+                            <span class="mc-appointment-day-heading">@group.Key.ToString("dd MMMM yyyy")</span>
+                            <span class="mc-appointment-day-count">@group.Count() appointment@(group.Count() == 1 ? "" : "s")</span>
+                            <svg class="mc-appointment-day-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                        </button>
+                        <div id="@dayId" class="mc-appointment-group-list" @(isOpen ? "" : "hidden")>
+                            @foreach (var appointment in group)
+                            {
+                                var isHighPriority = appointment.IsHighPriority || appointment.IsHighRisk || appointment.Priority == AppointmentPriorities.High || string.Equals(appointment.RiskLevel, "High", StringComparison.OrdinalIgnoreCase);
+                                <article id="appointment-@appointment.Id" class="mc-appointment-card @(isHighPriority ? "mc-appointment-card--priority" : "") @(appointment.Id == focusedAppointmentId ? "mc-appointment-card--focused" : "")">
+                                    <div class="mc-appointment-top">
+                                        <time class="mc-appointment-time">@FormatTime(appointment.StartTime) &ndash; @FormatTime(appointment.EndTime)</time>
+                                        <div class="mc-appointment-statuses">
+                                            @if (appointment.Id == focusedAppointmentId)
+                                            {
+                                                <span class="mc-appointment-focus-label">Selected from notification</span>
+                                            }
+                                            @if (isHighPriority)
+                                            {
+                                                <span class="mc-appointment-priority">High Priority Support</span>
+                                            }
+                                            <span class="mc-appointment-status">@appointment.Status</span>
+                                        </div>
+                                    </div>
+                                    <dl class="mc-appointment-client-meta">
+                                        <div><dt>Client</dt><dd>@appointment.User.Name</dd></div>
+                                        <div><dt>Email</dt><dd class="mc-appointment-email">@appointment.User.Email</dd></div>
+                                    </dl>
+                                    @if (CanOpenChat(appointment))
+                                    {
+                                        <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@appointment.Id" class="mc-appointment-chat-action">Open Session Chat <span aria-hidden="true">&rarr;</span></a>
+                                    }
+                                    else if ((appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) && (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed))
+                                    {
+                                        <p class="mc-appointment-message-state"><span aria-hidden="true">&#128172;</span> Messaging will be available when your appointment starts.</p>
+                                    }
+                                </article>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('mcAppointmentsBack').addEventListener('click', function () {
+            var fallbackUrl = '@fallbackUrl';
+            var hasSameSiteReferrer = false;
+            try {
+                hasSameSiteReferrer = document.referrer && new URL(document.referrer).origin === window.location.origin;
+            } catch (_) { }
+            if (hasSameSiteReferrer && window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.assign(fallbackUrl);
+            }
+        });
+        document.querySelectorAll('.mc-appointment-day-toggle').forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                var content = document.getElementById(toggle.getAttribute('aria-controls'));
+                var shouldOpen = toggle.getAttribute('aria-expanded') !== 'true';
+                document.querySelectorAll('.mc-appointment-day-toggle').forEach(function (otherToggle) {
+                    var otherContent = document.getElementById(otherToggle.getAttribute('aria-controls'));
+                    otherToggle.setAttribute('aria-expanded', 'false');
+                    otherContent.hidden = true;
+                });
+                if (shouldOpen) {
+                    toggle.setAttribute('aria-expanded', 'true');
+                    content.hidden = false;
+                }
+            });
+        });
+    </script>
+}

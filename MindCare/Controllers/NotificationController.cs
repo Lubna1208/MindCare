@@ -55,6 +55,21 @@ public class NotificationController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleRead(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+
+        var notification = await _context.Notifications.FirstOrDefaultAsync(item => item.Id == id && item.UserId == user.Id);
+        if (notification is null) return NotFound();
+
+        notification.IsRead = !notification.IsRead;
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
     [Authorize(Roles = RoleNames.User)]
     [HttpGet]
     public async Task<IActionResult> Settings()

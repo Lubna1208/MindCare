@@ -3,103 +3,24 @@
 @{
     ViewData["Title"] = "Counsellor Dashboard";
     var user = Model?.ApplicationUser;
+    var name = string.IsNullOrWhiteSpace(user?.Name) ? "Counsellor" : user.Name.Trim();
 }
 
-<style>
-    .mc-page { max-width: 720px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-welcome {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.75;
-        margin-bottom: 1.25rem;
-    }
-    .mc-section-heading {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-        margin-bottom: 0.75rem;
-    }
-    .mc-profile-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 18px;
-        padding: 1.5rem;
-        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
-        margin-bottom: 1.75rem;
-    }
-    .mc-profile-row {
-        display: flex;
-        gap: 0.4rem;
-        padding: 0.35rem 0;
-        color: var(--mc-deep, #2F5D57);
-        border-bottom: 1px solid var(--mc-mist, #F7FFFD);
-    }
-    .mc-profile-row:last-child { border-bottom: none; }
-    .mc-profile-label { font-weight: 600; min-width: 130px; opacity: 0.85; }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-btn-outline-teal {
-        border: 1px solid var(--mc-teal, #5BB9A6);
-        color: var(--mc-teal, #5BB9A6);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-outline-teal:hover { background: var(--mc-teal, #5BB9A6); color: #fff; }
-    .mc-btn-logout {
-        border: 1px solid #C96A6A;
-        color: #C96A6A;
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.55rem 1.3rem;
-        font-weight: 600;
-        margin-top: 1.5rem;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-logout:hover { background: #FBEAEA; color: #C96A6A; }
-</style>
+<section class="mc-counsellor-dashboard" aria-labelledby="counsellor-dashboard-title">
+    <div class="mc-counsellor-dashboard-container">
+        <header class="mc-counsellor-dashboard-header">
+            <p class="mc-counsellor-dashboard-eyebrow">Counsellor portal</p>
+            <h1 id="counsellor-dashboard-title">Counsellor Dashboard</h1>
+            <p class="mc-counsellor-dashboard-greeting">Welcome back, @name.</p>
+            <p class="mc-counsellor-dashboard-intro">Manage your availability and appointments from one place.</p>
+        </header>
 
-<div class="mc-page">
-    <h1 class="h3 mb-1">Counsellor Dashboard</h1>
-    <p class="mc-welcome">Welcome, @user?.Name.</p>
-
-    <section>
-        <h2 class="h5 mc-section-heading">Profile</h2>
-        <div class="mc-profile-card">
-            <div class="mc-profile-row"><span class="mc-profile-label">Name:</span><span>@user?.Name</span></div>
-            <div class="mc-profile-row"><span class="mc-profile-label">Email:</span><span>@user?.Email</span></div>
-            <div class="mc-profile-row"><span class="mc-profile-label">Phone:</span><span>@Model?.Phone</span></div>
-            <div class="mc-profile-row"><span class="mc-profile-label">Specialization:</span><span>@Model?.Specialization</span></div>
-            <div class="mc-profile-row"><span class="mc-profile-label">Qualification:</span><span>@Model?.Qualification</span></div>
-            <div class="mc-profile-row"><span class="mc-profile-label">Experience:</span><span>@Model?.Experience</span></div>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="h5 mc-section-heading">Appointments</h2>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a asp-action="Availability" class="mc-btn-primary">My Availability</a>
-            <a asp-action="BookedAppointments" class="mc-btn-outline-teal">My Booked Appointments</a>
-        </div>
-    </section>
-
-    <form asp-controller="Account" asp-action="Logout" method="post">
-        <button type="submit" class="mc-btn-logout">Logout</button>
-    </form>
-</div>
+        <section class="mc-counsellor-quick-actions" aria-labelledby="quick-actions-title">
+            <div class="mc-counsellor-section-heading"><h2 id="quick-actions-title">Quick Actions</h2><p>Keep your counselling schedule organised.</p></div>
+            <div class="mc-counsellor-action-grid">
+                <a asp-action="Availability" class="mc-counsellor-action-card"><span class="mc-counsellor-action-icon" aria-hidden="true">&#128197;</span><h3>Manage Availability</h3><p>Set and review your available counselling time slots.</p><span class="mc-counsellor-action-link">Manage <span aria-hidden="true">&rarr;</span></span></a>
+                <a asp-action="BookedAppointments" class="mc-counsellor-action-card"><span class="mc-counsellor-action-icon" aria-hidden="true">&#10003;</span><h3>View Appointments</h3><p>Review your booked counselling appointments.</p><span class="mc-counsellor-action-link">View <span aria-hidden="true">&rarr;</span></span></a>
+            </div>
+        </section>
+    </div>
+</section>

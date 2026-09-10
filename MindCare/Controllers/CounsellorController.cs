@@ -33,11 +33,85 @@ public class CounsellorController : Controller
 
         await _notificationService.EnsureChatAvailableNotificationsAsync();
 
-        var profile = await _context.CounsellorProfiles
-            .Include(item => item.ApplicationUser)
-            .FirstOrDefaultAsync(item => item.ApplicationUserId == user.Id);
+        return View(await GetCurrentCounsellorProfileAsync());
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        var profile = await GetCurrentCounsellorProfileAsync();
+        if (profile is null)
+        {
+            return Challenge();
+        }
 
         return View(profile);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditProfile()
+    {
+        var profile = await GetCurrentCounsellorProfileAsync();
+        if (profile is null)
+        {
+            return Challenge();
+        }
+
+        return View(new EditCounsellorProfileViewModel
+        {
+            Name = profile.ApplicationUser.Name,
+            Email = profile.ApplicationUser.Email ?? string.Empty,
+            Phone = profile.Phone,
+            Specialization = profile.Specialization,
+            Qualification = profile.Qualification,
+            Experience = profile.Experience
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditProfile(EditCounsellorProfileViewModel model)
+    {
+        var profile = await GetCurrentCounsellorProfileAsync();
+        if (profile is null)
+        {
+            return Challenge();
+        }
+
+        var email = model.Email.Trim();
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser is not null && existingUser.Id != profile.ApplicationUserId)
+        {
+            ModelState.AddModelError(nameof(model.Email), "An account with this email already exists.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = profile.ApplicationUser;
+        user.Name = model.Name.Trim();
+        user.Email = email;
+        user.UserName = email;
+        profile.Phone = model.Phone.Trim();
+        profile.Specialization = model.Specialization.Trim();
+        profile.Qualification = model.Qualification.Trim();
+        profile.Experience = model.Experience.Trim();
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            foreach (var error in updateResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
+        await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Profile updated successfully.";
+        return RedirectToAction(nameof(Profile));
     }
 
     [HttpGet]
@@ -137,7 +211,7 @@ public class CounsellorController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> BookedAppointments()
+    public async Task<IActionResult> BookedAppointments(int? appointmentId)
     {
         var profile = await GetCurrentCounsellorProfileAsync();
         if (profile is null)
@@ -158,6 +232,11 @@ public class CounsellorController : Controller
             .ThenBy(appointment => appointment.StartTime)
             .ToListAsync();
 
+        if (appointmentId.HasValue && appointments.Any(appointment => appointment.Id == appointmentId.Value))
+        {
+            ViewData["FocusedAppointmentId"] = appointmentId.Value;
+        }
+
         return View(appointments);
     }
 
@@ -170,6 +249,7 @@ public class CounsellorController : Controller
         }
 
         return await _context.CounsellorProfiles
+            .Include(profile => profile.ApplicationUser)
             .FirstOrDefaultAsync(profile => profile.ApplicationUserId == user.Id);
     }
 
