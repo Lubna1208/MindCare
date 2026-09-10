@@ -1,0 +1,35 @@
+@model MindCare.ViewModels.EditCounsellorProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<section class="mc-profile-page" aria-labelledby="edit-profile-title">
+    <div class="mc-profile-container">
+        <header class="mc-profile-header">
+            <div><p class="mc-profile-eyebrow">Counsellor portal</p><h1 id="edit-profile-title">Edit Profile</h1><p>Keep your professional information and profile avatar up to date.</p></div>
+            <button type="button" class="mc-admin-back-button mc-profile-back" id="mcEditProfileBack"><span aria-hidden="true">&larr;</span> Back</button>
+        </header>
+        <form asp-action="EditProfile" method="post" class="mc-profile-edit-form">
+            <div asp-validation-summary="ModelOnly" class="mc-profile-validation"></div>
+            <div class="mc-profile-edit-sections">
+                <section class="mc-profile-edit-card" aria-labelledby="edit-contact-title"><h2 id="edit-contact-title">Contact Information</h2><div class="mc-profile-edit-fields"><div><label asp-for="Name"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name"></span></div><div><label asp-for="Email"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email"></span></div><div><label asp-for="Phone"></label><input asp-for="Phone" class="form-control" /><span asp-validation-for="Phone"></span></div></div></section>
+                <section class="mc-profile-edit-card" aria-labelledby="edit-professional-title"><h2 id="edit-professional-title">Professional Information</h2><div class="mc-profile-edit-fields"><div><label asp-for="Specialization"></label><input asp-for="Specialization" class="form-control" /><span asp-validation-for="Specialization"></span></div><div><label asp-for="Qualification"></label><input asp-for="Qualification" class="form-control" /><span asp-validation-for="Qualification"></span></div><div><label asp-for="Experience"></label><input asp-for="Experience" class="form-control" /><span asp-validation-for="Experience"></span></div></div></section>
+            </div>
+            <div class="mc-profile-edit-actions"><button type="submit">Save Changes</button><a asp-action="Profile">Cancel</a></div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('mcEditProfileBack').addEventListener('click', function () {
+            var fallbackUrl = '@Url.Action("Profile", "Counsellor")';
+            var internalReferrer = false;
+            try { internalReferrer = document.referrer && new URL(document.referrer).origin === window.location.origin; } catch (_) { }
+            if (internalReferrer && window.history.length > 1) window.history.back();
+            else window.location.assign(fallbackUrl);
+        });
+    </script>
+}

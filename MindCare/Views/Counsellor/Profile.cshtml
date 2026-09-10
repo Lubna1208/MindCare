@@ -1,0 +1,60 @@
+@model MindCare.Models.CounsellorProfile
+
+@{
+    ViewData["Title"] = "My Profile";
+    var user = Model.ApplicationUser;
+    var name = string.IsNullOrWhiteSpace(user?.Name) ? "Counsellor" : user.Name.Trim();
+    var initial = string.IsNullOrWhiteSpace(user?.Name) ? "?" : user.Name.Trim()[0].ToString().ToUpperInvariant();
+}
+
+<section class="mc-profile-page" aria-labelledby="profile-title">
+    <div class="mc-profile-container">
+        <header class="mc-profile-header">
+            <div><p class="mc-profile-eyebrow">Counsellor portal</p><h1 id="profile-title">My Profile</h1><p>Your professional information at MindCare.</p></div>
+            <div class="mc-profile-header-actions"><a asp-action="EditProfile" class="mc-profile-edit-action">Edit Profile</a><button type="button" class="mc-admin-back-button mc-profile-back" id="mcProfileBack"><span aria-hidden="true">&larr;</span> Back</button></div>
+        </header>
+
+        <section class="mc-profile-identity" aria-labelledby="profile-name">
+            <div class="mc-profile-avatar-large" aria-hidden="true">@initial</div>
+            <div class="mc-profile-identity-content">
+                <h2 id="profile-name">@name</h2>
+                <p class="mc-profile-role">Counsellor</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Specialization))
+                {
+                    <span class="mc-profile-specialization">@Model.Specialization</span>
+                }
+            </div>
+        </section>
+
+        <div class="mc-profile-sections">
+            <section class="mc-profile-section-card" aria-labelledby="contact-information-title">
+                <h2 id="contact-information-title" class="mc-profile-section-title">Contact Information</h2>
+                <dl>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Name</dt><dd class="mc-profile-field-value">@name</dd></div>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Email</dt><dd class="mc-profile-field-value mc-profile-email">@user?.Email</dd></div>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Phone</dt><dd class="mc-profile-field-value mc-profile-phone">@Model.Phone</dd></div>
+                </dl>
+            </section>
+            <section class="mc-profile-section-card" aria-labelledby="professional-information-title">
+                <h2 id="professional-information-title" class="mc-profile-section-title">Professional Information</h2>
+                <dl>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Specialization</dt><dd class="mc-profile-field-value">@Model.Specialization</dd></div>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Qualification</dt><dd class="mc-profile-field-value">@Model.Qualification</dd></div>
+                    <div class="mc-profile-field"><dt class="mc-profile-field-label">Experience</dt><dd class="mc-profile-field-value">@Model.Experience</dd></div>
+                </dl>
+            </section>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('mcProfileBack').addEventListener('click', function () {
+            var fallbackUrl = '@Url.Action("Index", "Counsellor")';
+            var internalReferrer = false;
+            try { internalReferrer = document.referrer && new URL(document.referrer).origin === window.location.origin; } catch (_) { }
+            if (internalReferrer && window.history.length > 1) window.history.back();
+            else window.location.assign(fallbackUrl);
+        });
+    </script>
+}

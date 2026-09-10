@@ -8,11 +8,11 @@ namespace MindCare.ViewComponents;
 
 public class NotificationCountViewComponent(ApplicationDbContext context, UserManager<ApplicationUser> userManager) : ViewComponent
 {
-    public async Task<IViewComponentResult> InvokeAsync()
+    public async Task<IViewComponentResult> InvokeAsync(bool iconOnly = false)
     {
         var user = await userManager.GetUserAsync(HttpContext.User);
         if (user is null) return Content(string.Empty);
         var unreadCount = await context.Notifications.CountAsync(item => item.UserId == user.Id && !item.IsRead);
-        return View(unreadCount);
+        return View(iconOnly ? "Icon" : "Default", unreadCount);
     }
 }
