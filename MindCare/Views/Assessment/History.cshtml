@@ -4,134 +4,68 @@
     ViewData["Title"] = "Assessment History";
 }
 
-<style>
-    .mc-page { max-width: 900px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.55rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-table-wrap {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 18px;
-        overflow: hidden;
-    }
-    .mc-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .mc-table thead th {
-        background: var(--mc-pale, #D9F5EF);
-        color: var(--mc-deep, #2F5D57);
-        text-align: left;
-        padding: 0.9rem 1.1rem;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-    .mc-table tbody td {
-        padding: 0.9rem 1.1rem;
-        border-top: 1px solid var(--mc-mist, #F7FFFD);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-table tbody tr:hover { background: var(--mc-mist, #F7FFFD); }
-    .mc-indication-pill {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 0.25rem 0.75rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    .mc-risk-low { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-risk-moderate { background: var(--mc-soft, #A7E3D4); color: var(--mc-deep, #2F5D57); }
-    .mc-risk-high { background: #F3E3D3; color: #8A5A2B; }
-    .mc-view-link {
-        color: var(--mc-teal, #5BB9A6);
-        font-weight: 600;
-        text-decoration: none;
-        border: 1px solid var(--mc-teal, #5BB9A6);
-        border-radius: 999px;
-        padding: 0.3rem 0.9rem;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-view-link:hover { background: var(--mc-teal, #5BB9A6); color: #fff; }
-    .mc-empty-state {
-        background: var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-    }
-    @@media (max-width: 700px) {
-        .mc-table thead { display: none; }
-        .mc-table, .mc-table tbody, .mc-table tr, .mc-table td { display: block; width: 100%; }
-        .mc-table tbody tr {
-            border-top: 1px solid var(--mc-pale, #D9F5EF);
-            padding: 0.75rem 0;
-        }
-        .mc-table tbody td {
-            border-top: none;
-            padding: 0.25rem 1.1rem;
-        }
-    }
-</style>
-
-<div class="mc-page">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h1 class="h3 mb-0">Assessment History</h1>
-        <a asp-action="Index" class="mc-btn-primary">Take Assessment</a>
-    </div>
+<section class="mc-assessment-history-page" aria-labelledby="assessment-history-title">
+    <header class="mc-assessment-history-hero">
+        <div>
+            <p class="mc-assessment-history-eyebrow">Your wellbeing journey</p>
+            <h1 id="assessment-history-title">Assessment History</h1>
+            <p>Review your previous wellbeing check-ins and see how things have changed over time.</p>
+        </div>
+        <a asp-action="Index" class="mc-assessment-history-take">Take Assessment</a>
+    </header>
 
     @if (Model.Any())
     {
-        <div class="mc-table-wrap">
-            <table class="mc-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Score</th>
-                        <th>Wellbeing indication</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var assessment in Model)
-                    {
-                        var riskClass = assessment.RiskLevel switch
-                        {
-                            "Low" => "mc-risk-low",
-                            "Moderate" => "mc-risk-moderate",
-                            "High" => "mc-risk-high",
-                            _ => "mc-risk-moderate"
-                        };
+        <section class="mc-assessment-history-section" aria-label="Previous assessment results">
+            <div class="mc-assessment-history-section-heading">
+                <div>
+                    <h2>Your previous results</h2>
+                    <p>Each result is a wellbeing indication, not a diagnosis.</p>
+                </div>
+                <span class="mc-assessment-history-count">@Model.Count() check-in@(Model.Count() == 1 ? "" : "s")</span>
+            </div>
+
+            <div class="mc-assessment-history-table-wrap">
+                <table class="mc-assessment-history-table">
+                    <thead>
                         <tr>
-                            <td>@assessment.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@assessment.Score of @AssessmentQuestionnaire.MaximumScore</td>
-                            <td><span class="mc-indication-pill @riskClass">@assessment.RiskLevel</span></td>
-                            <td><a asp-action="Result" asp-route-id="@assessment.Id" class="mc-view-link">View result</a></td>
+                            <th scope="col">Date</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Wellbeing indication</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var assessment in Model)
+                        {
+                            var riskTone = assessment.RiskLevel switch
+                            {
+                                "Low" => "low",
+                                "Moderate" => "moderate",
+                                "High" => "high",
+                                _ => "moderate"
+                            };
+                            <tr>
+                                <td data-label="Date">@assessment.CreatedAt.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt")</td>
+                                <td data-label="Score"><strong>@assessment.Score</strong><span> of @AssessmentQuestionnaire.MaximumScore</span></td>
+                                <td data-label="Wellbeing indication">
+                                    <span class="mc-assessment-history-indication mc-assessment-history-indication--@riskTone"><span aria-hidden="true"></span>@assessment.RiskLevel</span>
+                                </td>
+                                <td class="mc-assessment-history-action-cell"><a asp-action="Result" asp-route-id="@assessment.Id" class="mc-assessment-history-view">View result <span aria-hidden="true">→</span></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
     }
     else
     {
-        <div class="mc-empty-state">
-            <p class="mb-0">You have not completed an assessment yet.</p>
-        </div>
+        <section class="mc-assessment-history-empty" aria-label="No assessments yet">
+            <span class="mc-assessment-history-empty-icon" aria-hidden="true">✦</span>
+            <h2>Your first check-in starts here</h2>
+            <p>You have not completed an assessment yet. It only takes a few calm moments.</p>
+            <a asp-action="Index" class="mc-assessment-history-take">Take Assessment</a>
+        </section>
     }
-</div>
+</section>

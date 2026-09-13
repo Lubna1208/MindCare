@@ -32,11 +32,11 @@ public class BookingController : Controller
         _notificationService = notificationService;
     }
 
-    private long AppointmentFeeCents =>
-        _configuration.GetValue<long?>("Stripe:AppointmentFeeCents") ?? 1500;
+    private long AppointmentFeeMinorUnits =>
+        _configuration.GetValue<long?>("Stripe:AppointmentFeeMinorUnits") ?? 50_000;
 
     private string Currency =>
-        _configuration.GetValue<string?>("Stripe:Currency") ?? "usd";
+        _configuration.GetValue<string?>("Stripe:Currency") ?? "bdt";
 
     [HttpGet]
     public async Task<IActionResult> Index(int? counsellorProfileId, DateTime? date)
@@ -72,7 +72,7 @@ public class BookingController : Controller
         {
             SlotId = slot.Id,
             Slot = slot,
-            AmountCents = AppointmentFeeCents,
+            AmountMinorUnits = AppointmentFeeMinorUnits,
             Currency = Currency
         });
     }
@@ -114,7 +114,7 @@ public class BookingController : Controller
                     PriceData = new SessionLineItemPriceDataOptions
                     {
                         Currency = Currency,
-                        UnitAmount = AppointmentFeeCents,
+                        UnitAmount = AppointmentFeeMinorUnits,
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = $"MindCare Counselling Session with {counsellorName}",
@@ -310,7 +310,7 @@ public class BookingController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> MyAppointments()
+    public async Task<IActionResult> MyAppointments(int? highlightAppointmentId)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user is null)
@@ -331,6 +331,11 @@ public class BookingController : Controller
             .ThenBy(appointment => appointment.Date)
             .ThenBy(appointment => appointment.StartTime)
             .ToListAsync();
+
+        if (highlightAppointmentId.HasValue && appointments.Any(appointment => appointment.Id == highlightAppointmentId.Value))
+        {
+            ViewData["HighlightAppointmentId"] = highlightAppointmentId.Value;
+        }
 
         return View(appointments);
     }

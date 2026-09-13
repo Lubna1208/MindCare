@@ -1,176 +1,64 @@
 @model MindCare.ViewModels.PaymentSummaryViewModel
 
 @{
-    ViewData["Title"] = "Payment Summary";
+    ViewData["Title"] = "Confirm and Pay";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
     var counsellor = Model.Slot.CounsellorProfile.ApplicationUser;
     var profile = Model.Slot.CounsellorProfile;
-    var amountDisplay = (Model.AmountCents / 100.0).ToString("0.00");
-    var currencyLabel = Model.Currency.ToUpperInvariant();
+    var counsellorInitial = string.IsNullOrWhiteSpace(counsellor.Name) ? "C" : counsellor.Name.Trim()[0].ToString().ToUpperInvariant();
+    var amountDisplay = (Model.AmountMinorUnits / 100m).ToString("0");
+    var selectedDate = Model.Slot.Date.ToString("yyyy-MM-dd");
 }
 
-<style>
-    .mc-page { max-width: 640px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-summary-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 20px;
-        padding: 1.75rem;
-        box-shadow: 0 8px 24px rgba(47, 93, 87, 0.06);
-        margin-bottom: 1.5rem;
-    }
-    .mc-counsellor-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-        padding-bottom: 1.25rem;
-        border-bottom: 1px solid var(--mc-mist, #F7FFFD);
-    }
-    .mc-avatar {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: var(--mc-soft, #A7E3D4);
-        color: var(--mc-deep, #2F5D57);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.4rem;
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        flex-shrink: 0;
-    }
-    .mc-counsellor-name {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin: 0;
-    }
-    .mc-counsellor-spec {
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.75;
-        font-size: 0.92rem;
-        margin: 0;
-    }
-    .mc-detail-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.5rem 0;
-        color: var(--mc-deep, #2F5D57);
-        border-bottom: 1px solid var(--mc-mist, #F7FFFD);
-    }
-    .mc-detail-row:last-child { border-bottom: none; }
-    .mc-detail-label { font-weight: 600; opacity: 0.75; }
-    .mc-detail-value { text-align: right; }
-    .mc-amount-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 2px solid var(--mc-pale, #D9F5EF);
-    }
-    .mc-amount-label {
-        font-weight: 700;
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-amount-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--mc-teal, #5BB9A6);
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.75rem 1rem;
-        font-weight: 600;
-        width: 100%;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-btn-outline {
-        border: 1px solid var(--mc-deep, #2F5D57);
-        color: var(--mc-deep, #2F5D57);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 0.6rem;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
-    .mc-secure-note {
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-        opacity: 0.6;
-        font-size: 0.85rem;
-        margin-top: 0.75rem;
-    }
-</style>
-
-<div class="mc-page">
-    <h1 class="h3 mb-3">Confirm and Pay</h1>
+<section class="mc-checkout-page" aria-labelledby="checkout-title">
+    <header class="mc-checkout-hero">
+        <p>Your appointment</p>
+        <h1 id="checkout-title">Confirm and Pay</h1>
+        <span>Review your appointment details before continuing to secure payment.</span>
+    </header>
 
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="alert alert-danger" role="alert" style="border-radius:12px;">@errorMessage</div>
+        <div class="mc-checkout-alert" role="alert">@errorMessage</div>
     }
 
-    <div class="mc-summary-card">
-        <div class="mc-counsellor-header">
-            <div class="mc-avatar">@counsellor.Name.Substring(0, 1)</div>
-            <div>
-                <p class="mc-counsellor-name">@counsellor.Name</p>
-                <p class="mc-counsellor-spec">@profile.Specialization</p>
-            </div>
+    <div class="mc-checkout-card">
+        <div class="mc-checkout-details">
+            <section class="mc-checkout-section" aria-labelledby="counsellor-title">
+                <p class="mc-checkout-label" id="counsellor-title">Counsellor</p>
+                <div class="mc-checkout-counsellor">
+                    <span class="mc-checkout-avatar" aria-hidden="true">@counsellorInitial</span>
+                    <div><h2>@counsellor.Name</h2><p>@profile.Specialization</p></div>
+                </div>
+            </section>
+
+            <section class="mc-checkout-section mc-checkout-professional" aria-labelledby="professional-title">
+                <p class="mc-checkout-label" id="professional-title">Professional details</p>
+                <dl>
+                    <div><dt>Qualification</dt><dd>@profile.Qualification</dd></div>
+                    <div><dt>Experience</dt><dd>@profile.Experience</dd></div>
+                    <div><dt>Phone</dt><dd>@profile.Phone</dd></div>
+                </dl>
+            </section>
+
+            <section class="mc-checkout-section mc-checkout-appointment" aria-labelledby="appointment-title">
+                <p class="mc-checkout-label" id="appointment-title">Appointment</p>
+                <div class="mc-checkout-appointment-item"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M7.5 3v4m9-4v4M3.5 10h17"/></svg></span><div><small>Date</small><strong>@Model.Slot.Date.ToString("dd MMMM yyyy")</strong></div></div>
+                <div class="mc-checkout-appointment-item"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span><div><small>Time</small><strong>@FormatTime(Model.Slot.StartTime) – @FormatTime(Model.Slot.EndTime)</strong></div></div>
+            </section>
         </div>
 
-        <div class="mc-detail-row">
-            <span class="mc-detail-label">Qualification</span>
-            <span class="mc-detail-value">@profile.Qualification</span>
-        </div>
-        <div class="mc-detail-row">
-            <span class="mc-detail-label">Experience</span>
-            <span class="mc-detail-value">@profile.Experience</span>
-        </div>
-        <div class="mc-detail-row">
-            <span class="mc-detail-label">Phone</span>
-            <span class="mc-detail-value">@profile.Phone</span>
-        </div>
-        <div class="mc-detail-row">
-            <span class="mc-detail-label">Date</span>
-            <span class="mc-detail-value">@Model.Slot.Date.ToString("dd MMMM yyyy")</span>
-        </div>
-        <div class="mc-detail-row">
-            <span class="mc-detail-label">Time</span>
-            <span class="mc-detail-value">@FormatTime(Model.Slot.StartTime) - @FormatTime(Model.Slot.EndTime)</span>
-        </div>
+        <aside class="mc-checkout-payment" aria-labelledby="payment-title">
+            <p class="mc-checkout-label" id="payment-title">Payment summary</p>
+            <div class="mc-checkout-price-row"><span>Counselling appointment</span><strong>৳@amountDisplay</strong></div>
+            <div class="mc-checkout-total"><span>Total</span><strong>৳@amountDisplay <small>BDT</small></strong></div>
 
-        <div class="mc-amount-row">
-            <span class="mc-amount-label">Total</span>
-            <span class="mc-amount-value">@currencyLabel @amountDisplay</span>
-        </div>
+            <form asp-action="CreateCheckoutSession" method="post" data-payment-form>
+                <input type="hidden" name="slotId" value="@Model.SlotId" />
+                <button type="submit" class="mc-checkout-submit"><span data-payment-label>Confirm Payment</span></button>
+            </form>
+            <p class="mc-checkout-stripe-note"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5.5" y="10" width="13" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10m-3.5 4v2"/></svg></span>You'll be securely redirected to Stripe to complete your payment.</p>
+            <a asp-action="Index" asp-route-counsellorProfileId="@Model.Slot.CounsellorProfileId" asp-route-date="@selectedDate" class="mc-checkout-cancel">← Change appointment</a>
+        </aside>
     </div>
-
-    <form asp-action="CreateCheckoutSession" method="post">
-        <input type="hidden" name="slotId" value="@Model.SlotId" />
-        <button type="submit" class="mc-btn-primary">Confirm Payment</button>
-    </form>
-    <p class="mc-secure-note">🔒 You'll be securely redirected to Stripe to complete your payment.</p>
-
-    <div class="text-center">
-        <a asp-action="Index" class="mc-btn-outline">Cancel and go back</a>
-    </div>
-</div>
+</section>

@@ -64,3 +64,40 @@ document.querySelectorAll('[data-counsellor-delete-form]').forEach((form) => {
         if (!window.confirm(message)) event.preventDefault();
     });
 });
+
+document.querySelectorAll('[data-auto-dismiss]').forEach((alert) => {
+    const delay = Number(alert.dataset.autoDismiss) || 5000;
+    window.setTimeout(() => {
+        alert.classList.add('is-hiding');
+        window.setTimeout(() => alert.remove(), 250);
+    }, delay);
+});
+
+document.querySelectorAll('[data-payment-form]').forEach((form) => {
+    form.addEventListener('submit', function () {
+        if (!this.checkValidity()) return;
+
+        const button = this.querySelector('button[type="submit"]');
+        const label = this.querySelector('[data-payment-label]');
+        if (!button || button.disabled) return;
+
+        button.disabled = true;
+        if (label) label.textContent = 'Redirecting to Stripe…';
+    });
+});
+
+const userSidebar = document.querySelector('[data-user-sidebar]');
+if (userSidebar) {
+    const toggle = document.querySelector('[data-user-sidebar-toggle]');
+    const overlay = document.querySelector('.mc-user-sidebar-overlay');
+    const setOpen = (open) => {
+        userSidebar.classList.toggle('is-open', open);
+        document.body.classList.toggle('mc-user-menu-open', open);
+        if (overlay) overlay.hidden = !open;
+        if (toggle) toggle.setAttribute('aria-expanded', String(open));
+        if (open) userSidebar.querySelector('a, button')?.focus();
+    };
+    toggle?.addEventListener('click', () => setOpen(!userSidebar.classList.contains('is-open')));
+    document.querySelectorAll('[data-user-sidebar-close], .mc-user-sidebar a').forEach((element) => element.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setOpen(false); });
+}

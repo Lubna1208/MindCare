@@ -4,8 +4,7 @@
     ViewData["Title"] = "Assessment";
 }
 
-<div class="row justify-content-center mc-assessment-page">
-    <div class="col-lg-8">
+<div class="mc-assessment-page">
         <div class="mc-assessment-intro">
             <p class="mc-eyebrow mb-1">A moment for yourself</p>
             <h1 class="mc-page-title mb-2">Wellbeing Assessment</h1>
@@ -45,11 +44,10 @@
             }
 
             <div class="mc-assessment-actions">
-                <button type="submit" class="btn btn-primary mc-submit-assessment">Submit Assessment</button>
-                <a asp-action="History" class="btn btn-outline-secondary mc-assessment-history">View Assessment History</a>
+                <div><p class="mc-assessment-actions-title">Ready to finish?</p><p>Please make sure you have answered each question.</p></div>
+                <div class="mc-assessment-actions-buttons"><button type="submit" class="btn btn-primary mc-submit-assessment">Submit Assessment</button><a asp-action="History" class="btn btn-outline-secondary mc-assessment-history">View Assessment History</a></div>
             </div>
         </form>
-    </div>
 </div>
 
 @section Scripts {
@@ -71,6 +69,7 @@
                 text.textContent = answered + ' of ' + total + ' answered';
                 track.setAttribute('aria-valuemax', total);
                 track.setAttribute('aria-valuenow', answered);
+                groups.forEach(function (group) { group.classList.toggle('mc-question-card--answered', !!group.querySelector('input[type="radio"]:checked')); });
             };
 
             document.querySelectorAll('.mc-assessment-radio').forEach(function (radio) {

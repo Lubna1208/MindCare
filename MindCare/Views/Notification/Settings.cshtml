@@ -1,11 +1,72 @@
 @model MindCare.ViewModels.NotificationPreferenceViewModel
-@{ ViewData["Title"] = "Notification Settings"; }
-<div class="mx-auto" style="max-width: 600px;">
-    <h1 class="h3 mb-3">Notification Settings</h1>
-    @if (TempData["SuccessMessage"] is string successMessage) { <div class="alert alert-success">@successMessage</div> }
-    <form asp-action="Settings" method="post" class="card card-body">
-        <div class="form-check mb-3"><input asp-for="DailyMoodReminderEnabled" class="form-check-input" /><label asp-for="DailyMoodReminderEnabled" class="form-check-label">Enable Daily Mood Reminder</label></div>
-        <div class="mb-3"><label asp-for="DailyMoodReminderTime" class="form-label"></label><input asp-for="DailyMoodReminderTime" type="time" class="form-control" /><span asp-validation-for="DailyMoodReminderTime" class="text-danger"></span></div>
-        <button type="submit" class="btn btn-primary align-self-start">Save</button>
+
+@{
+    ViewData["Title"] = "Notification Settings";
+    var reminderTimeInactive = (!Model.DailyMoodReminderEnabled).ToString().ToLowerInvariant();
+}
+
+<section class="mc-notification-settings-page" aria-labelledby="notification-settings-title">
+    <header class="mc-notification-settings-header">
+        <div>
+            <p>Notifications</p>
+            <h1 id="notification-settings-title">Notification Settings</h1>
+            <span>Choose when MindCare should remind you to check in with your mood.</span>
+        </div>
+        <a asp-action="Index" class="mc-notification-settings-back">← Back to Notifications</a>
+    </header>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="mc-notification-settings-status mc-notification-settings-status--success" role="status" data-auto-dismiss="5000"><span aria-hidden="true">✓</span>@successMessage</div>
+    }
+
+    <form asp-action="Settings" method="post" class="mc-notification-settings-card" data-notification-settings-form>
+        <div asp-validation-summary="ModelOnly" class="mc-notification-settings-validation" role="alert"></div>
+        <section class="mc-notification-setting-row" aria-labelledby="daily-reminder-title">
+            <div class="mc-notification-setting-copy"><h2 id="daily-reminder-title">Daily Mood Reminder</h2><p>Get a reminder to complete your daily mood check-in.</p><span data-reminder-status>@(Model.DailyMoodReminderEnabled ? "Reminder is currently enabled." : "Reminder is currently turned off.")</span></div>
+            <div class="mc-notification-toggle-control">
+                <input asp-for="DailyMoodReminderEnabled" class="mc-notification-toggle-input" aria-labelledby="daily-reminder-title" data-reminder-toggle />
+                <label asp-for="DailyMoodReminderEnabled" class="mc-notification-toggle" aria-label="Toggle daily mood reminder"><span aria-hidden="true"></span></label>
+            </div>
+        </section>
+
+        <section class="mc-notification-time-group @(!Model.DailyMoodReminderEnabled ? "is-inactive" : "")" data-reminder-time-group aria-labelledby="reminder-time-title" aria-disabled="@reminderTimeInactive">
+            <div><h2 id="reminder-time-title">Reminder Time</h2><p>Choose when you would like to receive your daily mood reminder.</p></div>
+            <label asp-for="DailyMoodReminderTime">Reminder Time</label>
+            <input asp-for="DailyMoodReminderTime" type="time" class="mc-notification-time-input" />
+            <span asp-validation-for="DailyMoodReminderTime" class="mc-notification-settings-field-error"></span>
+            <p class="mc-notification-settings-note">You can change or turn off this reminder at any time.</p>
+        </section>
+
+        <div class="mc-notification-settings-actions"><button type="submit" class="mc-notification-settings-save"><span data-notification-save-label>Save Settings</span></button></div>
     </form>
-</div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var reminderToggle = document.querySelector('[data-reminder-toggle]');
+        var reminderTimeGroup = document.querySelector('[data-reminder-time-group]');
+        var reminderStatus = document.querySelector('[data-reminder-status]');
+        var updateReminderState = function () {
+            if (!reminderToggle || !reminderTimeGroup || !reminderStatus) return;
+            var enabled = reminderToggle.checked;
+            reminderTimeGroup.classList.toggle('is-inactive', !enabled);
+            reminderTimeGroup.setAttribute('aria-disabled', String(!enabled));
+            reminderStatus.textContent = enabled ? 'Reminder is currently enabled.' : 'Reminder is currently turned off.';
+        };
+        reminderToggle?.addEventListener('change', updateReminderState);
+        updateReminderState();
+
+        document.querySelectorAll('[data-notification-settings-form]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (event.defaultPrevented || !this.checkValidity()) return;
+                var button = this.querySelector('button[type="submit"]');
+                var label = this.querySelector('[data-notification-save-label]');
+                if (!button || button.disabled) return;
+                button.disabled = true;
+                if (label) label.textContent = 'Saving...';
+            });
+        });
+    </script>
+}

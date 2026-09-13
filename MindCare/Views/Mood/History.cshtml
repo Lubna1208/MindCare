@@ -1,44 +1,80 @@
 @model IEnumerable<MindCare.Models.MoodLog>
 
+@functions {
+    private static string GetMoodEmoji(string mood) => mood switch
+    {
+        "Great" => "😊",
+        "Good" => "🙂",
+        "Okay" => "😐",
+        "Sad" => "😔",
+        "Very Sad" => "😢",
+        "Angry" => "😠",
+        "Anxious" => "😟",
+        _ => "🙂"
+    };
+}
+
 @{
     ViewData["Title"] = "Mood History";
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mc-mood-history-heading mb-4">
-    <h1 class="h3 mc-page-title mb-0">Mood History</h1>
-    <a asp-action="Index" class="btn btn-primary mc-track-mood-button">Track Today's Mood</a>
-</div>
+<section class="mc-mood-history-page" aria-labelledby="mood-history-title">
+    <header class="mc-mood-history-heading">
+        <div>
+            <p class="mc-mood-history-eyebrow">Your wellbeing</p>
+            <h1 id="mood-history-title">Mood History</h1>
+            <p>Review your previous mood check-ins and notes.</p>
+        </div>
+        <a asp-action="Index" class="btn mc-track-mood-button">Track Today's Mood</a>
+    </header>
 
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div class="alert alert-success mc-mood-success-alert" role="alert"><span aria-hidden="true">✓</span>@successMessage</div>
-}
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert mc-mood-success-alert" role="alert" data-auto-dismiss="5000"><span aria-hidden="true">✓</span>@successMessage</div>
+    }
 
-@if (Model.Any())
-{
-    <div class="table-responsive mc-mood-history-table-wrap">
-        <table class="table table-striped align-middle mc-mood-history-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Mood</th>
-                    <th>Note</th>
-                </tr>
-            </thead>
-            <tbody>
+    @if (Model.Any())
+    {
+        <section class="mc-mood-history-section" aria-labelledby="mood-checkins-title">
+            <h2 id="mood-checkins-title">Your check-ins</h2>
+            <div class="mc-mood-history-table-wrap">
+                <table class="table align-middle mc-mood-history-table">
+                    <colgroup><col class="mc-mood-history-date-column" /><col class="mc-mood-history-mood-column" /><col /></colgroup>
+                    <thead>
+                        <tr><th>Date &amp; Time</th><th>Mood</th><th>Note</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var moodLog in Model)
+                        {
+                            <tr>
+                                <td><time class="mc-mood-history-date" datetime="@moodLog.CreatedAt.ToString("O")"><span>@moodLog.CreatedAt.ToString("dd MMM yyyy")</span><small>@moodLog.CreatedAt.ToString("hh:mm tt")</small></time></td>
+                                <td><span class="mc-mood-history-mood"><span class="mc-mood-history-emoji" aria-hidden="true">@GetMoodEmoji(moodLog.Mood)</span>@moodLog.Mood</span></td>
+                                <td class="mc-mood-history-note">@if (string.IsNullOrWhiteSpace(moodLog.Note)) { <span class="mc-mood-history-no-note">—</span> } else { @moodLog.Note }</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mc-mood-history-mobile-list">
                 @foreach (var moodLog in Model)
                 {
-                    <tr>
-                        <td>@moodLog.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@moodLog.Mood</td>
-                        <td>@(string.IsNullOrWhiteSpace(moodLog.Note) ? "—" : moodLog.Note)</td>
-                    </tr>
+                    <article class="mc-mood-history-mobile-card">
+                        <time class="mc-mood-history-date" datetime="@moodLog.CreatedAt.ToString("O")"><span>@moodLog.CreatedAt.ToString("dd MMM yyyy")</span><small>@moodLog.CreatedAt.ToString("hh:mm tt")</small></time>
+                        <span class="mc-mood-history-mood"><span class="mc-mood-history-emoji" aria-hidden="true">@GetMoodEmoji(moodLog.Mood)</span>@moodLog.Mood</span>
+                        <div class="mc-mood-history-mobile-note"><span>Note</span><p>@(string.IsNullOrWhiteSpace(moodLog.Note) ? "—" : moodLog.Note)</p></div>
+                    </article>
                 }
-            </tbody>
-        </table>
-    </div>
-}
-else
-{
-    <p class="text-muted mc-mood-history-empty"><span aria-hidden="true">☼</span>You have not saved any moods yet.</p>
-}
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="mc-mood-history-empty" aria-labelledby="mood-history-empty-title">
+            <span class="mc-mood-history-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-6.5-3.7-6.5-9a3.5 3.5 0 0 1 6.1-2.3L12 9.3l.4-.6a3.5 3.5 0 0 1 6.1 2.3c0 5.3-6.5 9-6.5 9Z"/><path d="M9.5 13c.7.65 1.55 1 2.5 1s1.8-.35 2.5-1"/></svg></span>
+            <h2 id="mood-history-empty-title">No mood check-ins yet</h2>
+            <p>Track how you are feeling and your check-ins will appear here.</p>
+            <a asp-action="Index" class="btn mc-track-mood-button">Track Today's Mood</a>
+        </section>
+    }
+</section>

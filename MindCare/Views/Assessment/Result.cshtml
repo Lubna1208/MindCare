@@ -2,58 +2,59 @@
 
 @{
     ViewData["Title"] = "Assessment Result";
+    var resultTone = Model.RiskLevel switch
+    {
+        "High" => "high",
+        "Moderate" => "moderate",
+        _ => "low"
+    };
 }
 
-<div class="row justify-content-center mc-assessment-result-page">
-    <div class="col-md-8 col-lg-7">
-        <div class="mc-result-heading mb-3">
-            <p class="mc-eyebrow mb-1">Your wellbeing check-in</p>
-            <h1 class="mc-page-title mb-0">Assessment Result</h1>
-        </div>
-        <div class="card mb-3 mc-assessment-result-card">
-            <div class="card-body mc-assessment-result-body">
-                <div class="mc-result-summary">
-                    <div class="mc-result-score">
-                        <span class="mc-result-label">Score</span>
-                        <p class="mb-0"><strong>@Model.Score</strong><span>of @AssessmentQuestionnaire.MaximumScore</span></p>
-                    </div>
-                    <div class="mc-result-indication">
-                        <span class="mc-result-label">Wellbeing indication</span>
-                        <p class="mb-0"><span>@Model.RiskLevel</span></p>
-                    </div>
-                </div>
-                <div class="mc-result-recommendation">
-                    <h2 class="h5">Recommendation</h2>
-                    <p class="mb-0">@Model.Recommendation</p>
-                </div>
-            </div>
+<section class="mc-result-page" aria-labelledby="assessment-result-title">
+    <header class="mc-result-hero">
+        <span class="mc-result-hero-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-6.5-3.7-6.5-9a3.5 3.5 0 0 1 6.1-2.3l.4.6.4-.6a3.5 3.5 0 0 1 6.1 2.3c0 5.3-6.5 9-6.5 9Z"/><path d="M9.5 13c.7.65 1.55 1 2.5 1s1.8-.35 2.5-1"/></svg></span>
+        <div><p>Your wellbeing check-in</p><h1 id="assessment-result-title">Assessment Result</h1></div>
+    </header>
+
+    <article class="mc-result-card mc-result-card--@resultTone">
+        <span class="mc-result-summary-label">Result summary</span>
+        <div class="mc-result-summary">
+            <section class="mc-result-score" aria-label="Your score">
+                <span class="mc-result-label">Score</span>
+                <div class="mc-result-score-ring" style="--mc-score-progress: @(Model.Score * 100.0 / AssessmentQuestionnaire.MaximumScore)%"><div><strong>@Model.Score</strong><span>of @AssessmentQuestionnaire.MaximumScore</span></div></div>
+            </section>
+            <section class="mc-result-indication" aria-label="Wellbeing indication">
+                <span class="mc-result-label">Wellbeing indication</span>
+                <span class="mc-result-indication-heading">Current indication</span>
+                <span class="mc-result-indication-badge mc-result-indication--@resultTone"><i aria-hidden="true"></i>@Model.RiskLevel</span>
+            </section>
         </div>
 
-        @if (Model.IsHighRisk)
-        {
-            <div class="alert alert-warning mc-high-risk-alert" role="alert">
-                <span class="mc-high-risk-icon" aria-hidden="true">♥</span>
-                This result is a screening indication, not a diagnosis. Additional support may be helpful.
-            </div>
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <a asp-controller="Support" asp-action="Immediate" class="btn btn-warning">Get Immediate Support</a>
-                <a asp-controller="Booking" asp-action="Index" class="btn btn-outline-primary">Talk to a Counsellor</a>
-            </div>
-        }
-        else if (Model.RiskLevel == "Moderate")
-        {
-            <div class="alert alert-info" role="alert">Your responses indicate that additional support may be helpful. Consider speaking with a mental-health professional.</div>
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <a asp-controller="Booking" asp-action="Index" class="btn btn-outline-primary">Talk to a Counsellor</a>
-                <a asp-controller="Resources" asp-action="Index" class="btn btn-outline-secondary">View Support Resources</a>
-            </div>
-        }
+        <section class="mc-result-recommendation" aria-labelledby="recommendation-title">
+            <span class="mc-result-recommendation-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-6.5-3.7-6.5-9a3.5 3.5 0 0 1 6.1-2.3l.4.6.4-.6a3.5 3.5 0 0 1 6.1 2.3c0 5.3-6.5 9-6.5 9Z"/><path d="M9.5 13c.7.65 1.55 1 2.5 1s1.8-.35 2.5-1"/></svg></span>
+            <div><h2 id="recommendation-title">Recommendation</h2><p>@Model.Recommendation</p></div>
+        </section>
+    </article>
 
-        <p class="text-muted mc-assessment-disclaimer-note">This assessment cannot diagnose a mental health condition. If you have concerns about your wellbeing, consider speaking with a qualified professional.</p>
+    @if (Model.IsHighRisk)
+    {
+        <section class="mc-result-support mc-result-support--high" aria-label="Additional support">
+            <div><p>Additional support</p><span>This result is a screening indication, not a diagnosis. Additional support may be helpful.</span></div>
+            <nav aria-label="Support actions"><a asp-controller="Support" asp-action="Immediate" class="btn mc-result-support-primary">Get Immediate Support</a><a asp-controller="Booking" asp-action="Index" class="btn mc-result-support-secondary">Talk to a Counsellor</a></nav>
+        </section>
+    }
+    else if (Model.RiskLevel == "Moderate")
+    {
+        <section class="mc-result-support" aria-label="Additional support">
+            <div><p>Additional support</p><span>Your responses indicate that additional support may be helpful. Consider speaking with a mental-health professional.</span></div>
+            <nav aria-label="Support actions"><a asp-controller="Booking" asp-action="Index" class="btn mc-result-support-primary">Talk to a Counsellor</a><a asp-controller="Resources" asp-action="Index" class="btn mc-result-support-secondary">View Support Resources</a></nav>
+        </section>
+    }
 
-        <div class="mc-result-actions">
-            <a asp-action="History" class="btn btn-primary mc-result-history-button">View Assessment History</a>
-            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary mc-result-dashboard-button">Back to Dashboard</a>
-        </div>
+    <aside class="mc-result-disclaimer" aria-label="Assessment disclaimer"><span aria-hidden="true">i</span><p>This assessment cannot diagnose a mental health condition. If you have concerns about your wellbeing, consider speaking with a qualified professional.</p></aside>
+
+    <div class="mc-result-actions">
+        <p>What would you like to do next?</p>
+        <div><a asp-action="History" class="btn mc-result-history-action">View Assessment History</a><a asp-action="Index" class="btn mc-result-retake-action">Retake Assessment</a></div>
     </div>
-</div>
+</section>
