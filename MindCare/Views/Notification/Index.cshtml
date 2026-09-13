@@ -20,7 +20,7 @@
             <div class="mc-notifications-header-actions">
                 @if (User.IsInRole(RoleNames.User))
                 {
-                    <a asp-action="Settings" class="mc-notification-settings">Notification Settings</a>
+                    <a asp-action="Settings" class="mc-notification-settings" aria-label="Notification settings" title="Notification settings"><span aria-hidden="true">⚙</span> Settings</a>
                 }
                 <button type="button" class="mc-admin-back-button mc-notifications-back" id="mcNotificationsBack"><span aria-hidden="true">&larr;</span> Back</button>
             </div>
@@ -75,7 +75,7 @@
                             }
                             else if (notification.AppointmentId.HasValue)
                             {
-                                <a asp-controller="Booking" asp-action="MyAppointments" class="mc-notification-action-primary">View Appointment</a>
+                                <a asp-controller="Booking" asp-action="MyAppointments" asp-route-highlightAppointmentId="@notification.AppointmentId" class="mc-notification-action-primary">View Appointment</a>
                             }
                         </div>
                     </article>

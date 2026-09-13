@@ -4,50 +4,60 @@
     ViewData["Title"] = "Create Forum Post";
 }
 
-<style>
-    .mc-page { max-width: 720px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-form-card {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.4rem;
-        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.55rem 1.15rem;
-        font-weight: 600;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; }
-</style>
-
-<div class="mc-page">
-    <h1 class="h3 mb-3">Create Forum Post</h1>
-
-    <form asp-action="Create" method="post" class="mc-form-card">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="mb-3">
-            <label asp-for="Title" class="form-label"></label>
-            <input asp-for="Title" class="form-control" maxlength="120" />
-            <span asp-validation-for="Title" class="text-danger"></span>
+<section class="mc-forum-create-page" aria-labelledby="forum-create-title">
+    <header class="mc-forum-create-header">
+        <div>
+            <p>Community</p>
+            <h1 id="forum-create-title">Create Forum Post</h1>
+            <span>Share what is on your mind with the community.</span>
         </div>
-        <div class="mb-3">
-            <label asp-for="Content" class="form-label"></label>
-            <textarea asp-for="Content" class="form-control" rows="8" maxlength="3000"></textarea>
-            <span asp-validation-for="Content" class="text-danger"></span>
+    </header>
+
+    <form asp-action="Create" method="post" class="mc-forum-create-card" data-forum-create-form>
+        <div class="mc-forum-create-anonymity"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5.5 6v5.2c0 4.25 2.73 7.75 6.5 9.3 3.77-1.55 6.5-5.05 6.5-9.3V6L12 3Z"/><path d="m9.5 12.1 1.7 1.9 3.5-4"/></svg></span><p>Posts are displayed anonymously in the community.</p></div>
+        <p class="mc-forum-create-card-label">Start a conversation</p>
+        <div asp-validation-summary="ModelOnly" class="mc-forum-create-validation" role="alert"></div>
+
+        <div class="mc-forum-create-field">
+            <label asp-for="Title">Post title</label>
+            <input asp-for="Title" class="mc-forum-create-input" maxlength="120" placeholder="Give your post a clear title" aria-describedby="title-count" />
+            <div class="mc-forum-create-field-meta"><span asp-validation-for="Title" class="mc-forum-create-field-error"></span><span id="title-count" data-forum-counter="Title" aria-live="polite">@(Model.Title?.Length ?? 0) / 120</span></div>
         </div>
-        <button type="submit" class="mc-btn-primary">Create Post</button>
-        <a asp-action="Index" class="btn btn-link">Back to Forum</a>
+
+        <div class="mc-forum-create-field">
+            <label asp-for="Content">What would you like to share?</label>
+            <textarea asp-for="Content" class="mc-forum-create-textarea" rows="8" maxlength="3000" placeholder="Write your post here..." aria-describedby="content-help content-count"></textarea>
+            <p id="content-help" class="mc-forum-create-help">Avoid sharing personal identifying information.</p>
+            <div class="mc-forum-create-field-meta"><span asp-validation-for="Content" class="mc-forum-create-field-error"></span><span id="content-count" data-forum-counter="Content" aria-live="polite">@(Model.Content?.Length ?? 0) / 3000</span></div>
+        </div>
+
+        <div class="mc-forum-create-actions">
+            <button type="submit" class="mc-forum-create-submit"><span data-forum-submit-label>Create Post</span></button>
+            <a asp-action="Index" class="mc-forum-create-back">← Back to Forum</a>
+        </div>
     </form>
-</div>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('[data-forum-counter]').forEach(function (counter) {
+            var input = document.getElementById(counter.dataset.forumCounter);
+            if (!input) return;
+            var updateCount = function () { counter.textContent = input.value.length + ' / ' + input.maxLength; };
+            input.addEventListener('input', updateCount);
+            updateCount();
+        });
+
+        document.querySelectorAll('[data-forum-create-form]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (event.defaultPrevented || !this.checkValidity()) return;
+                var button = this.querySelector('button[type="submit"]');
+                var label = this.querySelector('[data-forum-submit-label]');
+                if (!button || button.disabled) return;
+                button.disabled = true;
+                if (label) label.textContent = 'Creating...';
+            });
+        });
+    </script>
 }

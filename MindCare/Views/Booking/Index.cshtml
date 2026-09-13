@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Find and Book Counsellor";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    var selectedCounsellor = Model.Counsellors.FirstOrDefault(counsellor => counsellor.Id == Model.CounsellorProfileId);
 }
 
 <style>
@@ -119,17 +120,18 @@
     }
 </style>
 
-<div class="mc-page">
-    <h1 class="h3 mb-3">Find and Book Counsellor</h1>
+<div class="mc-booking-page">
+    <header class="mc-booking-header"><p class="mc-booking-eyebrow">Your care</p><h1>Find and Book Counsellor</h1><p>Choose a counsellor and a date to view available appointment times.</p></header>
 
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="mc-alert-danger">@errorMessage</div>
+        <div class="mc-booking-alert">@errorMessage</div>
     }
 
-    <div class="mc-filter-card">
-        <form asp-action="Index" method="get" class="row g-3">
-            <div class="col-md-5">
+    <section class="mc-booking-search-card" aria-labelledby="booking-step-one-title">
+        <header><span class="mc-booking-step-badge">Step 1</span><div><h2 id="booking-step-one-title">Choose counsellor and date</h2><p>Select who you would like to meet and the date that works for you.</p></div></header>
+        <form asp-action="Index" method="get" class="mc-booking-form-grid">
+            <div class="mc-booking-field">
                 <label for="counsellorProfileId" class="form-label">Select Counsellor</label>
                 <select id="counsellorProfileId" name="counsellorProfileId" class="form-select" required>
                     <option value="">Choose a counsellor</option>
@@ -147,46 +149,46 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="mc-booking-field">
                 <label for="date" class="form-label">Select Date</label>
                 <input id="date" name="date" value="@Model.Date?.ToString("yyyy-MM-dd")" class="form-control" type="date" required />
             </div>
 
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="mc-btn-primary w-100">View Slots</button>
+            <div class="mc-booking-field mc-booking-field-action">
+                <button type="submit" class="mc-booking-view-slots">View Available Slots</button>
             </div>
         </form>
-    </div>
+    </section>
 
-    <section>
-        <h2 class="h5 mb-3">Available Slots</h2>
+    <section class="mc-booking-slots-section" aria-labelledby="booking-step-two-title">
+        <header class="mc-booking-slots-header"><span class="mc-booking-step-badge">Step 2</span><div><h2 id="booking-step-two-title">Available Slots</h2>
+        @if (selectedCounsellor is not null && Model.Date.HasValue) { <p>Available times for @selectedCounsellor.ApplicationUser.Name on @Model.Date.Value.ToString("dddd, dd MMMM yyyy").</p> } else { <p>Choose a counsellor and date to view appointment times.</p> }</div></header>
 
         @if (Model.CounsellorProfileId is null || Model.Date is null)
         {
-            <div class="mc-empty-state">
-                <p class="mb-0">Select a counsellor and date to view available slots.</p>
+            <div class="mc-booking-empty">
+                <span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16m-5 4v3m-1.5-1.5h3"/></svg></span><h3>Choose a counsellor and date</h3><p>Available appointment times will appear here.</p>
             </div>
         }
         else if (!Model.AvailableSlots.Any())
         {
-            <div class="mc-empty-state">
-                <p class="mb-0">No available slots were found for this date.</p>
+            <div class="mc-booking-empty mc-booking-empty--no-slots">
+                <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg></span><h3>No available slots for this date</h3><p>Try another date or choose a different counsellor.</p>
             </div>
         }
         else
         {
-            <div class="mc-slots-list">
+            <div class="mc-booking-slots-grid">
                 @foreach (var slot in Model.AvailableSlots)
                 {
-                    <form asp-action="SelectSlot" method="post" class="mc-slot-row">
-                        <span class="mc-slot-time">@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</span>
+                    <form asp-action="SelectSlot" method="post" class="mc-booking-slot">
+                        <div><span class="mc-booking-slot-status">Available</span><strong>@FormatTime(slot.StartTime) - @FormatTime(slot.EndTime)</strong></div>
                         <input type="hidden" name="slotId" value="@slot.Id" />
-                        <button type="submit" class="mc-btn-slot">Continue to Payment</button>
+                        <button type="submit" class="mc-booking-slot-action">Continue to Payment</button>
                     </form>
                 }
             </div>
         }
     </section>
 
-    <a asp-controller="Dashboard" asp-action="Index" class="mc-btn-outline">Back to Dashboard</a>
 </div>

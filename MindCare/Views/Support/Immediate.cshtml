@@ -2,11 +2,6 @@
     ViewData["Title"] = "Immediate Support";
     var isSignedInUser = User.Identity?.IsAuthenticated == true && User.IsInRole(MindCare.Models.RoleNames.User);
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
-    var dashboardController = User.IsInRole(MindCare.Models.RoleNames.Admin)
-        ? "Admin"
-        : User.IsInRole(MindCare.Models.RoleNames.Counsellor)
-            ? "Counsellor"
-            : "Dashboard";
 }
 
 <div class="mc-immediate-page">
@@ -60,41 +55,32 @@
         <div class="col-12 col-md-6">
             <article class="mc-card mc-support-option h-100">
                 <span class="mc-support-icon" aria-hidden="true">&#9825;</span>
+                <p class="mc-support-option-kicker">Personal support</p>
                 <h2 class="h4 mc-action-card-title">Trusted Person</h2>
                 <p>Reach out to someone you trust and let them know you need support.</p>
                 <p class="mc-support-note">Call, message, or speak with a trusted friend, family member, teacher, or another person you feel safe contacting.</p>
                 @if (isSignedInUser)
                 {
-                    <a asp-action="TrustedPeople" class="btn mc-btn-outline mt-auto align-self-start">View Trusted People</a>
+                    <div class="mc-trusted-person-actions">
+                        <a asp-action="TrustedPeople" class="mc-immediate-action-link mc-immediate-action-link--secondary">View Trusted People</a>
+                        <a asp-action="TrustedPeople" class="mc-immediate-action-link">Manage Trusted People</a>
+                    </div>
                 }
             </article>
         </div>
         <div class="col-12 col-md-6">
             <article class="mc-card mc-support-option h-100">
                 <span class="mc-support-icon" aria-hidden="true">+</span>
+                <p class="mc-support-option-kicker">Practical guidance</p>
                 <h2 class="h4 mc-action-card-title">Mental Health Resources</h2>
                 <p>Explore practical crisis-support resources at a pace that feels right for you.</p>
                 <p class="mc-support-note">The support services above are available to review or contact right now.</p>
                 @if (isAuthenticated)
                 {
-                    <a asp-controller="Resources" asp-action="Index" asp-route-category="Crisis Support" class="btn mc-btn-outline mt-auto align-self-start">Explore Full Resources</a>
+                    <div class="mc-resource-support-actions"><a asp-controller="Resources" asp-action="Index" asp-route-category="Crisis Support" class="mc-immediate-action-link mc-immediate-action-link--secondary">Explore Full Resources <span aria-hidden="true">&rarr;</span></a></div>
                 }
             </article>
         </div>
     </section>
 
-    <div class="mc-immediate-actions">
-        @if (isSignedInUser)
-        {
-            <a asp-action="TrustedPeople" class="mc-text-link">Manage Trusted People</a>
-        }
-        @if (isAuthenticated)
-        {
-            <a asp-controller="@dashboardController" asp-action="Index" class="btn mc-btn-outline">&larr; Return to Dashboard</a>
-        }
-        else
-        {
-            <a asp-controller="Home" asp-action="Index" class="btn mc-btn-outline">&larr; Return Home</a>
-        }
-    </div>
 </div>

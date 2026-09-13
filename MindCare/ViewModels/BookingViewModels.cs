@@ -19,7 +19,7 @@ public class PaymentSummaryViewModel
 
     public AvailabilitySlot Slot { get; set; } = null!;
 
-    public long AmountCents { get; set; }
+    public long AmountMinorUnits { get; set; }
 
-    public string Currency { get; set; } = "usd";
+    public string Currency { get; set; } = "bdt";
 }
