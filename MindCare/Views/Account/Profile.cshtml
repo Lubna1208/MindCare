@@ -1,0 +1,18 @@
+@model MindCare.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "My Profile";
+    var name = string.IsNullOrWhiteSpace(Model.Name) ? "MindCare Member" : Model.Name.Trim();
+    var initials = string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => char.ToUpperInvariant(part[0])));
+    if (string.IsNullOrEmpty(initials)) { initials = "U"; }
+}
+
+<section class="mc-user-profile-page" aria-labelledby="userProfileTitle">
+    <header class="mc-user-profile-header"><div><p>Your profile</p><h1 id="userProfileTitle">My Profile</h1><span>Manage your personal information at MindCare.</span></div><div><a asp-action="EditProfile" class="mc-user-profile-edit">Edit Profile</a><button type="button" class="mc-user-profile-back" data-profile-back><span aria-hidden="true">←</span> Back</button></div></header>
+    @if (TempData["SuccessMessage"] is string successMessage) { <div class="mc-user-profile-success" role="status" data-auto-dismiss>@successMessage</div> }
+    <section class="mc-user-profile-hero" aria-labelledby="userProfileName"><span class="mc-user-profile-avatar" aria-hidden="true">@initials</span><div><h2 id="userProfileName">@name</h2><p>MindCare Member</p></div></section>
+    <section class="mc-user-profile-card" aria-labelledby="personalInformationTitle"><h2 id="personalInformationTitle">Personal Information</h2><dl class="mc-user-profile-fields"><div><dt>Name</dt><dd>@name</dd></div><div><dt>Email</dt><dd class="mc-user-profile-email">@Model.Email</dd></div><div><dt>Phone</dt><dd class="mc-user-profile-phone">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</dd></div></dl></section>
+    <section class="mc-user-profile-card mc-user-profile-security" aria-labelledby="accountSecurityTitle"><h2 id="accountSecurityTitle">Account Security</h2><div class="mc-user-profile-security-row"><span class="mc-user-profile-security-icon" aria-hidden="true">&#128274;</span><div><h3>Password</h3><p>Keep your MindCare account protected with a secure password.</p></div><a asp-action="ChangePassword" class="mc-user-profile-security-action">Change Password</a></div></section>
+</section>
+
+@section Scripts { <script>document.querySelector('[data-profile-back]')?.addEventListener('click',function(){var fallback='@Url.Action("Index","Dashboard")';try{if(document.referrer&&new URL(document.referrer).origin===window.location.origin&&window.history.length>1){window.history.back();return;}}catch(_){ }window.location.assign(fallback);});</script> }

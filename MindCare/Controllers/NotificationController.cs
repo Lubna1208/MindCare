@@ -15,12 +15,14 @@ public class NotificationController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly NotificationService _notificationService;
+    private readonly IAppointmentChatWindowService _chatWindowService;
 
-    public NotificationController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
+    public NotificationController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService, IAppointmentChatWindowService chatWindowService)
     {
         _context = context;
         _userManager = userManager;
         _notificationService = notificationService;
+        _chatWindowService = chatWindowService;
     }
 
     [HttpGet]
@@ -34,6 +36,20 @@ public class NotificationController : Controller
 
         var notifications = await _context.Notifications.Where(item => item.UserId == user.Id)
             .OrderByDescending(item => item.CreatedAt).ToListAsync();
+        var chatAppointmentIds = notifications
+            .Where(item => item.NotificationType == NotificationTypes.ChatAvailable && item.AppointmentId.HasValue)
+            .Select(item => item.AppointmentId!.Value)
+            .Distinct()
+            .ToList();
+        var openChatAppointmentIds = (await _context.Appointments
+                .Where(item => chatAppointmentIds.Contains(item.Id) &&
+                    (item.Status == AppointmentStatuses.Booked || item.Status == AppointmentStatuses.Confirmed) &&
+                    (item.PaymentStatus == PaymentStatuses.Paid || item.PaymentStatus == PaymentStatuses.Confirmed))
+                .ToListAsync())
+            .Where(_chatWindowService.IsOpen)
+            .Select(item => item.Id)
+            .ToHashSet();
+        ViewData["OpenChatAppointmentIds"] = openChatAppointmentIds;
         return View(notifications);
     }
 

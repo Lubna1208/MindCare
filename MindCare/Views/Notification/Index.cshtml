@@ -6,6 +6,7 @@
     var unreadCount = Model.Count(notification => !notification.IsRead);
     var isCounsellor = User.IsInRole(RoleNames.Counsellor);
     var fallbackUrl = isCounsellor ? Url.Action("Index", "Counsellor") : Url.Action("Index", "Dashboard");
+    var openChatAppointmentIds = ViewData["OpenChatAppointmentIds"] as HashSet<int> ?? new HashSet<int>();
 }
 
 <section class="mc-notifications-page" aria-labelledby="notifications-title">
@@ -65,7 +66,7 @@
                             {
                                 <a asp-controller="Mood" asp-action="Index" class="mc-notification-action-primary">Log Mood</a>
                             }
-                            else if (notification.NotificationType == NotificationTypes.ChatAvailable && notification.AppointmentId.HasValue)
+                            else if (notification.NotificationType == NotificationTypes.ChatAvailable && notification.AppointmentId.HasValue && openChatAppointmentIds.Contains(notification.AppointmentId.Value))
                             {
                                 <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@notification.AppointmentId" class="mc-notification-action-primary">Open Chat</a>
                             }

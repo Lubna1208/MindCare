@@ -15,12 +15,14 @@ public class CounsellorController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly NotificationService _notificationService;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public CounsellorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
+    public CounsellorController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService, SignInManager<ApplicationUser> signInManager)
     {
         _context = context;
         _userManager = userManager;
         _notificationService = notificationService;
+        _signInManager = signInManager;
     }
 
     public async Task<IActionResult> Index()
@@ -111,6 +113,59 @@ public class CounsellorController : Controller
 
         await _context.SaveChangesAsync();
         TempData["SuccessMessage"] = "Profile updated successfully.";
+        return RedirectToAction(nameof(Profile));
+    }
+
+    [HttpGet]
+    public IActionResult ChangeInitialPassword() => View("ChangeInitialPassword", new CounsellorChangePasswordViewModel());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeInitialPassword(CounsellorChangePasswordViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (!ModelState.IsValid) return View(model);
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            AddIdentityErrors(result);
+            return View(model);
+        }
+
+        var claimResult = await RemovePasswordChangeRequirementAsync(user);
+        if (!claimResult.Succeeded)
+        {
+            AddIdentityErrors(claimResult);
+            return View(model);
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        TempData["SuccessMessage"] = "Password changed successfully.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public IActionResult ChangePassword() => View(new CounsellorChangePasswordViewModel());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(CounsellorChangePasswordViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (!ModelState.IsValid) return View(model);
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            AddIdentityErrors(result);
+            return View(model);
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        TempData["SuccessMessage"] = "Password changed successfully.";
         return RedirectToAction(nameof(Profile));
     }
 
@@ -226,8 +281,8 @@ public class CounsellorController : Controller
 
         var appointments = await _context.Appointments
             .Include(appointment => appointment.User)
-            .Where(appointment => appointment.CounsellorProfileId == profile.Id)
-            .OrderBy(appointment => appointment.Date < today || (appointment.Date == today && appointment.StartTime < now))
+            .Where(appointment => appointment.CounsellorProfileId == profile.Id && appointment.Date >= today)
+            .OrderBy(appointment => appointment.Date == today && appointment.StartTime <= now && now < appointment.EndTime ? 0 : appointment.Date > today || (appointment.Date == today && appointment.StartTime > now) ? 1 : 2)
             .ThenBy(appointment => appointment.Date)
             .ThenBy(appointment => appointment.StartTime)
             .ToListAsync();
@@ -255,11 +310,29 @@ public class CounsellorController : Controller
 
     private async Task<List<AvailabilitySlot>> GetSlotsAsync(int counsellorProfileId)
     {
+        var today = DateTime.Today;
         return await _context.AvailabilitySlots
             .Include(slot => slot.Appointment)
-            .Where(slot => slot.CounsellorProfileId == counsellorProfileId)
+            .Where(slot => slot.CounsellorProfileId == counsellorProfileId && slot.Date >= today)
             .OrderBy(slot => slot.Date)
             .ThenBy(slot => slot.StartTime)
             .ToListAsync();
+    }
+
+    private async Task<IdentityResult> RemovePasswordChangeRequirementAsync(ApplicationUser user)
+    {
+        var claims = await _userManager.GetClaimsAsync(user);
+        foreach (var claim in claims.Where(claim => claim.Type == SecurityClaimTypes.MustChangePassword))
+        {
+            var result = await _userManager.RemoveClaimAsync(user, claim);
+            if (!result.Succeeded) return result;
+        }
+
+        return IdentityResult.Success;
+    }
+
+    private void AddIdentityErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
     }
 }

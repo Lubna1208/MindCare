@@ -28,6 +28,34 @@ document.querySelectorAll('.mc-password-toggle').forEach((button) => {
     });
 });
 
+document.querySelectorAll('.mc-security-password-form').forEach((form) => {
+    form.addEventListener('submit', function () {
+        const newPassword = this.querySelector('#mc-new-password');
+        const confirmPassword = this.querySelector('#mc-confirm-password');
+        if (!this.checkValidity() || (newPassword && confirmPassword && newPassword.value !== confirmPassword.value)) return;
+
+        const button = this.querySelector('[data-security-submit]');
+        const label = this.querySelector('[data-security-submit-label]');
+        if (!button || button.disabled) return;
+
+        button.disabled = true;
+        if (label) label.textContent = 'Changing Password...';
+    });
+});
+
+document.querySelectorAll('[data-forgot-password-form]').forEach((form) => {
+    form.addEventListener('submit', function () {
+        if (!this.checkValidity()) return;
+
+        const button = this.querySelector('[data-forgot-password-submit]');
+        const label = this.querySelector('[data-forgot-password-label]');
+        if (!button || button.disabled) return;
+
+        button.disabled = true;
+        if (label) label.textContent = 'Sending...';
+    });
+});
+
 document.querySelectorAll('[data-digits-only]').forEach((input) => {
     input.addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '');

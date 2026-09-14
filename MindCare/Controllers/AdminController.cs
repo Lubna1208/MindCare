@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.ViewModels;
@@ -232,32 +233,59 @@ public class AdminController : Controller
             EmailConfirmed = true
         };
 
-        var createResult = await _userManager.CreateAsync(user, model.Password);
-        if (!createResult.Succeeded)
-        {
-            foreach (var error in createResult.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+        IdentityResult? createResult = null;
+        IdentityResult? roleResult = null;
+        IdentityResult? claimResult = null;
 
+        try
+        {
+            var executionStrategy = _context.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                createResult = await _userManager.CreateAsync(user, model.Password);
+                if (!createResult.Succeeded) return;
+
+                roleResult = await _userManager.AddToRoleAsync(user, RoleNames.Counsellor);
+                if (!roleResult.Succeeded) return;
+
+                claimResult = await _userManager.AddClaimAsync(
+                    user,
+                    new Claim(SecurityClaimTypes.MustChangePassword, SecurityClaimTypes.True));
+                if (!claimResult.Succeeded) return;
+
+                _context.CounsellorProfiles.Add(new CounsellorProfile
+                {
+                    ApplicationUserId = user.Id,
+                    Phone = model.Phone.Trim(),
+                    Specialization = model.Specialization.Trim(),
+                    Qualification = model.Qualification.Trim(),
+                    Experience = model.Experience.Trim()
+                });
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(string.Empty, "The counsellor account could not be created. Please try again.");
             return View(model);
         }
 
-        await _userManager.AddToRoleAsync(user, RoleNames.Counsellor);
-
-        var profile = new CounsellorProfile
+        if (createResult is null || !createResult.Succeeded)
         {
-            ApplicationUserId = user.Id,
-            Phone = model.Phone.Trim(),
-            Specialization = model.Specialization.Trim(),
-            Qualification = model.Qualification.Trim(),
-            Experience = model.Experience.Trim()
-        };
+            foreach (var error in createResult?.Errors ?? []) ModelState.AddModelError(string.Empty, error.Description);
+            return View(model);
+        }
 
-        _context.CounsellorProfiles.Add(profile);
-        await _context.SaveChangesAsync();
+        if (roleResult is null || !roleResult.Succeeded || claimResult is null || !claimResult.Succeeded)
+        {
+            foreach (var error in (roleResult?.Errors ?? []).Concat(claimResult?.Errors ?? [])) ModelState.AddModelError(string.Empty, error.Description);
+            return View(model);
+        }
 
-        TempData["SuccessMessage"] = "Counsellor account created.";
+        TempData["SuccessMessage"] = "Counsellor account created with a temporary password.";
         return RedirectToAction(nameof(Counsellors));
     }
 

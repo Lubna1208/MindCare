@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
+using MindCare.Middleware;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,7 +47,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<RoleRedirectService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IAppointmentChatWindowService, AppointmentChatWindowService>();
+builder.Services.AddSingleton<IVideoCallRoomService, VideoCallRoomService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddHostedService<AppointmentChatNotificationWorker>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -67,6 +73,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseMiddleware<AuthenticatedResponseNoCacheMiddleware>();
+app.UseMiddleware<CounsellorPasswordChangeMiddleware>();
 app.UseAuthorization();
 
 app.MapStaticAssets();

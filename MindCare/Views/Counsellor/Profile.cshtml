@@ -11,8 +11,13 @@
     <div class="mc-profile-container">
         <header class="mc-profile-header">
             <div><p class="mc-profile-eyebrow">Counsellor portal</p><h1 id="profile-title">My Profile</h1><p>Your professional information at MindCare.</p></div>
-            <div class="mc-profile-header-actions"><a asp-action="EditProfile" class="mc-profile-edit-action">Edit Profile</a><button type="button" class="mc-admin-back-button mc-profile-back" id="mcProfileBack"><span aria-hidden="true">&larr;</span> Back</button></div>
+            <div class="mc-profile-header-actions"><a asp-action="EditProfile" class="mc-profile-edit-action">Edit Profile</a><a asp-action="ChangePassword" class="mc-profile-edit-action mc-profile-security-action">Change Password</a><button type="button" class="mc-admin-back-button mc-profile-back" id="mcProfileBack"><span aria-hidden="true">&larr;</span> Back</button></div>
         </header>
+
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mc-security-success" role="status" data-auto-dismiss="5000">@successMessage</div>
+        }
 
         <section class="mc-profile-identity" aria-labelledby="profile-name">
             <div class="mc-profile-avatar-large" aria-hidden="true">@initial</div>

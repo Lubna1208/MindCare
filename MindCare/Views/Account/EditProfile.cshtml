@@ -1,0 +1,10 @@
+@model MindCare.ViewModels.EditUserProfileViewModel
+
+@{ ViewData["Title"] = "Edit Profile"; }
+
+<section class="mc-user-profile-page" aria-labelledby="editUserProfileTitle">
+    <header class="mc-user-profile-header"><div><p>Your profile</p><h1 id="editUserProfileTitle">Edit Profile</h1><span>Update your personal information.</span></div><button type="button" class="mc-user-profile-back" data-edit-profile-back><span aria-hidden="true">←</span> Back</button></header>
+    <form asp-action="EditProfile" method="post" class="mc-user-profile-form" data-user-profile-form><div asp-validation-summary="ModelOnly" class="mc-user-profile-validation" role="alert"></div><section aria-labelledby="editPersonalInformationTitle"><h2 id="editPersonalInformationTitle">Personal Information</h2><div class="mc-user-profile-form-grid"><div><label asp-for="Name"></label><input asp-for="Name" autocomplete="name" /><span asp-validation-for="Name"></span></div><div><label asp-for="Email"></label><input asp-for="Email" autocomplete="email" /><span asp-validation-for="Email"></span></div><div><label asp-for="PhoneNumber"></label><input asp-for="PhoneNumber" autocomplete="tel" /><span asp-validation-for="PhoneNumber"></span></div></div></section><div class="mc-user-profile-form-actions"><button type="submit" data-profile-save><span data-profile-save-label>Save Changes</span></button><a asp-action="Profile">Cancel</a></div></form>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /><script>document.querySelector('[data-edit-profile-back]')?.addEventListener('click',function(){window.location.assign('@Url.Action("Profile","Account")');});document.querySelector('[data-user-profile-form]')?.addEventListener('submit',function(){if(!this.checkValidity())return;var button=this.querySelector('[data-profile-save]'),label=this.querySelector('[data-profile-save-label]');if(button&&!button.disabled){button.disabled=true;label.textContent='Saving...';}});</script> }
