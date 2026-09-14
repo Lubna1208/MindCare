@@ -20,5 +20,6 @@ public static class NotificationTypes
     public const string AppointmentBooked = "AppointmentBooked";
     public const string NewAppointment = "NewAppointment";
     public const string ChatAvailable = "ChatAvailable";
+    public const string ChatEnded = "ChatEnded";
     public const string DailyMoodReminder = "DailyMoodReminder";
 }

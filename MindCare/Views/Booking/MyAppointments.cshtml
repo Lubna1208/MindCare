@@ -1,15 +1,16 @@
 @model IReadOnlyList<MindCare.Models.Appointment>
+@inject MindCare.Services.IAppointmentChatWindowService ChatWindowService
 
 @{
     ViewData["Title"] = "My Appointments";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
-    bool HasStarted(Appointment appointment) => DateTime.Now >= appointment.Date.Date.Add(appointment.StartTime);
     bool CanOpenChat(Appointment appointment) =>
         (appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) &&
         (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed) &&
-        HasStarted(appointment);
+        ChatWindowService.IsOpen(appointment);
     var dateGroups = Model.GroupBy(appointment => appointment.Date.Date).OrderBy(group => group.Key).ToList();
     var highlightAppointmentId = ViewData["HighlightAppointmentId"] is int appointmentId ? appointmentId : (int?)null;
+    var serverNow = ChatWindowService.GetCurrentLocalTime();
     var defaultOpenDate = dateGroups.FirstOrDefault(group => group.Key >= DateTime.Today)?.Key ?? dateGroups.FirstOrDefault()?.Key;
     var highlightedGroup = highlightAppointmentId.HasValue
         ? dateGroups.FirstOrDefault(group => group.Any(appointment => appointment.Id == highlightAppointmentId.Value))
@@ -124,7 +125,7 @@
     }
     else
     {
-        <div class="mc-user-appointment-groups" data-appointment-accordion data-highlight-appointment-id="@highlightAppointmentId">
+        <div class="mc-user-appointment-groups" data-appointment-accordion data-highlight-appointment-id="@highlightAppointmentId" data-chat-server-now="@serverNow.ToString("O")">
             @foreach (var group in dateGroups)
             {
                 var isOpen = group.Key == defaultOpenDate;
@@ -135,13 +136,15 @@
                     @foreach (var appointment in group.OrderBy(appointment => appointment.StartTime))
                     {
                         var statusClass = appointment.Status switch { AppointmentStatuses.Completed => "mc-user-appointment-status--completed", AppointmentStatuses.Cancelled => "mc-user-appointment-status--cancelled", _ => "mc-user-appointment-status--booked" };
-                        <article id="appointment-@appointment.Id" class="mc-user-appointment-card @(appointment.Id == highlightAppointmentId ? "mc-user-appointment-card--highlight" : "")">
+                        var isChatEligible = (appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) && (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed);
+                        var chatState = isChatEligible ? ChatWindowService.GetState(appointment) : (MindCare.Services.AppointmentChatWindowState?)null;
+                        var chatBoundary = chatState == MindCare.Services.AppointmentChatWindowState.BeforeStart ? appointment.Date.Date.Add(appointment.StartTime) : chatState == MindCare.Services.AppointmentChatWindowState.Open ? appointment.Date.Date.Add(appointment.EndTime) : (DateTime?)null;
+                        <article id="appointment-@appointment.Id" class="mc-user-appointment-card @(appointment.Id == highlightAppointmentId ? "mc-user-appointment-card--highlight" : "")" data-chat-transition-at="@(chatBoundary?.ToString("O"))">
                             <div class="mc-user-appointment-time"><span aria-hidden="true">◷</span><strong>@FormatTime(appointment.StartTime) - @FormatTime(appointment.EndTime)</strong></div>
                             <div class="mc-user-appointment-counsellor"><span>Counsellor</span><strong>@appointment.CounsellorProfile.ApplicationUser.Name</strong></div>
                             <div class="mc-user-appointment-right"><span class="mc-user-appointment-status @statusClass">@appointment.Status</span>
-                            @if (appointment.Id == highlightAppointmentId) { <span class="mc-user-appointment-highlight-label" data-appointment-highlight-label>Just booked</span> }
-                            @if (CanOpenChat(appointment)) { <a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@appointment.Id" class="mc-user-appointment-chat">Open Chat</a> }
-                            else if ((appointment.Status == AppointmentStatuses.Booked || appointment.Status == AppointmentStatuses.Confirmed) && (appointment.PaymentStatus == PaymentStatuses.Paid || appointment.PaymentStatus == PaymentStatuses.Confirmed)) { <span class="mc-user-appointment-message">Messaging will be available when your appointment starts.</span> }</div>
+                            @if (CanOpenChat(appointment)) { <div class="d-flex flex-wrap gap-2 justify-content-end"><a asp-controller="Messaging" asp-action="Chat" asp-route-appointmentId="@appointment.Id" class="mc-user-appointment-chat">Open Chat</a><a asp-controller="Appointments" asp-action="VideoCall" asp-route-appointmentId="@appointment.Id" class="mc-user-appointment-chat">Join Video Call</a></div> }
+                            else if (isChatEligible) { <span class="mc-user-appointment-message">@(chatState == MindCare.Services.AppointmentChatWindowState.Ended ? "Chat and video session ended." : $"Chat and video session available at {FormatTime(appointment.StartTime)}")</span> }</div>
                         </article>
                     }
                     </div>
@@ -178,6 +181,14 @@ if (highlightId) {
         cleanUrl.searchParams.delete('highlightAppointmentId');
         window.history.replaceState({}, '', cleanUrl);
     }
+}
+
+var serverNowValue = appointmentGroups && appointmentGroups.dataset.chatServerNow;
+var nextChatBoundary = Array.from(document.querySelectorAll('[data-chat-transition-at]')).map(function (item) { return item.dataset.chatTransitionAt; }).filter(Boolean).map(function (value) { return new Date(value).getTime(); }).filter(function (value) { return !Number.isNaN(value); }).sort(function (a, b) { return a - b; })[0];
+var serverNowTime = serverNowValue ? new Date(serverNowValue).getTime() : NaN;
+if (nextChatBoundary && !Number.isNaN(serverNowTime)) {
+    var refreshDelay = nextChatBoundary - serverNowTime + 250;
+    if (refreshDelay > 0 && refreshDelay < 86400000) window.setTimeout(function () { window.location.reload(); }, refreshDelay);
 }
 </script>
 }

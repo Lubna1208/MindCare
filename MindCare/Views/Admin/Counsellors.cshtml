@@ -22,7 +22,7 @@
 
         @if (TempData["SuccessMessage"] is string message)
         {
-            <div class="mc-counsellors-alert mc-counsellors-alert-success" role="status">@message</div>
+            <div class="mc-counsellors-alert mc-counsellors-alert-success" role="status" data-auto-dismiss="5000">@message</div>
         }
         @if (TempData["ErrorMessage"] is string errorMessage)
         {

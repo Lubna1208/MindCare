@@ -3,214 +3,48 @@
 @{
     ViewData["Title"] = "Appointment Chat";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    var appointment = Model.Appointment;
+    var counsellorName = appointment?.CounsellorProfile.ApplicationUser.Name ?? "Counsellor";
+    var counsellorInitial = string.IsNullOrWhiteSpace(counsellorName) ? "C" : counsellorName.Trim()[0].ToString().ToUpperInvariant();
+    var returnController = Model.ReturnController ?? "Booking";
+    var returnAction = Model.ReturnAction ?? "MyAppointments";
+    var hasChatAccess = string.IsNullOrWhiteSpace(Model.ErrorMessage) && appointment is not null;
 }
 
 <style>
-    .mc-page { max-width: 900px; margin: 0 auto; }
-    .mc-page h1 {
-        font-family: var(--mc-font-heading, 'Lora', 'Playfair Display', serif);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-alert-danger {
-        background: #FBEAEA;
-        border: 1px solid #E7B3B3;
-        border-left: 4px solid #C96A6A;
-        color: #7A3535;
-        border-radius: 12px;
-        padding: 0.9rem 1.1rem;
-        margin-bottom: 1.25rem;
-    }
-    .mc-chat-summary,
-    .mc-message-panel {
-        background: #fff;
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.2rem;
-        box-shadow: 0 6px 18px rgba(47, 93, 87, 0.05);
-        margin-bottom: 1rem;
-    }
-    .mc-chat-summary {
-        color: var(--mc-deep, #2F5D57);
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-        gap: 0.75rem;
-    }
-    .mc-label {
-        display: block;
-        font-weight: 700;
-        font-size: 0.86rem;
-        margin-bottom: 0.15rem;
-    }
-    .mc-messages {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-        min-height: 220px;
-        max-height: 520px;
-        overflow-y: auto;
-        padding-right: 0.25rem;
-    }
-    .mc-message {
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 14px;
-        padding: 0.85rem 1rem;
-        background: var(--mc-mist, #F7FFFD);
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-message-own {
-        background: var(--mc-pale, #D9F5EF);
-        border-color: var(--mc-soft, #A7E3D4);
-    }
-    .mc-message-meta {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        font-size: 0.85rem;
-        margin-bottom: 0.35rem;
-    }
-    .mc-sender { font-weight: 700; }
-    .mc-time { opacity: 0.72; }
-    .mc-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
-    .mc-empty-state {
-        background: var(--mc-pale, #D9F5EF);
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        color: var(--mc-deep, #2F5D57);
-    }
-    .mc-message-form {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    .mc-message-form textarea {
-        border: 1px solid var(--mc-pale, #D9F5EF);
-        border-radius: 12px;
-        padding: 0.85rem;
-        background: var(--mc-mist, #F7FFFD);
-        min-height: 110px;
-        resize: vertical;
-    }
-    .mc-message-form textarea:focus {
-        border-color: var(--mc-teal, #5BB9A6);
-        box-shadow: 0 0 0 0.2rem rgba(91, 185, 166, 0.25);
-        outline: none;
-        background: #fff;
-    }
-    .mc-actions {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        flex-wrap: wrap;
-    }
-    .mc-btn-primary {
-        background: var(--mc-teal, #5BB9A6);
-        border: none;
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .mc-btn-primary:hover { background: var(--mc-deep, #2F5D57); color: #fff; transform: translateY(-1px); }
-    .mc-btn-outline {
-        border: 1px solid var(--mc-deep, #2F5D57);
-        color: var(--mc-deep, #2F5D57);
-        background: transparent;
-        border-radius: 999px;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .mc-btn-outline:hover { background: var(--mc-pale, #D9F5EF); color: var(--mc-deep, #2F5D57); }
+    .mc-chat-page { width: min(100%, 66rem); margin: clamp(1.5rem, 3vw, 2.25rem) auto clamp(2.75rem, 5vw, 3.75rem); color: #2F5D57; }
+    .mc-chat-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.3rem; }.mc-chat-eyebrow { margin: 0 0 .38rem; color: #3f8378; font-size: .72rem; font-weight: 800; letter-spacing: .1em; line-height: 1.2; text-transform: uppercase; }.mc-chat-header h1 { margin: 0; color: #2F5D57; font-family: "Lora",serif; font-size: clamp(1.85rem,3vw,2.35rem); font-weight: 700; line-height: 1.18; }.mc-chat-header-copy { margin: .48rem 0 0; color: #5d7c76; line-height: 1.55; }
+    .mc-chat-back { display: inline-flex; flex: 0 0 auto; min-height: 2.5rem; align-items: center; justify-content: center; gap: .42rem; padding: .45rem .85rem; color: #2F5D57; background: #fff; border: 1px solid rgba(47,93,87,.30); border-radius: .56rem; font-weight: 700; line-height: 1.2; text-decoration: none; transition: background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }.mc-chat-back:hover,.mc-chat-back:focus { color: #2F5D57; background: #F3FBF9; border-color: #5BB9A6; box-shadow: 0 .25rem .65rem rgba(47,93,87,.07); }.mc-chat-back:focus-visible,.mc-chat-send:focus-visible,.mc-chat-input:focus-visible { outline: 3px solid rgba(91,185,166,.30); outline-offset: 3px; }
+    .mc-chat-alert { padding: .85rem 1rem; margin-bottom: 1rem; color: #863f46; background: #fff6f6; border: 1px solid #ebc1c4; border-radius: .72rem; font-weight: 700; line-height: 1.5; }
+    .mc-chat-appointment-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: center; gap: 0; padding: 1rem 1.15rem; margin-bottom: 1rem; background: #fff; border: 1px solid rgba(47,93,87,.10); border-radius: 1rem; box-shadow: 0 .5rem 1.4rem rgba(47,93,87,.05); }.mc-chat-counsellor { display: flex; min-width: 0; align-items: center; gap: .72rem; }.mc-chat-avatar { display: inline-flex; width: 3.15rem; height: 3.15rem; flex: 0 0 auto; align-items: center; justify-content: center; color: #2F5D57; background: #D9F5EF; border: 1px solid rgba(91,185,166,.22); border-radius: 50%; font-family: "Lora",serif; font-size: 1.1rem; font-weight: 700; }.mc-chat-counsellor small,.mc-chat-appointment-meta small { display: block; margin-bottom: .16rem; color: #718b86; font-size: .69rem; font-weight: 800; letter-spacing: .08em; line-height: 1.2; text-transform: uppercase; }.mc-chat-counsellor strong,.mc-chat-appointment-meta strong { display: block; color: #2F5D57; font-size: .94rem; line-height: 1.4; }
+    .mc-chat-appointment-meta { display: contents; }.mc-chat-appointment-meta > div { display: flex; min-height: 2.75rem; flex-direction: column; justify-content: center; padding-left: 1.1rem; border-left: 1px solid rgba(47,93,87,.10); }.mc-chat-appointment-meta strong { display: flex; align-items: center; gap: .36rem; white-space: nowrap; }.mc-chat-appointment-meta svg { width: .95rem; height: .95rem; color: #4c978a; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .mc-chat-panel { overflow: hidden; background: #fff; border: 1px solid rgba(47,93,87,.10); border-radius: 1.05rem; box-shadow: 0 .5rem 1.75rem rgba(47,93,87,.05); }.mc-chat-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(47,93,87,.09); }.mc-chat-panel-header h2 { display: flex; align-items: center; gap: .5rem; margin: 0; color: #2F5D57; font-family: "Lora",serif; font-size: 1.16rem; font-weight: 700; }.mc-chat-panel-header h2 svg { width: 1rem; height: 1rem; color: #4c978a; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }.mc-chat-window-status { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .38rem; padding: .3rem .58rem; color: #39756b; background: #eaf8f4; border: 1px solid rgba(91,185,166,.20); border-radius: 999px; font-size: .73rem; font-weight: 800; line-height: 1.2; }.mc-chat-window-status i { width: .42rem; height: .42rem; background: #5BB9A6; border-radius: 50%; }
+    .mc-chat-history { height: clamp(21.25rem,44vh,31.25rem); min-height: 20rem; overflow-x: hidden; overflow-y: auto; padding: 1.4rem 1.5rem; background: #F7FFFD; scroll-behavior: smooth; }.mc-chat-history-inner { display: flex; width: min(100%,51.25rem); min-height: 100%; min-width: 0; flex-direction: column; gap: .75rem; margin-inline: auto; }.mc-chat-message { display: flex; width: fit-content; min-width: 0; max-width: min(72%,38.75rem); flex-direction: column; align-items: flex-start; gap: .25rem; }.mc-chat-message--user { align-self: flex-end; align-items: flex-end; }.mc-chat-counsellor-message-head { display: flex; max-width: 100%; align-items: center; gap: .45rem; margin-bottom: .05rem; }.mc-chat-message-avatar { display: inline-flex; width: 1.9rem; height: 1.9rem; flex: 0 0 auto; align-items: center; justify-content: center; color: #2F5D57; background: #D9F5EF; border: 1px solid rgba(91,185,166,.22); border-radius: 50%; font-family: "Lora",serif; font-size: .76rem; font-weight: 700; }.mc-chat-message-sender,.mc-chat-message time { color: rgba(47,93,87,.58); font-size: .73rem; line-height: 1.3; }.mc-chat-message-sender { min-width: 0; font-weight: 800; overflow-wrap: anywhere; }.mc-chat-bubble { width: fit-content; min-width: 0; max-width: 100%; padding: .625rem .875rem; color: #2F5D57; background: #fff; border: 1px solid rgba(47,93,87,.12); border-radius: .875rem .875rem .875rem .25rem; box-shadow: 0 .18rem .45rem rgba(47,93,87,.035); font-size: .94rem; line-height: 1.5; word-break: normal; overflow-wrap: anywhere; white-space: pre-wrap; }.mc-chat-message--user .mc-chat-bubble { background: #D9F5EF; border-color: rgba(91,185,166,.28); border-radius: .875rem .875rem .25rem .875rem; box-shadow: none; }.mc-chat-message-meta { display: flex; align-items: center; gap: .45rem; margin-top: .05rem; }.mc-chat-date-separator { display: flex; align-items: center; gap: .65rem; margin: .1rem 0; color: rgba(47,93,87,.58); font-size: .72rem; font-weight: 800; text-align: center; }.mc-chat-date-separator::before,.mc-chat-date-separator::after { height: 1px; flex: 1; background: rgba(47,93,87,.10); content: ""; }.mc-chat-date-separator span { padding: .25rem .55rem; background: rgba(255,255,255,.76); border: 1px solid rgba(47,93,87,.07); border-radius: 999px; white-space: nowrap; }
+    .mc-chat-empty,.mc-chat-unavailable { display: flex; flex: 1 1 auto; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: #5b7b75; text-align: center; }.mc-chat-empty-icon,.mc-chat-unavailable-icon { display: inline-flex; width: 3rem; height: 3rem; align-items: center; justify-content: center; margin-bottom: .8rem; color: #398d7d; background: #D9F5EF; border-radius: 50%; }.mc-chat-empty svg,.mc-chat-unavailable svg { width: 1.35rem; height: 1.35rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }.mc-chat-empty h3,.mc-chat-unavailable h2 { margin: 0; color: #2F5D57; font-family: "Lora",serif; font-size: 1.2rem; font-weight: 700; }.mc-chat-empty p,.mc-chat-unavailable p { max-width: 27rem; margin: .35rem 0 0; font-size: .93rem; line-height: 1.55; }
+    .mc-chat-composer { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; gap: .7rem; padding: 1rem; background: #F8FCFB; border-top: 1px solid rgba(47,93,87,.08); }.mc-chat-composer-field { min-width: 0; }.mc-chat-composer label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }.mc-chat-input { display: block; width: 100%; min-height: 3rem; max-height: 7.5rem; padding: .72rem .875rem; color: #2F5D57; background: #fff; border: 1px solid rgba(91,185,166,.28); border-radius: .75rem; font: inherit; font-size: .96rem; line-height: 1.45; resize: none; overflow-y: hidden; }.mc-chat-input::placeholder { color: #829b96; opacity: 1; }.mc-chat-input:focus { border-color: #5BB9A6; box-shadow: 0 0 0 3px rgba(91,185,166,.10); outline: 0; }.mc-chat-field-meta { display: flex; min-height: 1.05rem; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .25rem; padding-right: .1rem; }.mc-chat-field-error,.mc-chat-character-count { margin: 0; color: rgba(47,93,87,.56); font-size: .72rem; line-height: 1.35; }.mc-chat-field-error { color: #a64e55; font-weight: 700; }.mc-chat-send { min-width: 4.75rem; height: 3rem; align-self: start; padding: 0 1.1rem; color: #fff; background: #5BB9A6; border: 1px solid #5BB9A6; border-radius: .7rem; box-shadow: 0 .25rem .7rem rgba(47,93,87,.12); font-weight: 800; transition: background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease,transform 180ms ease; }.mc-chat-send:hover,.mc-chat-send:focus { background: #3f9d8d; border-color: #3f9d8d; box-shadow: 0 .4rem .9rem rgba(47,93,87,.16); transform: translateY(-1px); }.mc-chat-send:disabled { cursor: wait; opacity: .76; transform: none; }.mc-chat-unavailable-panel { min-height: clamp(16rem,34vh,22rem); }
+    @@media (max-width:767.98px) { .mc-chat-page { margin-top:1.25rem; }.mc-chat-appointment-summary { grid-template-columns:repeat(2,minmax(0,1fr)); gap:.85rem 0; align-items:flex-start; }.mc-chat-counsellor { grid-column:1 / -1; }.mc-chat-history { height:clamp(21rem,48vh,29rem); }.mc-chat-message { max-width:82%; } } @@media (max-width:575.98px) { .mc-chat-page { margin-top:1rem; }.mc-chat-header { align-items:flex-start; flex-direction:column; }.mc-chat-back { width:100%; }.mc-chat-appointment-summary { display:flex; gap:.85rem; padding:.95rem; }.mc-chat-appointment-meta { display:grid; width:100%; grid-template-columns:1fr; gap:.5rem; }.mc-chat-appointment-meta > div { min-height:auto; padding:.5rem 0 0; border-top:1px solid rgba(47,93,87,.09); border-left:0; }.mc-chat-panel-header { align-items:flex-start; flex-direction:column; gap:.55rem; }.mc-chat-history { min-height:18rem; padding:.9rem; }.mc-chat-message { max-width:88%; }.mc-chat-composer { grid-template-columns:1fr; }.mc-chat-send { width:100%; } } @@media (prefers-reduced-motion:reduce) { .mc-chat-history { scroll-behavior:auto; }.mc-chat-back,.mc-chat-send { transition:none; } }
+    /* Keep latest-message positioning instant after a POST; do not animate through history. */
+    .mc-chat-history { scroll-behavior: auto; }
+    .mc-chat-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
+    .mc-chat-video-action { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; gap: .5rem; padding: 0 1.15rem; color: #fff; background: #5BB9A6; border: 1px solid #5BB9A6; border-radius: .65rem; box-shadow: 0 .25rem .75rem rgba(91,185,166,.16); font-size: .95rem; font-weight: 700; line-height: 1; text-decoration: none; transition: background-color 170ms ease,border-color 170ms ease,box-shadow 170ms ease,transform 170ms ease; }
+    .mc-chat-video-action:hover { color: #fff; background: #3f9d8d; border-color: #3f9d8d; box-shadow: 0 .375rem 1rem rgba(91,185,166,.20); transform: translateY(-1px); }.mc-chat-video-action:active { box-shadow: 0 .18rem .5rem rgba(91,185,166,.16); transform: translateY(0); }.mc-chat-video-action:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(91,185,166,.18),0 .25rem .75rem rgba(91,185,166,.16); }.mc-chat-video-action-icon { width: 1.125rem; height: 1.125rem; flex: 0 0 1.125rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.9; }
+    @@media (max-width:575.98px) { .mc-chat-header-actions { width: 100%; }.mc-chat-header-actions .mc-chat-video-action,.mc-chat-header-actions .mc-chat-back { width: 100%; } }
 </style>
 
-<div class="mc-page">
-    <h1 class="h3 mb-3">Appointment Chat</h1>
-
-    @if (TempData["ErrorMessage"] is string tempErrorMessage)
-    {
-        <div class="mc-alert-danger">@tempErrorMessage</div>
+<section class="mc-chat-page">
+    <header class="mc-chat-header"><div><p class="mc-chat-eyebrow">Your appointment</p><h1>Appointment Chat</h1><p class="mc-chat-header-copy">Chat with your counsellor once appointment messaging is available.</p></div><div class="mc-chat-header-actions">@if (hasChatAccess) { <a asp-controller="Appointments" asp-action="VideoCall" asp-route-appointmentId="@appointment!.Id" class="mc-chat-video-action"><svg class="mc-chat-video-action-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg><span>Join Video Call</span></a> }<a asp-controller="@returnController" asp-action="@returnAction" class="mc-chat-back"><span aria-hidden="true">←</span> Back to Appointments</a></div></header>
+    @if (TempData["ErrorMessage"] is string tempErrorMessage) { <div class="mc-chat-alert" role="alert">@tempErrorMessage</div> }
+    @if (appointment is not null) {
+        <section class="mc-chat-appointment-summary" aria-label="Appointment summary"><div class="mc-chat-counsellor"><span class="mc-chat-avatar" aria-hidden="true">@counsellorInitial</span><div><small>Counsellor</small><strong>@counsellorName</strong></div></div><div class="mc-chat-appointment-meta"><div><small>Appointment</small><strong><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>@appointment.Date.ToString("dd MMM yyyy")</strong></div><div><small>Time</small><strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>@FormatTime(appointment.StartTime) – @FormatTime(appointment.EndTime)</strong></div></div></section>
     }
-
-    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-    {
-        <div class="mc-alert-danger">@Model.ErrorMessage</div>
-        <a asp-controller="@Model.ReturnController" asp-action="@Model.ReturnAction" class="mc-btn-outline">Back to Appointments</a>
+    @if (!hasChatAccess) {
+        <section class="mc-chat-panel mc-chat-unavailable-panel" aria-labelledby="chatUnavailableTitle"><div class="mc-chat-unavailable"><span class="mc-chat-unavailable-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><h2 id="chatUnavailableTitle">Messaging is unavailable</h2><p>@(Model.ErrorMessage ?? "This appointment conversation is unavailable.")</p></div></section>
+    } else {
+        <section class="mc-chat-panel" aria-labelledby="chatConversationTitle"><header class="mc-chat-panel-header"><h2 id="chatConversationTitle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a4 4 0 0 1-4 4H9l-5 3v-7a4 4 0 0 1-2-3.5V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 11h8"/></svg>Conversation with @counsellorName</h2><span class="mc-chat-window-status"><i aria-hidden="true"></i>Appointment ends at @FormatTime(appointment!.EndTime)</span></header><div class="mc-chat-history" data-chat-history aria-live="polite"><div class="mc-chat-history-inner">
+        @if (!Model.Messages.Any()) { <div class="mc-chat-empty"><span class="mc-chat-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 15a4 4 0 0 1-4 4H9l-5 3v-7a4 4 0 0 1-2-3.5V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 11h8m-8 3h5"/></svg></span><h3>No messages yet</h3><p>Start the conversation when you are ready.</p></div> }
+        else { for (var index = 0; index < Model.Messages.Count; index++) { var message = Model.Messages[index]; var previousMessage = index > 0 ? Model.Messages[index - 1] : null; var nextMessage = index + 1 < Model.Messages.Count ? Model.Messages[index + 1] : null; var isOwnMessage = message.SenderUserId == Model.CurrentUserId; var isNewDate = previousMessage is null || previousMessage.SentAt.Date != message.SentAt.Date; var showCounsellorIdentity = !isOwnMessage && (previousMessage is null || previousMessage.SenderUserId != message.SenderUserId); var showMessageTime = nextMessage is null || nextMessage.SenderUserId != message.SenderUserId || nextMessage.SentAt.Date != message.SentAt.Date || nextMessage.SentAt.Hour != message.SentAt.Hour || nextMessage.SentAt.Minute != message.SentAt.Minute; if (isNewDate) { <div class="mc-chat-date-separator"><span>@(message.SentAt.Date == DateTime.Today ? "Today" : message.SentAt.ToString("dd MMMM yyyy"))</span></div> } <article class="mc-chat-message @(isOwnMessage ? "mc-chat-message--user" : "mc-chat-message--counsellor")">@if (showCounsellorIdentity) { <div class="mc-chat-counsellor-message-head"><span class="mc-chat-message-avatar" aria-hidden="true">@counsellorInitial</span><span class="mc-chat-message-sender">@counsellorName · Counsellor</span></div> }<div class="mc-chat-bubble">@message.MessageText</div>@if (showMessageTime) { <div class="mc-chat-message-meta"><time datetime="@message.SentAt.ToString("O")">@message.SentAt.ToString("h:mm tt")</time></div> }</article> } }
+        </div></div><form asp-action="SendMessage" method="post" class="mc-chat-composer" data-chat-form><input type="hidden" name="appointmentId" value="@appointment!.Id" /><div class="mc-chat-composer-field"><label for="messageText">Message</label><textarea id="messageText" class="mc-chat-input" name="messageText" rows="1" maxlength="2000" required placeholder="Type your message..."></textarea><div class="mc-chat-field-meta"><p class="mc-chat-field-error" data-chat-field-error aria-live="polite"></p><span class="mc-chat-character-count" data-chat-character-count>0 / 2000</span></div></div><button type="submit" class="mc-chat-send" data-chat-send><span data-chat-send-label>Send</span></button></form></section>
     }
-    else if (Model.Appointment is not null)
-    {
-        <div class="mc-chat-summary">
-            <div>
-                <span class="mc-label">Counsellor</span>
-                <span>@Model.Appointment.CounsellorProfile.ApplicationUser.Name</span>
-            </div>
-            <div>
-                <span class="mc-label">User</span>
-                <span>@Model.Appointment.User.Name</span>
-            </div>
-            <div>
-                <span class="mc-label">Appointment Date</span>
-                <span>@Model.Appointment.Date.ToString("dd MMM yyyy")</span>
-            </div>
-            <div>
-                <span class="mc-label">Time</span>
-                <span>@FormatTime(Model.Appointment.StartTime) - @FormatTime(Model.Appointment.EndTime)</span>
-            </div>
-        </div>
+</section>
 
-        <div class="mc-message-panel">
-            @if (!Model.Messages.Any())
-            {
-                <div class="mc-empty-state">
-                    <p class="mb-0">No messages have been sent yet.</p>
-                </div>
-            }
-            else
-            {
-                <div class="mc-messages">
-                    @foreach (var message in Model.Messages)
-                    {
-                        var senderLabel = message.SenderUserId == Model.Appointment.UserId ? "User" : "Counsellor";
-                        var ownClass = message.SenderUserId == Model.CurrentUserId ? "mc-message-own" : string.Empty;
-                        <div class="mc-message @ownClass">
-                            <div class="mc-message-meta">
-                                <span class="mc-sender">@senderLabel: @message.SenderUser.Name</span>
-                                <span class="mc-time">@message.SentAt.ToString("dd MMM yyyy, h:mm tt")</span>
-                            </div>
-                            <p class="mc-text">@message.MessageText</p>
-                        </div>
-                    }
-                </div>
-            }
-        </div>
-
-        <form asp-action="SendMessage" method="post" class="mc-message-panel mc-message-form">
-            <input type="hidden" name="appointmentId" value="@Model.Appointment.Id" />
-            <textarea id="messageText" name="messageText" maxlength="2000" required placeholder="Type your message..."></textarea>
-            <div class="mc-actions">
-                <button type="submit" class="mc-btn-primary">Send</button>
-                <a asp-controller="@Model.ReturnController" asp-action="@Model.ReturnAction" class="mc-btn-outline">Back to Appointments</a>
-            </div>
-        </form>
-    }
-</div>
-
-@section Scripts {
-    @if (string.IsNullOrWhiteSpace(Model.ErrorMessage) && Model.Appointment is not null)
-    {
-        <script>
-            window.setTimeout(function () {
-                const messageBox = document.getElementById('messageText');
-                if (!messageBox || messageBox.value.trim().length === 0) {
-                    window.location.reload();
-                }
-            }, 10000);
-        </script>
-    }
-}
+@section Scripts { @if (hasChatAccess) { <script>(function(){const history=document.querySelector('[data-chat-history]');if(history&&history.querySelector('.mc-chat-message'))history.scrollTop=history.scrollHeight;const form=document.querySelector('[data-chat-form]'),input=document.getElementById('messageText'),error=document.querySelector('[data-chat-field-error]'),counter=document.querySelector('[data-chat-character-count]'),button=document.querySelector('[data-chat-send]'),label=document.querySelector('[data-chat-send-label]'),maxInputHeight=120;const resizeInput=function(){if(!input)return;input.style.height='auto';const nextHeight=Math.min(input.scrollHeight,maxInputHeight);input.style.height=Math.max(nextHeight,48)+'px';input.style.overflowY=input.scrollHeight>maxInputHeight?'auto':'hidden';};const updateCounter=function(){if(input&&counter)counter.textContent=input.value.length+' / 2000';};input?.addEventListener('input',function(){updateCounter();resizeInput();});updateCounter();resizeInput();form?.addEventListener('submit',function(event){if(!input||!button||!label)return;if(!input.value.trim()){event.preventDefault();if(error)error.textContent='Please enter a message before sending.';input.focus();return;}if(error)error.textContent='';button.disabled=true;label.textContent='Sending...';});})();</script> } else if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) { <script>window.setTimeout(function(){window.location.assign('@Url.Action(returnAction, returnController)');},5000);</script> } }

@@ -326,8 +326,8 @@ public class BookingController : Controller
         var appointments = await _context.Appointments
             .Include(appointment => appointment.CounsellorProfile)
             .ThenInclude(profile => profile.ApplicationUser)
-            .Where(appointment => appointment.UserId == user.Id)
-            .OrderBy(appointment => appointment.Date < today || (appointment.Date == today && appointment.StartTime < now))
+            .Where(appointment => appointment.UserId == user.Id && appointment.Date >= today)
+            .OrderBy(appointment => appointment.Date == today && appointment.StartTime <= now && now < appointment.EndTime ? 0 : appointment.Date > today || (appointment.Date == today && appointment.StartTime > now) ? 1 : 2)
             .ThenBy(appointment => appointment.Date)
             .ThenBy(appointment => appointment.StartTime)
             .ToListAsync();

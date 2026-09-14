@@ -16,12 +16,14 @@ public class MessagingController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly NotificationService _notificationService;
+    private readonly IAppointmentChatWindowService _chatWindowService;
 
-    public MessagingController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService)
+    public MessagingController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, NotificationService notificationService, IAppointmentChatWindowService chatWindowService)
     {
         _context = context;
         _userManager = userManager;
         _notificationService = notificationService;
+        _chatWindowService = chatWindowService;
     }
 
     [HttpGet]
@@ -129,9 +131,15 @@ public class MessagingController : Controller
             return ChatAccessResult.Denied("Messaging is not available for cancelled or completed appointments.", currentUser.Id, returnTarget.Controller, returnTarget.Action, appointment);
         }
 
-        if (!HasAppointmentStarted(appointment))
+        var chatState = _chatWindowService.GetState(appointment);
+        if (chatState == AppointmentChatWindowState.BeforeStart)
         {
             return ChatAccessResult.Denied("Messaging will be available when your appointment starts.", currentUser.Id, returnTarget.Controller, returnTarget.Action, appointment);
+        }
+
+        if (chatState == AppointmentChatWindowState.Ended)
+        {
+            return ChatAccessResult.Denied("The appointment messaging period has ended.", currentUser.Id, returnTarget.Controller, returnTarget.Action, appointment);
         }
 
         return ChatAccessResult.Allowed(currentUser.Id, returnTarget.Controller, returnTarget.Action, appointment);
@@ -153,12 +161,6 @@ public class MessagingController : Controller
     {
         return appointment.Status == AppointmentStatuses.Booked ||
             appointment.Status == AppointmentStatuses.Confirmed;
-    }
-
-    private bool HasAppointmentStarted(Appointment appointment)
-    {
-        var appointmentStart = appointment.Date.Date.Add(appointment.StartTime);
-        return DateTime.Now >= appointmentStart;
     }
 
     private (string Controller, string Action) GetReturnTarget()

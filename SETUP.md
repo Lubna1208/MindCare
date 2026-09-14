@@ -44,6 +44,19 @@ The initial administrator values are currently configured in `MindCare/appsettin
 
 Use them only for the first local login, then change the password. Before sharing, deployment, or committing a real environment configuration, override `SeedAdmin__Password` through a secret store or environment variable and use a strong unique password. Do not put real credentials in source control.
 
+## Counsellor password-reset email
+
+Counsellor password reset uses ASP.NET Identity's built-in password-reset tokens and the configured SMTP service. Do not place email credentials in `appsettings.json`. Configure these values through User Secrets for local development or your production secret store:
+
+```powershell
+dotnet user-secrets set "Email:FromAddress" "no-reply@example.com" --project MindCare\MindCare.csproj
+dotnet user-secrets set "Email:Smtp:Host" "smtp.example.com" --project MindCare\MindCare.csproj
+dotnet user-secrets set "Email:Smtp:Username" "smtp-user" --project MindCare\MindCare.csproj
+dotnet user-secrets set "Email:Smtp:Password" "smtp-password" --project MindCare\MindCare.csproj
+```
+
+`Email:Smtp:Port` defaults to `587` and `Email:Smtp:UseSsl` defaults to `true`. The forgot-password page deliberately gives the same confirmation for all requests, including unknown and non-counsellor email addresses.
+
 ## If migration reports `Cannot generate SSPI context`
 
 For a local, non-domain Windows account, do not register or change Kerberos SPNs. Use a TCP loopback connection to bypass named-instance discovery and Kerberos negotiation.
