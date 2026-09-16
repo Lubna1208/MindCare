@@ -1,0 +1,37 @@
+<section class="mc-ai-faq" data-ai-faq aria-label="MindCare Assistant">
+    <button type="button" class="mc-ai-faq-launcher" data-ai-faq-open aria-expanded="false" aria-controls="mcAiFaqPanel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8-.8 2.7-.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg>
+        <span>Ask MindCare</span>
+    </button>
+
+    <section class="mc-ai-faq-panel" id="mcAiFaqPanel" data-ai-faq-panel role="dialog" aria-modal="false" aria-labelledby="mcAiFaqTitle" hidden>
+        <header class="mc-ai-faq-header">
+            <span class="mc-ai-faq-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg></span>
+            <div><h2 id="mcAiFaqTitle">MindCare Assistant</h2><p>App guidance</p></div>
+            <button type="button" class="mc-ai-faq-close" data-ai-faq-close aria-label="Close MindCare Assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg></button>
+        </header>
+
+        <div class="mc-ai-faq-messages" data-ai-faq-messages role="log" aria-live="polite" aria-relevant="additions text">
+            <div class="mc-ai-faq-intro" data-ai-faq-intro>
+                <p>Ask me about using MindCare, such as booking, appointments, chat, video sessions, account settings, resources, and other app features.</p>
+                <small>Please don't share passwords, payment card details, or private counselling information.</small>
+            </div>
+            <div class="mc-ai-faq-suggestions" data-ai-faq-suggestions aria-label="Suggested questions">
+                <button type="button" data-ai-faq-suggestion>How do I book a counsellor?</button>
+                <button type="button" data-ai-faq-suggestion>How do I join my video session?</button>
+                <button type="button" data-ai-faq-suggestion>When can I use appointment chat?</button>
+                <button type="button" data-ai-faq-suggestion>How do I reset my password?</button>
+            </div>
+        </div>
+
+        <form class="mc-ai-faq-composer" data-ai-faq-form novalidate>
+            @Html.AntiForgeryToken()
+            <label class="mc-ai-faq-visually-hidden" for="mcAiFaqQuestion">Ask a question about using MindCare</label>
+            <textarea id="mcAiFaqQuestion" data-ai-faq-input rows="1" maxlength="1000" placeholder="Ask about MindCare..." aria-describedby="mcAiFaqMeta"></textarea>
+            <div class="mc-ai-faq-composer-meta" id="mcAiFaqMeta"><span data-ai-faq-status role="status"></span><span data-ai-faq-count>0 / 1000</span></div>
+            <button type="submit" class="mc-ai-faq-send" data-ai-faq-send aria-label="Send question">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 12 15-8-4 16-3.5-6L4 12Zm7.5 2L19 4" /></svg>
+            </button>
+        </form>
+    </section>
+</section>
