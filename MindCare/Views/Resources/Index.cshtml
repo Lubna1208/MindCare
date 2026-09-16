@@ -1,63 +1,6 @@
-@model IEnumerable<MindCare.Models.Resource>
+@model MindCare.ViewModels.ResourceListViewModel
 @using MindCare.Models
-
-@{
-    ViewData["Title"] = "Resources";
-    var categories = (IReadOnlyList<string>)ViewBag.Categories;
-    var selectedCategory = (string?)ViewBag.SelectedCategory;
-    var search = (string?)ViewBag.Search;
-}
-
-<section class="mc-resources-page">
-    <div class="mc-resources-container">
-        <header class="mc-resources-hero">
-            <div class="mc-resources-hero-content">
-                <p class="mc-eyebrow mb-2">Support at your pace</p>
-                <h1 class="mc-resources-title">Resources for Your Wellbeing</h1>
-                <p class="mc-resources-intro mb-0">Take a moment for yourself. Explore resources that may help you understand and care for your mental wellbeing.</p>
-            </div>
-            <div class="mc-resources-hero-decoration" aria-hidden="true"><span></span><span></span><span></span></div>
-        </header>
-
-        <form method="get" class="mc-resource-search">
-            <label for="search" class="visually-hidden">Search resources</label>
-            <input id="search" name="search" value="@search" type="search" class="form-control mc-resource-search-input" placeholder="Search resources" />
-            <button type="submit" class="btn mc-resource-search-button">Search</button>
-        </form>
-
-        <section class="mc-resource-categories" aria-label="Resource categories">
-            <h2 class="mc-resource-category-title">Categories</h2>
-            <div class="mc-category-pills">
-                <a asp-action="Index" asp-route-search="@search" class="mc-resource-category-chip @(selectedCategory is null ? "is-active" : "")">All</a>
-                @foreach (var category in categories)
-                {
-                    <a asp-action="Index" asp-route-category="@category" asp-route-search="@search" class="mc-resource-category-chip @(selectedCategory == category ? "is-active" : "")">@category</a>
-                }
-            </div>
-        </section>
-
-        @if (!Model.Any())
-        {
-            <section class="mc-resources-empty" aria-live="polite">
-                <h2>No resources found</h2>
-                <p class="mb-0">Try another search term or category.</p>
-            </section>
-        }
-        else
-        {
-            <div class="mc-resources-grid">
-                @foreach (var resource in Model)
-                {
-                    <article class="mc-resource-card">
-                        <div class="mc-resource-card-content">
-                            <span class="mc-resource-badge">@resource.Category</span>
-                            <h2 class="mc-resource-title">@resource.Title</h2>
-                            <p class="mc-resource-description">@resource.Description</p>
-                            <a asp-action="Details" asp-route-id="@resource.Id" class="mc-resource-action">Read More</a>
-                        </div>
-                    </article>
-                }
-            </div>
-        }
-    </div>
-</section>
+@{ ViewData["Title"]="Resources"; }
+<section class="mc-resources-page"><div class="mc-resources-container"><header class="mc-resources-hero"><p class="mc-eyebrow">YOUR WELLBEING</p><h1 class="mc-resources-title">Resources</h1><p>Explore practical resources to support your wellbeing.</p></header>
+<form method="get" class="mc-resource-search"><input name="search" value="@Model.Search" class="form-control" placeholder="Search resources"/><select name="categoryId" class="form-select"><option value="">All categories</option>@foreach(var c in Model.Categories){<option value="@c.Id" selected="@(Model.CategoryId==c.Id)">@c.Name</option>}</select><select name="sort" class="form-select"><option value="featured">Featured & newest</option><option value="newest">Newest</option><option value="az">A–Z</option></select><button class="btn mc-btn-primary">Filter</button></form>
+@if(!Model.Resources.Any()){<section class="mc-resources-empty"><h2>No resources match your search.</h2></section>}else{<div class="mc-resources-grid">@foreach(var r in Model.Resources){<article class="mc-resource-card"><span class="mc-resource-badge">@(r.ResourceCategory?.Name??r.Category)</span>@if(r.IsFeatured){<span class="mc-resource-badge">Featured</span>}<h2 class="mc-resource-title">@r.Title</h2><p class="mc-resource-description">@r.Description</p><small>@Math.Max(1,(r.Content??"").Split(' ',StringSplitOptions.RemoveEmptyEntries).Length/200) min read</small><div><a asp-action="Details" asp-route-id="@r.Id" class="mc-resource-action">Read Resource</a>@if(User.IsInRole(RoleNames.User)){<form asp-action="ToggleBookmark" asp-route-id="@r.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-link">@(Model.BookmarkedIds.Contains(r.Id)?"Saved":"Save")</button></form>}</div></article>}</div>}<nav>@for(var p=1;p<=Model.TotalPages;p++){<a asp-route-page="@p" asp-route-search="@Model.Search" asp-route-categoryId="@Model.CategoryId" asp-route-sort="@Model.Sort" class="btn btn-sm">@p</a>}</nav></div></section>

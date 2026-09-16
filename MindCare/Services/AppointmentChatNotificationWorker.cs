@@ -4,12 +4,19 @@ public sealed class AppointmentChatNotificationWorker(IServiceScopeFactory scope
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await ProcessNotificationsAsync(stoppingToken);
-
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
             await ProcessNotificationsAsync(stoppingToken);
+
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                await ProcessNotificationsAsync(stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            logger.LogDebug("Appointment chat notification worker stopped because the application is shutting down.");
         }
     }
 
@@ -23,6 +30,7 @@ public sealed class AppointmentChatNotificationWorker(IServiceScopeFactory scope
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            throw;
         }
         catch (Exception exception)
         {

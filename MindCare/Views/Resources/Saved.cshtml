@@ -1,0 +1,2 @@
+@model IEnumerable<MindCare.Models.Resource>
+<section class="mc-resources-page"><div class="mc-resources-container"><h1>Saved Resources</h1>@if(!Model.Any()){<p>You haven't saved any resources yet. <a asp-action="Index">Browse Resources</a></p>}else{<div class="mc-resources-grid">@foreach(var r in Model){<article class="mc-resource-card"><h2>@r.Title</h2><p>@r.Description</p><a asp-action="Details" asp-route-id="@r.Id">Read Resource</a></article>}</div>}</div></section>

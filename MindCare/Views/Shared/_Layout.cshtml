@@ -92,11 +92,18 @@
                             @if (isCounsellor && !isMandatoryCounsellorSecurityPage)
                             {
                                 <li class="nav-item">
+                                    <a class="nav-link mc-nav-link @(currentController == "CounsellorResources" ? "active" : "")" asp-controller="CounsellorResources" asp-action="Index">My Resources</a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link mc-nav-link @(currentController == "Counsellor" && currentAction == "Availability" ? "active" : "")" asp-controller="Counsellor" asp-action="Availability">My Availability</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link mc-nav-link @(currentController == "Counsellor" && currentAction == "BookedAppointments" ? "active" : "")" asp-controller="Counsellor" asp-action="BookedAppointments">Appointments</a>
                                 </li>
+                            }
+                            @if (isAdmin)
+                            {
+                                <li class="nav-item"><a class="nav-link mc-nav-link @(currentController == "AdminResources" ? "active" : "")" asp-controller="AdminResources" asp-action="Index">Resources</a></li>
                             }
                             @if (User.IsInRole("User"))
                             {
@@ -110,9 +117,12 @@
                                     <a class="nav-link mc-nav-link" asp-controller="Notification" asp-action="Settings">Notification Settings</a>
                                 </li>
                             }
-                            <li class="nav-item">
-                                <a class="nav-link mc-nav-link @(currentController == "Resources" && currentAction == "Index" ? "active" : "")" asp-controller="Resources" asp-action="Index" aria-current="@(currentController == "Resources" && currentAction == "Index" ? "page" : null)">Resources</a>
-                            </li>
+                            @if (!isAdmin && !isCounsellor)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link mc-nav-link @(currentController == "Resources" && currentAction == "Index" ? "active" : "")" asp-controller="Resources" asp-action="Index" aria-current="@(currentController == "Resources" && currentAction == "Index" ? "page" : null)">Resources</a>
+                                </li>
+                            }
                         </ul>
                     }
                     <ul class="navbar-nav @(isUser ? "" : "navbar-collapse collapse") mc-account-nav">
@@ -168,6 +178,7 @@
                     <p class="mc-user-sidebar-label">Explore</p>
                     <a class="mc-user-sidebar-link @(currentController == "Forum" ? "mc-user-sidebar-link--active" : "")" asp-controller="Forum" asp-action="Index" aria-current="@(currentController == "Forum" ? "page" : null)"><span class="mc-user-sidebar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 15a4 4 0 0 1-4 4H9l-5 3v-7a4 4 0 0 1-2-3.5V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M7 10h.01M12 10h.01M17 10h.01"/></svg></span>Community</a>
                     <a class="mc-user-sidebar-link @(currentController == "Resources" ? "mc-user-sidebar-link--active" : "")" asp-controller="Resources" asp-action="Index" aria-current="@(currentController == "Resources" ? "page" : null)"><span class="mc-user-sidebar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 19h16v2H6.5A2.5 2.5 0 0 1 4 18.5M8 7h8m-8 4h8"/></svg></span>Resources</a>
+                    <a class="mc-user-sidebar-link @(currentController == "Resources" && currentAction == "Saved" ? "mc-user-sidebar-link--active" : "")" asp-controller="Resources" asp-action="Saved">Saved Resources</a>
                     <div class="mc-user-sidebar-mobile-public"><p class="mc-user-sidebar-label">Public</p><a class="mc-user-sidebar-link" asp-controller="Home" asp-action="Index">Home</a><a class="mc-user-sidebar-link" asp-controller="Home" asp-action="Privacy">Privacy Policy</a><a class="mc-user-sidebar-link mc-user-sidebar-link--support" asp-controller="Support" asp-action="Immediate">Need immediate help?</a></div>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="mc-user-sidebar-mobile-logout"><button type="submit">Logout</button></form>
                 </nav>
