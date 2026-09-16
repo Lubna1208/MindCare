@@ -1,77 +1,19 @@
-@model MindCare.Models.Resource
-
-@{
-    ViewData["Title"] = Model.Title;
-    var canSummarize = User.Identity?.IsAuthenticated == true &&
-        User.IsInRole(RoleNames.User) &&
-        !User.IsInRole(RoleNames.Admin) &&
-        !User.IsInRole(RoleNames.Counsellor) &&
-        !string.IsNullOrWhiteSpace(Model.Content);
-    var summaryEndpoint = $"/AI/Resources/{Model.Id}/Summarize";
-}
-
-<section class="mc-resource-detail-page">
-    <div class="mc-resource-detail-container">
-        <a asp-action="Index" class="mc-resource-back"><span aria-hidden="true">&larr;</span> Back to Resources</a>
-
-        <article class="mc-resource-details-card">
-            <header class="mc-resource-header">
-                <span class="mc-resource-category">@Model.Category</span>
-                <h1 class="mc-resource-detail-title">@Model.Title</h1>
-                <p class="mc-resource-summary">@Model.Description</p>
-                <p class="mc-resource-meta mb-0">Added @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</p>
-            </header>
-
-            @if (canSummarize)
-            {
-                <section class="mc-resource-ai" data-resource-ai data-summary-endpoint="@summaryEndpoint">
-                    @Html.AntiForgeryToken()
-                    <div class="mc-resource-ai-action">
-                        <button type="button" class="mc-resource-ai-button" data-resource-ai-button aria-describedby="resource-ai-status">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg>
-                            <span data-resource-ai-label>Summarize with AI</span>
-                            <span class="mc-resource-ai-spinner" data-resource-ai-spinner hidden aria-hidden="true"></span>
-                        </button>
-                        <p class="mc-resource-ai-status" id="resource-ai-status" data-resource-ai-status role="status" aria-live="polite"></p>
-                    </div>
-
-                    <section class="mc-resource-ai-card" data-resource-ai-card aria-labelledby="resource-ai-title" hidden>
-                        <header class="mc-resource-ai-header">
-                            <span class="mc-resource-ai-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg></span>
-                            <div><h2 id="resource-ai-title">AI Summary</h2><p>Generated from this resource</p></div>
-                        </header>
-                        <section class="mc-resource-ai-summary" aria-labelledby="resource-ai-summary-title">
-                            <h3 id="resource-ai-summary-title">Simple Summary</h3>
-                            <p data-resource-ai-summary></p>
-                        </section>
-                        <section class="mc-resource-ai-points" aria-labelledby="resource-ai-points-title">
-                            <h3 id="resource-ai-points-title">Key Points</h3>
-                            <ul data-resource-ai-points></ul>
-                        </section>
-                        <p class="mc-resource-ai-note">AI summarizes only this MindCare resource.</p>
-                    </section>
-                </section>
-            }
-
-            @if (!string.IsNullOrWhiteSpace(Model.Content))
-            {
-                <section class="mc-resource-content" aria-labelledby="resource-content-title">
-                    <h2 id="resource-content-title">Overview</h2>
-                    <div class="mc-resource-body">@Model.Content</div>
-                </section>
-            }
-
-            @if (Resource.IsSafeExternalUrl(Model.Url))
-            {
-                <a href="@Model.Url" target="_blank" rel="noopener noreferrer" class="btn mc-btn-primary">Open External Resource</a>
-            }
-        </article>
-    </div>
-</section>
-
+@model MindCare.ViewModels.ResourceDetailsViewModel
+@using MindCare.Models
+@{ var resource = Model.Resource; ViewData["Title"] = resource.Title; var canSummarize = User.IsInRole(RoleNames.User) && !string.IsNullOrWhiteSpace(resource.Content); }
+<section class="mc-resource-detail-page"><div class="mc-resource-detail-container">
+    <a asp-action="Index" class="mc-resource-back">← Back to Resources</a>
+    <article class="mc-resource-details-card">
+        <span class="mc-resource-category">@(resource.ResourceCategory?.Name ?? resource.Category)</span>
+        <h1 class="mc-resource-detail-title">@resource.Title</h1><p class="mc-resource-summary">@resource.Description</p>
+        <p class="mc-resource-meta">@Math.Max(1, (resource.Content ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Length / 200) min read</p>
+        @if (User.IsInRole(RoleNames.User)) { <form asp-action="ToggleBookmark" asp-route-id="@resource.Id" asp-route-returnUrl="@Context.Request.Path" method="post">@Html.AntiForgeryToken()<button class="btn mc-btn-primary">@(Model.IsBookmarked ? "Saved" : "Save Resource")</button></form> }
+        @if (canSummarize) { <section class="mc-resource-ai" data-resource-ai data-summary-endpoint="/AI/Resources/@resource.Id/Summarize">@Html.AntiForgeryToken()<button type="button" class="mc-resource-ai-button" data-resource-ai-button><span data-resource-ai-label>Summarize with AI</span></button><p data-resource-ai-status></p><section data-resource-ai-card hidden><h2>AI Summary</h2><p data-resource-ai-summary></p><ul data-resource-ai-points></ul></section></section> }
+        <section class="mc-resource-content"><h2>Overview</h2><div class="mc-resource-body">@resource.Content</div></section>
+    </article>
+    @if (Model.Related.Any()) { <section><h2>You may also find helpful</h2><div class="mc-resources-grid">@foreach (var related in Model.Related) { <article class="mc-resource-card"><h3>@related.Title</h3><p>@related.Description</p><a asp-action="Details" asp-route-id="@related.Id">Read Resource</a></article> }</div></section> }
+</div></section>
 @if (canSummarize)
 {
-    @section Scripts {
-        <script src="~/js/ai-resource-summary.js" asp-append-version="true"></script>
-    }
+    @section Scripts { <script src="~/js/ai-resource-summary.js" asp-append-version="true"></script> }
 }

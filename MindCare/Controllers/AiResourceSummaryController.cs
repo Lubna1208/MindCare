@@ -23,7 +23,7 @@ public sealed class AiResourceSummaryController(
     {
         var resource = await context.Resources
             .AsNoTracking()
-            .Where(item => item.Id == resourceId)
+            .Where(item => item.Id == resourceId && item.Status == ResourceStatus.Published)
             .Select(item => new { item.Title, item.Content })
             .SingleOrDefaultAsync(cancellationToken);
 

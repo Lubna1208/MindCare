@@ -10,10 +10,20 @@ public static class ResourceSeeder
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        if (await context.Resources.AnyAsync())
+        var categoryNames = ResourceCategories.All;
+        foreach (var category in categoryNames.Where(name => !context.ResourceCategories.Any(c => c.Name == name)))
+            context.ResourceCategories.Add(new ResourceCategory { Name = category, CreatedAt = DateTime.UtcNow });
+        await context.SaveChangesAsync();
+
+        // Keep historic seeded rows; upgrade their lifecycle fields without creating duplicates.
+        foreach (var existing in await context.Resources.Where(r => r.Status != ResourceStatus.Published || r.UpdatedAt == default).ToListAsync())
         {
-            return;
+            existing.Status = ResourceStatus.Published; existing.CreatedByRole = "System";
+            existing.UpdatedAt = existing.CreatedAt == default ? DateTime.UtcNow : existing.CreatedAt;
+            existing.PublishedAt ??= existing.CreatedAt == default ? DateTime.UtcNow : existing.CreatedAt;
+            existing.CategoryId ??= await context.ResourceCategories.Where(c => c.Name == existing.Category).Select(c => (int?)c.Id).FirstOrDefaultAsync();
         }
+        if (await context.Resources.AnyAsync()) { await context.SaveChangesAsync(); return; }
 
         var createdAt = DateTime.UtcNow;
         context.Resources.AddRange(

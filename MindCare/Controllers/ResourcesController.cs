@@ -1,61 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MindCare.Data;
-using MindCare.Models;
-
+using System.Security.Claims; using Microsoft.AspNetCore.Authorization; using Microsoft.AspNetCore.Mvc; using Microsoft.EntityFrameworkCore;
+using MindCare.Data; using MindCare.Models; using MindCare.ViewModels;
 namespace MindCare.Controllers;
-
-[AllowAnonymous]
-public class ResourcesController : Controller
+[Authorize] public class ResourcesController(ApplicationDbContext context) : Controller
 {
-    private readonly ApplicationDbContext _context;
-
-    public ResourcesController(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Index(string? category, string? search)
-    {
-        var resources = _context.Resources.AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(category) && ResourceCategories.All.Contains(category))
-        {
-            resources = resources.Where(resource => resource.Category == category);
-        }
-        else
-        {
-            category = null;
-        }
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            search = search.Trim();
-            resources = resources.Where(resource =>
-                resource.Title.Contains(search) ||
-                resource.Description.Contains(search) ||
-                resource.Category.Contains(search));
-        }
-
-        ViewBag.Categories = ResourceCategories.All;
-        ViewBag.SelectedCategory = category;
-        ViewBag.Search = search;
-
-        return View(await resources
-            .OrderBy(resource => resource.Category)
-            .ThenBy(resource => resource.Title)
-            .ToListAsync());
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        var resource = await _context.Resources
-            .AsNoTracking()
-            .SingleOrDefaultAsync(resource => resource.Id == id);
-
-        return resource is null ? NotFound() : View(resource);
-    }
+    [AllowAnonymous, HttpGet] public async Task<IActionResult> Index(string? search, int? categoryId, string sort="featured", int page=1) { const int size=9; var q=context.Resources.AsNoTracking().Include(r=>r.ResourceCategory).Where(r=>r.Status==ResourceStatus.Published); if(!string.IsNullOrWhiteSpace(search)){search=search.Trim();q=q.Where(r=>r.Title.Contains(search)||r.Description.Contains(search)||(r.Content??string.Empty).Contains(search));} if(categoryId.HasValue)q=q.Where(r=>r.CategoryId==categoryId); q=sort switch{"az"=>q.OrderBy(r=>r.Title),"newest"=>q.OrderByDescending(r=>r.PublishedAt),_=>q.OrderByDescending(r=>r.IsFeatured).ThenByDescending(r=>r.PublishedAt)};var count=await q.CountAsync();var m=new ResourceListViewModel{Resources=await q.Skip((Math.Max(page,1)-1)*size).Take(size).ToListAsync(),Categories=await context.ResourceCategories.AsNoTracking().Where(c=>c.IsActive).OrderBy(c=>c.Name).ToListAsync(),Search=search,CategoryId=categoryId,Sort=sort,Page=Math.Max(page,1),TotalPages=(int)Math.Ceiling(count/(double)size)};if(User.IsInRole(RoleNames.User)){var uid=User.FindFirstValue(ClaimTypes.NameIdentifier)!;m.BookmarkedIds=(await context.ResourceBookmarks.Where(b=>b.UserId==uid).Select(b=>b.ResourceId).ToListAsync()).ToHashSet();}return View(m); }
+    [AllowAnonymous, HttpGet] public async Task<IActionResult> Details(int id) { var r=await context.Resources.Include(x=>x.ResourceCategory).SingleOrDefaultAsync(x=>x.Id==id&&x.Status==ResourceStatus.Published);if(r is null)return NotFound();var saved=false;if(User.IsInRole(RoleNames.User)){r.ViewCount++;await context.SaveChangesAsync();var uid=User.FindFirstValue(ClaimTypes.NameIdentifier)!;saved=await context.ResourceBookmarks.AnyAsync(b=>b.UserId==uid&&b.ResourceId==id);}var related=await context.Resources.AsNoTracking().Include(x=>x.ResourceCategory).Where(x=>x.Id!=id&&x.Status==ResourceStatus.Published&&x.CategoryId==r.CategoryId).OrderByDescending(x=>x.IsFeatured).Take(3).ToListAsync();return View(new ResourceDetailsViewModel{Resource=r,IsBookmarked=saved,Related=related}); }
+    [Authorize(Roles=RoleNames.User)] public async Task<IActionResult> Saved(){var uid=User.FindFirstValue(ClaimTypes.NameIdentifier)!;return View(await context.ResourceBookmarks.AsNoTracking().Where(b=>b.UserId==uid&&b.Resource!.Status==ResourceStatus.Published).Select(b=>b.Resource!).Include(r=>r.ResourceCategory).ToListAsync());}
+    [Authorize(Roles=RoleNames.User),HttpPost,ValidateAntiForgeryToken] public async Task<IActionResult> ToggleBookmark(int id,string? returnUrl){var uid=User.FindFirstValue(ClaimTypes.NameIdentifier)!;if(!await context.Resources.AnyAsync(r=>r.Id==id&&r.Status==ResourceStatus.Published))return NotFound();var b=await context.ResourceBookmarks.SingleOrDefaultAsync(x=>x.UserId==uid&&x.ResourceId==id);if(b is null){context.ResourceBookmarks.Add(new(){UserId=uid,ResourceId=id,CreatedAt=DateTime.UtcNow});TempData["SuccessMessage"]="Resource saved.";}else{context.ResourceBookmarks.Remove(b);TempData["SuccessMessage"]="Resource removed from saved resources.";}await context.SaveChangesAsync();return LocalRedirect(Url.IsLocalUrl(returnUrl)?returnUrl!:Url.Action(nameof(Details),new{id})!);}
 }

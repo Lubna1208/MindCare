@@ -1,0 +1,3 @@
+@model IEnumerable<MindCare.Models.Resource>
+@{ ViewData["Title"]="Pending Resource Reviews"; }
+<section class="mc-resources-page"><div class="mc-resources-container"><h1>Pending Reviews</h1>@if(!Model.Any()){<div class="mc-resources-empty"><h2>No resources are waiting for review.</h2></div>}else{<div class="mc-resources-grid">@foreach(var r in Model){<article class="mc-resource-card"><h2>@r.Title</h2><p>@(r.CreatedByUser?.Name??"Counsellor") · @(r.ResourceCategory?.Name??r.Category)</p><small>Submitted @r.SubmittedAt?.ToLocalTime().ToString("g")</small><p><a asp-action="Review" asp-route-id="@r.Id" class="mc-resource-action">Review resource</a></p></article>}</div>}</div></section>
