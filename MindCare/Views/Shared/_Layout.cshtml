@@ -7,6 +7,8 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ai-faq-assistant.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ai-resource-summary.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MindCare.styles.css" asp-append-version="true" />
 </head>
 <body class="@(User.Identity?.IsAuthenticated == true && User.IsInRole(RoleNames.User) && !User.IsInRole(RoleNames.Admin) && !User.IsInRole(RoleNames.Counsellor) ? "mc-user-portal-body" : "")">
@@ -197,9 +199,17 @@
             </div>
         </footer>
     }
+    @if (hasUserPortalShell)
+    {
+        @await Html.PartialAsync("_AiFaqAssistant")
+    }
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (hasUserPortalShell)
+    {
+        <script src="~/js/ai-faq-assistant.js" asp-append-version="true"></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
