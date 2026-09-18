@@ -7,6 +7,7 @@ public sealed class GeminiAIService(HttpClient httpClient, IConfiguration config
 {
     private const int MaximumQuestionLength = 1000;
     private const int MaximumResourceContentLength = 12_000;
+    private const int MaximumMatchCandidates = 3;
     private const string GenericFailureMessage = "Sorry, I couldn't generate an answer right now. Please try again.";
 
     public async Task<string> AskFaqAsync(string question, CancellationToken cancellationToken = default)
@@ -89,6 +90,70 @@ public sealed class GeminiAIService(HttpClient httpClient, IConfiguration config
         }
 
         return summary;
+    }
+
+    public async Task<IReadOnlyDictionary<int, string>> ExplainCounsellorMatchesAsync(
+        string concern,
+        IReadOnlyList<CounsellorMatchExplanationCandidate> candidates,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(concern))
+        {
+            throw new ArgumentException("A selected concern is required.", nameof(concern));
+        }
+
+        if (candidates.Count == 0)
+        {
+            return new Dictionary<int, string>();
+        }
+
+        var safeCandidates = candidates.Take(MaximumMatchCandidates).ToList();
+        var permittedIds = safeCandidates.Select(candidate => candidate.CounsellorProfileId).ToHashSet();
+        var responseText = await GenerateContentAsync(new
+        {
+            systemInstruction = new
+            {
+                parts = new[]
+                {
+                    new
+                    {
+                        text = "You explain why a counsellor's listed professional areas may relate to a concern explicitly selected by a user. " +
+                               "Do not diagnose, assess severity, rank counsellors, choose a best counsellor, tell the user whom to choose, make medical or clinical claims, or infer facts not supplied. " +
+                               "Use only supplied specialization and availability information. Keep each explanation neutral and concise (one or two short sentences). " +
+                               "Return JSON only: {\\\"matches\\\":[{\\\"candidateId\\\":number,\\\"explanation\\\":string}]}. Return entries only for supplied candidate IDs."
+                    }
+                }
+            },
+            contents = new[]
+            {
+                new
+                {
+                    role = "user",
+                    parts = new[]
+                    {
+                        new
+                        {
+                            text = JsonSerializer.Serialize(new
+                            {
+                                concern = concern.Trim(),
+                                candidates = safeCandidates.Select(candidate => new
+                                {
+                                    candidateId = candidate.CounsellorProfileId,
+                                    displayName = candidate.CounsellorName,
+                                    specialization = candidate.Specialization,
+                                    availability = candidate.AvailabilitySummary
+                                })
+                            })
+                        }
+                    }
+                }
+            },
+            generationConfig = new { responseMimeType = "application/json" }
+        }, "counsellor match explanation", cancellationToken);
+
+        return string.IsNullOrWhiteSpace(responseText)
+            ? new Dictionary<int, string>()
+            : ParseCounsellorMatchExplanations(responseText, permittedIds);
     }
 
     private async Task<string?> GenerateContentAsync(object payload, string operation, CancellationToken cancellationToken)
@@ -210,6 +275,36 @@ public sealed class GeminiAIService(HttpClient httpClient, IConfiguration config
         catch (JsonException)
         {
             return false;
+        }
+    }
+
+    private static IReadOnlyDictionary<int, string> ParseCounsellorMatchExplanations(
+        string responseText,
+        ISet<int> permittedIds)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(responseText);
+            if (!document.RootElement.TryGetProperty("matches", out var matches) || matches.ValueKind != JsonValueKind.Array)
+            {
+                return new Dictionary<int, string>();
+            }
+
+            return matches.EnumerateArray()
+                .Where(match => match.TryGetProperty("candidateId", out var id) && id.TryGetInt32(out _) &&
+                                match.TryGetProperty("explanation", out var explanation) && explanation.ValueKind == JsonValueKind.String)
+                .Select(match => new
+                {
+                    Id = match.GetProperty("candidateId").GetInt32(),
+                    Explanation = match.GetProperty("explanation").GetString()?.Trim()
+                })
+                .Where(match => permittedIds.Contains(match.Id) && !string.IsNullOrWhiteSpace(match.Explanation))
+                .GroupBy(match => match.Id)
+                .ToDictionary(group => group.Key, group => group.First().Explanation!);
+        }
+        catch (JsonException)
+        {
+            return new Dictionary<int, string>();
         }
     }
 }

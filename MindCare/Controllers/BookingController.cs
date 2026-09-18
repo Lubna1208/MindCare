@@ -2,10 +2,13 @@ using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
+using MindCare.Services.AI;
+using MindCare.Services.CounsellorMatching;
 using MindCare.ViewModels;
 using Stripe;
 using Stripe.Checkout;
@@ -19,17 +22,26 @@ public class BookingController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _configuration;
     private readonly NotificationService _notificationService;
+    private readonly ICounsellorMatchingService _counsellorMatchingService;
+    private readonly IAIService _aiService;
+    private readonly ILogger<BookingController> _logger;
 
     public BookingController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        ICounsellorMatchingService counsellorMatchingService,
+        IAIService aiService,
+        ILogger<BookingController> logger)
     {
         _context = context;
         _userManager = userManager;
         _configuration = configuration;
         _notificationService = notificationService;
+        _counsellorMatchingService = counsellorMatchingService;
+        _aiService = aiService;
+        _logger = logger;
     }
 
     private long AppointmentFeeMinorUnits =>
@@ -39,9 +51,64 @@ public class BookingController : Controller
         _configuration.GetValue<string?>("Stripe:Currency") ?? "bdt";
 
     [HttpGet]
-    public async Task<IActionResult> Index(int? counsellorProfileId, DateTime? date)
+    public async Task<IActionResult> Index(int? counsellorProfileId, DateTime? date, string? mode)
     {
-        return View(await BuildBookingViewModelAsync(counsellorProfileId, date));
+        var model = await BuildBookingViewModelAsync(counsellorProfileId, date);
+        model.IsMatchMode = string.Equals(mode, "match", StringComparison.OrdinalIgnoreCase);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("ai-counsellor-match")]
+    public async Task<IActionResult> FindMatch(CounsellorMatchRequestViewModel request, CancellationToken cancellationToken)
+    {
+        var bookingModel = await BuildBookingViewModelAsync(null, null);
+        bookingModel.IsMatchMode = true;
+
+        if (!request.Concern.HasValue || !Enum.IsDefined(request.Concern.Value))
+        {
+            ModelState.AddModelError(nameof(request.Concern), "Choose a valid area of support to find counsellors.");
+            bookingModel.Matching = new CounsellorMatchPageViewModel { Request = request };
+            return View("Index", bookingModel);
+        }
+
+        var matches = (await _counsellorMatchingService.FindMatchesAsync(request.Concern.Value, cancellationToken)).ToList();
+        if (matches.Count > 0)
+        {
+            try
+            {
+                var explanations = await _aiService.ExplainCounsellorMatchesAsync(
+                    CounsellorMatchingService.GetConcernDisplayName(request.Concern.Value),
+                    matches.Select(match => new CounsellorMatchExplanationCandidate(
+                        match.CounsellorProfileId,
+                        match.CounsellorName,
+                        match.Specialization,
+                        "Future availability exists"))
+                        .ToList(),
+                    cancellationToken);
+
+                foreach (var match in matches)
+                {
+                    if (explanations.TryGetValue(match.CounsellorProfileId, out var explanation) && !string.IsNullOrWhiteSpace(explanation))
+                    {
+                        match.Explanation = explanation;
+                        match.HasAiExplanation = true;
+                    }
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "AI counsellor-match explanation was unavailable; showing deterministic explanations.");
+            }
+        }
+
+        bookingModel.Matching = new CounsellorMatchPageViewModel { Request = request, Matches = matches };
+        return View("Index", bookingModel);
     }
 
     [HttpPost]

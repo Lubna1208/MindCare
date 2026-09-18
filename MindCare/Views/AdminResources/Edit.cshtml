@@ -1,3 +1,13 @@
 @model MindCare.ViewModels.ResourceEditViewModel
-@{ ViewData["Title"]="Edit Resource"; }
-<section class="mc-resources-page"><div class="mc-resources-container"><h1>Edit Resource</h1><partial name="_ResourceForm" model="Model" /></div></section>
+@using MindCare.Models
+@{
+    ViewData["Title"] = "Edit Resource";
+    ViewData["ResourceFormDesign"] = "edit";
+    ResourceStatus? status = ViewData["ResourceStatus"] is ResourceStatus storedStatus ? storedStatus : null;
+    var statusClass = status switch { ResourceStatus.Published => "published", ResourceStatus.PendingReview => "pending", ResourceStatus.Draft => "draft", ResourceStatus.Archived => "archived", ResourceStatus.Rejected => "rejected", _ => "draft" };
+    var statusText = status == ResourceStatus.PendingReview ? "Pending" : status?.ToString();
+}
+<section class="mc-resource-form-page"><div class="mc-resource-form-page-container">
+    <header class="mc-resource-form-header"><div><p>RESOURCE MANAGEMENT</p><h1>Edit Resource</h1><span>Update the resource content, category, and publishing options.</span>@if (status.HasValue) { <span class="mc-resource-form-current-status">Current status <b class="mc-admin-resource-status mc-admin-resource-status--@statusClass">@statusText</b></span> }</div><a asp-action="Index" class="mc-resource-form-back">← Back to Resources</a></header>
+    <partial name="_ResourceForm" model="Model" />
+</div></section>

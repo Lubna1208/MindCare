@@ -43,7 +43,6 @@ public class Resource
     [StringLength(1000)] public string? ReviewNote { get; set; }
     public DateTime? PublishedAt { get; set; }
     public DateTime? ArchivedAt { get; set; }
-    public int ViewCount { get; set; }
     public ICollection<ResourceBookmark> Bookmarks { get; set; } = new List<ResourceBookmark>();
 
     public static bool IsSafeExternalUrl(string? url) =>

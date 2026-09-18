@@ -62,7 +62,6 @@
                 @if (isSignedInUser)
                 {
                     <div class="mc-trusted-person-actions">
-                        <a asp-action="TrustedPeople" class="mc-immediate-action-link mc-immediate-action-link--secondary">View Trusted People</a>
                         <a asp-action="TrustedPeople" class="mc-immediate-action-link">Manage Trusted People</a>
                     </div>
                 }
@@ -77,7 +76,7 @@
                 <p class="mc-support-note">The support services above are available to review or contact right now.</p>
                 @if (isAuthenticated)
                 {
-                    <div class="mc-resource-support-actions"><a asp-controller="Resources" asp-action="Index" asp-route-category="Crisis Support" class="mc-immediate-action-link mc-immediate-action-link--secondary">Explore Full Resources <span aria-hidden="true">&rarr;</span></a></div>
+                    <div class="mc-resource-support-actions"><a asp-controller="Resources" asp-action="Index" asp-route-category="Crisis Support" class="mc-immediate-action-link mc-immediate-action-link--secondary">Explore Resources</a></div>
                 }
             </article>
         </div>

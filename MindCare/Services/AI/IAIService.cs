@@ -8,4 +8,9 @@ public interface IAIService
         string title,
         string content,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyDictionary<int, string>> ExplainCounsellorMatchesAsync(
+        string concern,
+        IReadOnlyList<CounsellorMatchExplanationCandidate> candidates,
+        CancellationToken cancellationToken = default);
 }

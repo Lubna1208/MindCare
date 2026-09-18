@@ -1,3 +1,7 @@
 @model MindCare.ViewModels.ResourceEditViewModel
-@{ ViewData["Title"]="Add Resource"; }
-<section class="mc-resources-page"><div class="mc-resources-container"><h1>Add Resource</h1><p>Save a draft or submit your completed resource for Admin review.</p><partial name="_ResourceForm" model="Model" /></div></section>
+@{ ViewData["Title"] = "Add Resource"; ViewData["CounsellorResourceFormDesign"] = "add"; }
+<section class="mc-resource-form-page mc-counsellor-resource-form-page"><div class="mc-resource-form-page-container">
+    <header class="mc-resource-form-header"><div><p>MY CONTRIBUTIONS</p><h1>Add Resource</h1><span>Create a helpful wellbeing resource and submit it for Admin review.</span></div><a asp-action="Index" class="mc-resource-form-back">← Back to My Resources</a></header>
+    <aside class="mc-counsellor-resource-notice" aria-label="Admin review information"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.5 7 10 4.1-1.5 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><p>Resources submitted by counsellors require Admin approval before they become visible in the Resource Library.</p></aside>
+    <partial name="_ResourceForm" model="Model" />
+</div></section>

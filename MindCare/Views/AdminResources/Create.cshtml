@@ -1,3 +1,11 @@
 @model MindCare.ViewModels.ResourceEditViewModel
-@{ ViewData["Title"]="Add Resource"; }
-<section class="mc-resources-page"><div class="mc-resources-container"><h1>Add Resource</h1><partial name="_ResourceForm" model="Model" /></div></section>
+@{ ViewData["Title"] = "Add Resource"; ViewData["ResourceFormDesign"] = "add"; }
+<section class="mc-resource-form-page">
+    <div class="mc-resource-form-page-container">
+        <header class="mc-resource-form-header">
+            <div><p>RESOURCE MANAGEMENT</p><h1>Add Resource</h1><span>Create a new wellbeing resource for the MindCare library.</span></div>
+            <a asp-action="Index" class="mc-resource-form-back">← Back to Resources</a>
+        </header>
+        <partial name="_ResourceForm" model="Model" />
+    </div>
+</section>

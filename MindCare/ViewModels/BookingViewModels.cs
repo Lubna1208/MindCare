@@ -4,6 +4,10 @@ namespace MindCare.ViewModels;
 
 public class BookAppointmentViewModel
 {
+    public bool IsMatchMode { get; set; }
+
+    public CounsellorMatchPageViewModel? Matching { get; set; }
+
     public int? CounsellorProfileId { get; set; }
 
     public DateTime? Date { get; set; }

@@ -22,7 +22,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Resource> Resources => Set<Resource>();
     public DbSet<ResourceCategory> ResourceCategories => Set<ResourceCategory>();
     public DbSet<ResourceBookmark> ResourceBookmarks => Set<ResourceBookmark>();
-    public DbSet<ResourceReviewLog> ResourceReviewLogs => Set<ResourceReviewLog>();
 
     public DbSet<AvailabilitySlot> AvailabilitySlots => Set<AvailabilitySlot>();
 
@@ -79,7 +78,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ResourceBookmark>().HasIndex(b => new { b.UserId, b.ResourceId }).IsUnique();
         builder.Entity<ResourceBookmark>().HasOne(b => b.User).WithMany().HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<ResourceBookmark>().HasOne(b => b.Resource).WithMany(r => r.Bookmarks).HasForeignKey(b => b.ResourceId).OnDelete(DeleteBehavior.Cascade);
-        builder.Entity<ResourceReviewLog>().HasOne(l => l.Resource).WithMany().HasForeignKey(l => l.ResourceId).OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<AvailabilitySlot>()
             .HasOne(slot => slot.CounsellorProfile)

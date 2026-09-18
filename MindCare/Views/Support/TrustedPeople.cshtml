@@ -4,52 +4,47 @@
     ViewData["Title"] = "Trusted People";
 }
 
-<div class="mc-trusted-people-page">
-    <header class="mc-trusted-header mb-4">
-        <p class="mc-eyebrow mb-1">Your support circle</p>
-        <h1 class="mc-page-title mb-2">Trusted People</h1>
-        <p class="mb-0">Save the people you may want to reach when you need support. Only you can see and manage this list.</p>
+<section class="mc-trusted-people-page">
+    <header class="mc-trusted-people-hero">
+        <p>YOUR SUPPORT CIRCLE</p>
+        <h1>Trusted People</h1>
+        <span>Save the people you may want to reach when you need support. Only you can see and manage this list.</span>
     </header>
 
     @if (TempData["SuccessMessage"] is string successMessage)
     {
-        <div class="alert mc-success-message" role="status">@successMessage</div>
+        <div class="mc-trusted-success" role="status" data-auto-dismiss="5000">@successMessage</div>
     }
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-        <h2 class="mc-section-title mb-0">Saved contacts</h2>
-        <a asp-action="AddTrustedPerson" class="btn mc-btn-primary">Add Trusted Person</a>
-    </div>
+    <section class="mc-trusted-people-section" aria-labelledby="savedContactsTitle">
+        <header class="mc-trusted-people-header">
+            <div><h2 id="savedContactsTitle">Saved contacts</h2><p>@Model.Count contact@(Model.Count == 1 ? string.Empty : "s") in your support circle.</p></div>
+            <a asp-action="AddTrustedPerson" class="mc-trusted-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 3 18.5V20" /><circle cx="9" cy="7" r="3" /><path d="M19 8v6m3-3h-6" /></svg>Add Trusted Person</a>
+        </header>
 
-    @if (!Model.Any())
-    {
-        <section class="mc-trusted-empty-state" aria-label="No trusted people saved">
-            <h2 class="h5 mc-section-title">No trusted people saved yet</h2>
-            <p class="mb-0">You can add someone now, so their details are easy to find later.</p>
-        </section>
-    }
-    else
-    {
-        <div class="row g-3">
-            @foreach (var contact in Model)
-            {
-                <div class="col-12 col-md-6">
-                    <article class="mc-trusted-contact-card h-100">
-                        <p class="mc-eyebrow mb-1">@contact.Relationship</p>
-                        <h3 class="h4 mc-action-card-title mb-1">@contact.Name</h3>
-                        <p class="mc-contact-phone mb-3">@contact.PhoneNumber</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a href="tel:@contact.PhoneNumber" class="btn mc-btn-primary">Call</a>
-                            <a asp-action="EditTrustedPerson" asp-route-id="@contact.Id" class="btn mc-btn-outline">Edit</a>
-                            <form asp-action="DeleteTrustedPerson" asp-route-id="@contact.Id" method="post" onsubmit="return confirm('Remove this trusted person?');">
-                                <button type="submit" class="btn mc-btn-delete">Delete</button>
-                            </form>
-                        </div>
+        @if (!Model.Any())
+        {
+            <section class="mc-trusted-empty-state" aria-labelledby="emptyTrustedPeopleTitle">
+                <span class="mc-trusted-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" /><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20M16 7h5m-2.5-2.5v5" /></svg></span>
+                <h3 id="emptyTrustedPeopleTitle">No trusted people saved yet</h3>
+                <p>You can add someone you trust so their details are easy to find when you need support.</p>
+                <a asp-action="AddTrustedPerson" class="mc-trusted-empty-action">Add Trusted Person</a>
+            </section>
+        }
+        else
+        {
+            <div class="mc-trusted-grid">
+                @foreach (var contact in Model)
+                {
+                    <article class="mc-trusted-card">
+                        <header class="mc-trusted-card-identity"><span class="mc-trusted-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.25" /><path d="M5 20v-1.5A5.5 5.5 0 0 1 10.5 13h3a5.5 5.5 0 0 1 5.5 5.5V20" /></svg></span><div><p class="mc-trusted-relationship">@contact.Relationship</p><h3 class="mc-trusted-name">@contact.Name</h3></div></header>
+                        <a href="tel:@contact.PhoneNumber" class="mc-trusted-phone mc-trusted-phone-row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3H4.8A1.8 1.8 0 0 0 3 4.8c0 8.95 7.25 16.2 16.2 16.2a1.8 1.8 0 0 0 1.8-1.8V17l-4-1.2-1.35 1.35a13.1 13.1 0 0 1-8.8-8.8L8.2 7 7 3Z" /></svg>@contact.PhoneNumber</a>
+                        <footer class="mc-trusted-actions"><a href="tel:@contact.PhoneNumber" class="mc-trusted-call" aria-label="Call @contact.Name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3H4.8A1.8 1.8 0 0 0 3 4.8c0 8.95 7.25 16.2 16.2 16.2a1.8 1.8 0 0 0 1.8-1.8V17l-4-1.2-1.35 1.35a13.1 13.1 0 0 1-8.8-8.8L8.2 7 7 3Z" /></svg>Call</a><a asp-action="EditTrustedPerson" asp-route-id="@contact.Id" class="mc-trusted-edit" aria-label="Edit @contact.Name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16.5-.5 4 4-.5L18.7 8.8a2.15 2.15 0 0 0-3-3L4.5 17Z" /><path d="m13.8 7.7 2.5 2.5" /></svg>Edit</a><form asp-action="DeleteTrustedPerson" asp-route-id="@contact.Id" method="post" onsubmit="return confirm('Remove this trusted person?');"><button type="submit" class="mc-trusted-remove" aria-label="Remove @contact.Name"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16m-10 4v5m4-5v5M9 7l1-3h4l1 3m-8 0 1 13h8l1-13" /></svg>Remove</button></form></footer>
                     </article>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </section>
 
-    <div class="mt-4"><a asp-action="Immediate" class="mc-text-link">Back to Immediate Support</a></div>
-</div>
+    <a asp-action="Immediate" class="mc-trusted-back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7" /><path d="M7 12h12" /></svg>Back to Immediate Support</a>
+</section>
