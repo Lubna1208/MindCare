@@ -7,6 +7,7 @@ using MindCare.Data;
 using MindCare.Models;
 using MindCare.Services;
 using MindCare.Services.AI;
+using MindCare.Services.CounsellorMatching;
 using MindCare.Middleware;
 using Stripe;
 using System.Security.Claims;
@@ -56,6 +57,7 @@ builder.Services.AddSingleton<IAppointmentChatWindowService, AppointmentChatWind
 builder.Services.AddSingleton<IVideoCallRoomService, VideoCallRoomService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<ICounsellorMatchingService, CounsellorMatchingService>();
 var aiProvider = builder.Configuration["AI:Provider"];
 if (!string.Equals(aiProvider, "Gemini", StringComparison.OrdinalIgnoreCase))
 {
@@ -85,6 +87,20 @@ builder.Services.AddRateLimiter(options =>
         });
     });
     options.AddPolicy("ai-resource-summary", context =>
+    {
+        var partitionKey = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? context.Connection.RemoteIpAddress?.ToString()
+            ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
+    });
+    options.AddPolicy("ai-counsellor-match", context =>
     {
         var partitionKey = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? context.Connection.RemoteIpAddress?.ToString()

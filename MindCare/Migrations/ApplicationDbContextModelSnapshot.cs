@@ -758,9 +758,6 @@ namespace MindCare.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)");
 
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -831,41 +828,6 @@ namespace MindCare.Migrations
                         .IsUnique();
 
                     b.ToTable("ResourceCategories");
-                });
-
-            modelBuilder.Entity("MindCare.Models.ResourceReviewLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("AdminUserId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("ResourceId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResourceId");
-
-                    b.ToTable("ResourceReviewLogs");
                 });
 
             modelBuilder.Entity("MindCare.Models.TrustedContact", b =>
@@ -1175,17 +1137,6 @@ namespace MindCare.Migrations
                     b.Navigation("Resource");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MindCare.Models.ResourceReviewLog", b =>
-                {
-                    b.HasOne("MindCare.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Resource");
                 });
 
             modelBuilder.Entity("MindCare.Models.TrustedContact", b =>

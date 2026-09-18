@@ -3,6 +3,13 @@
 @{
     ViewData["Title"] = "Find and Book Counsellor";
     string FormatTime(TimeSpan time) => DateTime.Today.Add(time).ToString("h:mm tt");
+    string ConcernLabel(MindCare.ViewModels.CounsellorConcern concern) => concern switch
+    {
+        MindCare.ViewModels.CounsellorConcern.StudyPressure => "Study Pressure",
+        MindCare.ViewModels.CounsellorConcern.RelationshipConcerns => "Relationship Concerns",
+        MindCare.ViewModels.CounsellorConcern.GeneralWellbeing => "General Wellbeing",
+        _ => concern.ToString()
+    };
     var selectedCounsellor = Model.Counsellors.FirstOrDefault(counsellor => counsellor.Id == Model.CounsellorProfileId);
 }
 
@@ -120,14 +127,72 @@
     }
 </style>
 
-<div class="mc-booking-page">
-    <header class="mc-booking-header"><p class="mc-booking-eyebrow">Your care</p><h1>Find and Book Counsellor</h1><p>Choose a counsellor and a date to view available appointment times.</p></header>
+<div class="mc-booking-page mc-counsellor-finder">
+    <header class="mc-booking-header"><p class="mc-booking-eyebrow">Your care</p><h1>Find a Counsellor</h1><p>Browse available counsellors or find options based on the concern you would like support with.</p></header>
+
+    <nav class="mc-counsellor-mode-tabs" aria-label="Counsellor discovery options">
+        <a asp-action="Index" class="@(Model.IsMatchMode ? "" : "is-active")" aria-current="@(!Model.IsMatchMode ? "page" : null)">Browse All</a>
+        <a asp-action="Index" asp-route-mode="match" class="@(Model.IsMatchMode ? "is-active" : "")" aria-current="@(Model.IsMatchMode ? "page" : null)">Find a Match</a>
+    </nav>
 
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
         <div class="mc-booking-alert">@errorMessage</div>
     }
 
+    @if (Model.IsMatchMode)
+    {
+        var matching = Model.Matching;
+        var selectedConcern = matching?.Request.Concern;
+        <section class="mc-match-form-card" aria-labelledby="match-form-title">
+            <span class="mc-match-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10Z"/><path d="M9.5 13.1 11.2 15l3.5-4"/></svg></span>
+            <div><h2 id="match-form-title">Find counsellors by area of support</h2><p>Choose what you would like support with. MindCare will show counsellors whose listed areas of support may be relevant.</p></div>
+            <form asp-action="FindMatch" method="post">
+                <fieldset class="mc-match-concerns">
+                    <legend>Choose an area of support</legend>
+                    @foreach (var concern in Enum.GetValues<MindCare.ViewModels.CounsellorConcern>())
+                    {
+                        var id = $"concern-{concern}";
+                        <input id="@id" type="radio" name="Concern" value="@concern" checked="@(selectedConcern == concern ? "checked" : null)" />
+                        <label for="@id">@ConcernLabel(concern)</label>
+                    }
+                </fieldset>
+                @if (ViewData.ModelState.TryGetValue("Concern", out var concernState) && concernState.Errors.Count > 0)
+                {
+                    <span id="match-concern-error" class="text-danger" role="alert">@concernState.Errors[0].ErrorMessage</span>
+                }
+                <button type="submit" class="mc-booking-view-slots">Find Matching Counsellors</button>
+            </form>
+        </section>
+
+        @if (matching?.Matches is not null)
+        {
+            <section class="mc-match-results" aria-labelledby="match-results-title">
+                <header><p class="mc-booking-eyebrow">Your options</p><h2 id="match-results-title">Suggested Counsellors</h2><p>These options are based on the concern you selected, listed areas of support, and current availability. You can review each profile and choose what feels appropriate for you.</p></header>
+                @if (!matching.Matches.Any())
+                {
+                    <div class="mc-booking-empty mc-match-empty"><h3>No matching counsellors with available slots were found right now.</h3><p>You can browse all counsellors or check again later.</p><a asp-action="Index" class="mc-btn-outline">Browse All Counsellors</a></div>
+                }
+                else
+                {
+                    <div class="mc-match-results-grid">
+                    @foreach (var match in matching.Matches)
+                    {
+                        <article class="mc-match-card">
+                            <header><span class="mc-match-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21c.45-4 3-6.3 7-6.3s6.55 2.3 7 6.3"/></svg></span><div><h3>@match.CounsellorName</h3><p>Listed area of support</p></div></header>
+                            <p class="mc-match-specialization">@match.Specialization</p>
+                            <div class="mc-match-explanation"><div><h4>Why this may be relevant</h4>@if (match.HasAiExplanation) { <span>AI-assisted explanation</span> }</div><p>@match.Explanation</p></div>
+                            <p class="mc-match-availability"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><span><strong>Next available</strong>@match.NextAvailableDate.ToString("dd MMM") · @FormatTime(match.NextAvailableStartTime)</span></p>
+                            <div class="mc-match-actions"><a asp-action="Index" asp-route-counsellorProfileId="@match.CounsellorProfileId" asp-route-date="@match.NextAvailableDate.ToString("yyyy-MM-dd")" class="mc-booking-view-slots">View Available Slots</a></div>
+                        </article>
+                    }
+                    </div>
+                }
+            </section>
+        }
+    }
+    else
+    {
     <section class="mc-booking-search-card" aria-labelledby="booking-step-one-title">
         <header><span class="mc-booking-step-badge">Step 1</span><div><h2 id="booking-step-one-title">Choose counsellor and date</h2><p>Select who you would like to meet and the date that works for you.</p></div></header>
         <form asp-action="Index" method="get" class="mc-booking-form-grid">
@@ -190,5 +255,6 @@
             </div>
         }
     </section>
+    }
 
 </div>

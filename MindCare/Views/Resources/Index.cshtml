@@ -1,6 +1,56 @@
 @model MindCare.ViewModels.ResourceListViewModel
 @using MindCare.Models
-@{ ViewData["Title"]="Resources"; }
-<section class="mc-resources-page"><div class="mc-resources-container"><header class="mc-resources-hero"><p class="mc-eyebrow">YOUR WELLBEING</p><h1 class="mc-resources-title">Resources</h1><p>Explore practical resources to support your wellbeing.</p></header>
-<form method="get" class="mc-resource-search"><input name="search" value="@Model.Search" class="form-control" placeholder="Search resources"/><select name="categoryId" class="form-select"><option value="">All categories</option>@foreach(var c in Model.Categories){<option value="@c.Id" selected="@(Model.CategoryId==c.Id)">@c.Name</option>}</select><select name="sort" class="form-select"><option value="featured">Featured & newest</option><option value="newest">Newest</option><option value="az">A–Z</option></select><button class="btn mc-btn-primary">Filter</button></form>
-@if(!Model.Resources.Any()){<section class="mc-resources-empty"><h2>No resources match your search.</h2></section>}else{<div class="mc-resources-grid">@foreach(var r in Model.Resources){<article class="mc-resource-card"><span class="mc-resource-badge">@(r.ResourceCategory?.Name??r.Category)</span>@if(r.IsFeatured){<span class="mc-resource-badge">Featured</span>}<h2 class="mc-resource-title">@r.Title</h2><p class="mc-resource-description">@r.Description</p><small>@Math.Max(1,(r.Content??"").Split(' ',StringSplitOptions.RemoveEmptyEntries).Length/200) min read</small><div><a asp-action="Details" asp-route-id="@r.Id" class="mc-resource-action">Read Resource</a>@if(User.IsInRole(RoleNames.User)){<form asp-action="ToggleBookmark" asp-route-id="@r.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post" class="d-inline">@Html.AntiForgeryToken()<button class="btn btn-link">@(Model.BookmarkedIds.Contains(r.Id)?"Saved":"Save")</button></form>}</div></article>}</div>}<nav>@for(var p=1;p<=Model.TotalPages;p++){<a asp-route-page="@p" asp-route-search="@Model.Search" asp-route-categoryId="@Model.CategoryId" asp-route-sort="@Model.Sort" class="btn btn-sm">@p</a>}</nav></div></section>
+@{
+    ViewData["Title"] = "Resources";
+    var returnUrl = $"{ViewContext.HttpContext.Request.Path}{ViewContext.HttpContext.Request.QueryString}";
+}
+
+<section class="mc-resource-library">
+    <div class="mc-resource-library-container">
+        <header class="mc-resource-library-header">
+            <p>YOUR WELLBEING</p>
+            <h1>Resources</h1>
+            <span>Explore practical resources to support your wellbeing.</span>
+        </header>
+        <nav class="mc-resource-library-tabs" aria-label="Resource library sections">
+            <a asp-action="Index" class="is-active" aria-current="page">All Resources</a>
+            <a asp-action="Saved">Saved Resources</a>
+        </nav>
+
+        <form method="get" class="mc-resource-toolbar">
+            <div class="mc-resource-toolbar-search"><label class="visually-hidden" for="resourceSearch">Search resources</label><input id="resourceSearch" name="search" value="@Model.Search" class="form-control" placeholder="Search resources" /></div>
+            <div><label class="visually-hidden" for="resourceCategory">Category</label><select id="resourceCategory" name="categoryId" class="form-select"><option value="">All categories</option>@foreach (var category in Model.Categories) { if (Model.CategoryId == category.Id) { <option value="@category.Id" selected>@category.Name</option> } else { <option value="@category.Id">@category.Name</option> } }</select></div>
+            <div><label class="visually-hidden" for="resourceSort">Sort resources</label><select id="resourceSort" name="sort" class="form-select"><option value="featured" selected="@(Model.Sort == "featured")">Featured &amp; newest</option><option value="newest" selected="@(Model.Sort == "newest")">Newest</option><option value="az" selected="@(Model.Sort == "az")">A-Z</option></select></div>
+            <button class="mc-resource-toolbar-submit" type="submit">Filter</button>
+        </form>
+
+        @if (!Model.Resources.Any())
+        {
+            <section class="mc-resource-library-empty"><h2>No resources found</h2><p>We couldn't find resources matching your current filters.</p><a asp-action="Index" class="mc-resource-library-clear">Clear Filters</a></section>
+        }
+        else
+        {
+            <div class="mc-resource-library-grid">
+                @foreach (var resource in Model.Resources)
+                {
+                    <article class="mc-resource-library-card">
+                        <div class="mc-resource-library-card-top"><span class="mc-resource-library-category">@(resource.ResourceCategory?.Name ?? resource.Category)</span>@if (resource.IsFeatured) { <span class="mc-resource-library-featured">Featured</span> }</div>
+                        <h2>@resource.Title</h2>
+                        <p class="mc-resource-library-description">@resource.Description</p>
+                        <footer>
+                            <a asp-action="Details" asp-route-id="@resource.Id" class="mc-resource-library-read">Read Resource</a>
+                            @if (User.IsInRole(RoleNames.User))
+                            {
+                                <form asp-action="ToggleBookmark" asp-route-id="@resource.Id" asp-route-returnUrl="@returnUrl" method="post">@Html.AntiForgeryToken()<button class="mc-resource-library-save" type="submit">@(Model.BookmarkedIds.Contains(resource.Id) ? "Saved" : "Save")</button></form>
+                            }
+                        </footer>
+                    </article>
+                }
+            </div>
+        }
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mc-resource-library-pagination" aria-label="Resource pages">@for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++) { <a asp-route-page="@pageNumber" asp-route-search="@Model.Search" asp-route-categoryId="@Model.CategoryId" asp-route-sort="@Model.Sort" class="@(pageNumber == Model.Page ? "is-current" : "")" aria-current="@(pageNumber == Model.Page ? "page" : null)">@pageNumber</a> }</nav>
+        }
+    </div>
+</section>

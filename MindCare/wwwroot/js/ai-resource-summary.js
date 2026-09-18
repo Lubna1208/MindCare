@@ -20,8 +20,8 @@
     const setLoading = (loading) => {
         button.disabled = loading;
         button.setAttribute('aria-busy', String(loading));
-        spinner.hidden = !loading;
-        label.textContent = loading ? 'Generating summary...' : hasSummary ? 'View AI Summary' : 'Summarize with AI';
+        if (spinner) spinner.hidden = !loading;
+        label.textContent = loading ? 'Generating Summary...' : hasSummary ? 'AI Summary Ready' : 'Summarize with AI';
     };
     const createPointIcon = () => {
         const icon = document.createElement('span');
@@ -84,7 +84,7 @@
                 points.append(item);
             });
             hasSummary = true;
-            setStatus('Summary ready.');
+            setStatus('');
             revealCard();
         } catch {
             setStatus('AI summary is temporarily unavailable. Please try again.', true);

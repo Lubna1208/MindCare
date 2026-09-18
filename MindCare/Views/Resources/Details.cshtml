@@ -1,18 +1,81 @@
 @model MindCare.ViewModels.ResourceDetailsViewModel
 @using MindCare.Models
-@{ var resource = Model.Resource; ViewData["Title"] = resource.Title; var canSummarize = User.IsInRole(RoleNames.User) && !string.IsNullOrWhiteSpace(resource.Content); }
-<section class="mc-resource-detail-page"><div class="mc-resource-detail-container">
-    <a asp-action="Index" class="mc-resource-back">← Back to Resources</a>
-    <article class="mc-resource-details-card">
-        <span class="mc-resource-category">@(resource.ResourceCategory?.Name ?? resource.Category)</span>
-        <h1 class="mc-resource-detail-title">@resource.Title</h1><p class="mc-resource-summary">@resource.Description</p>
-        <p class="mc-resource-meta">@Math.Max(1, (resource.Content ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Length / 200) min read</p>
-        @if (User.IsInRole(RoleNames.User)) { <form asp-action="ToggleBookmark" asp-route-id="@resource.Id" asp-route-returnUrl="@Context.Request.Path" method="post">@Html.AntiForgeryToken()<button class="btn mc-btn-primary">@(Model.IsBookmarked ? "Saved" : "Save Resource")</button></form> }
-        @if (canSummarize) { <section class="mc-resource-ai" data-resource-ai data-summary-endpoint="/AI/Resources/@resource.Id/Summarize">@Html.AntiForgeryToken()<button type="button" class="mc-resource-ai-button" data-resource-ai-button><span data-resource-ai-label>Summarize with AI</span></button><p data-resource-ai-status></p><section data-resource-ai-card hidden><h2>AI Summary</h2><p data-resource-ai-summary></p><ul data-resource-ai-points></ul></section></section> }
-        <section class="mc-resource-content"><h2>Overview</h2><div class="mc-resource-body">@resource.Content</div></section>
-    </article>
-    @if (Model.Related.Any()) { <section><h2>You may also find helpful</h2><div class="mc-resources-grid">@foreach (var related in Model.Related) { <article class="mc-resource-card"><h3>@related.Title</h3><p>@related.Description</p><a asp-action="Details" asp-route-id="@related.Id">Read Resource</a></article> }</div></section> }
-</div></section>
+@{
+    var resource = Model.Resource;
+    ViewData["Title"] = resource.Title;
+    var canSummarize = User.IsInRole(RoleNames.User) && !string.IsNullOrWhiteSpace(resource.Content);
+    var readingMinutes = Math.Max(1, (resource.Content ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Length / 200);
+    var returnUrl = ViewContext.HttpContext.Request.Path;
+}
+
+<section class="mc-resource-details">
+    <div class="mc-resource-details-container">
+        <a asp-action="Index" class="mc-resource-details-back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>Back to Resources</a>
+
+        <article class="mc-resource-details-card">
+            <header class="mc-resource-details-header">
+                <div class="mc-resource-details-badges">
+                    <span class="mc-resource-library-category">@(resource.ResourceCategory?.Name ?? resource.Category)</span>
+                    @if (resource.IsFeatured) { <span class="mc-resource-library-featured">Featured</span> }
+                </div>
+                <h1>@resource.Title</h1>
+                <p>@resource.Description</p>
+                <div class="mc-resource-details-meta">
+                    <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg>@readingMinutes min read</span>
+                    <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4m8-4v4M4 10h16" /></svg>Updated @resource.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")</span>
+                </div>
+            </header>
+
+            @if (User.IsInRole(RoleNames.User) || canSummarize)
+            {
+                <div class="mc-resource-details-actions">
+                    @if (User.IsInRole(RoleNames.User))
+                    {
+                        <form asp-action="ToggleBookmark" asp-route-id="@resource.Id" asp-route-returnUrl="@returnUrl" method="post">
+                            @Html.AntiForgeryToken()
+                            <button class="mc-resource-details-save @(Model.IsBookmarked ? "mc-resource-details-save--saved" : "")" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.7L6 21V4.75Z" /></svg>@(Model.IsBookmarked ? "Saved" : "Save Resource")</button>
+                        </form>
+                    }
+                    @if (canSummarize)
+                    {
+                        <section class="mc-resource-ai" data-resource-ai data-summary-endpoint="/AI/Resources/@resource.Id/Summarize" aria-label="AI resource summary">
+                            <div class="mc-resource-ai-action">
+                                @Html.AntiForgeryToken()
+                                <button type="button" class="mc-resource-ai-button" data-resource-ai-button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8-.8 2.7-.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg><span data-resource-ai-label>Summarize with AI</span><span class="mc-resource-ai-spinner" data-resource-ai-spinner hidden></span></button>
+                                <p class="mc-resource-ai-status" data-resource-ai-status role="status"></p>
+                            </div>
+                            <section class="mc-resource-ai-card" data-resource-ai-card aria-live="polite" hidden>
+                                <header class="mc-resource-ai-header"><span class="mc-resource-ai-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 13.7 9l5.3 1.7-5.3 1.7L12 18l-1.7-5.6L5 10.7 10.3 9 12 3.5ZM18.5 15l.8 2.7 2.7.8-2.7.8.8-2.7-2.7-.8 2.7-.8.8-2.7Z" /></svg></span><div><h2>AI Summary</h2><p>Generated from this MindCare resource.</p></div></header>
+                                <div class="mc-resource-ai-summary"><h3>Simple summary</h3><p data-resource-ai-summary></p></div>
+                                <div class="mc-resource-ai-points"><h3>Key points</h3><ul data-resource-ai-points></ul></div>
+                                <p class="mc-resource-ai-note">This is a reading aid and does not replace the original resource.</p>
+                            </section>
+                        </section>
+                    }
+                </div>
+            }
+
+            <section class="mc-resource-article" aria-labelledby="resourceOverview">
+                <h2 id="resourceOverview">Overview</h2>
+                <div>@resource.Content</div>
+            </section>
+        </article>
+
+        @if (Model.Related.Any())
+        {
+            <section class="mc-related-resources" aria-labelledby="relatedResourcesTitle">
+                <header><h2 id="relatedResourcesTitle">You may also find helpful</h2><p>Explore more resources from MindCare.</p></header>
+                <div class="mc-related-resource-grid">
+                    @foreach (var related in Model.Related)
+                    {
+                        <article class="mc-related-resource-card"><span class="mc-resource-library-category">@(related.ResourceCategory?.Name ?? related.Category)</span><h3>@related.Title</h3><p>@related.Description</p><a asp-action="Details" asp-route-id="@related.Id">Read Resource</a></article>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</section>
+
 @if (canSummarize)
 {
     @section Scripts { <script src="~/js/ai-resource-summary.js" asp-append-version="true"></script> }

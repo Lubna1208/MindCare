@@ -1,2 +1,51 @@
 @model IEnumerable<MindCare.Models.Resource>
-<section class="mc-resources-page"><div class="mc-resources-container"><h1>Saved Resources</h1>@if(!Model.Any()){<p>You haven't saved any resources yet. <a asp-action="Index">Browse Resources</a></p>}else{<div class="mc-resources-grid">@foreach(var r in Model){<article class="mc-resource-card"><h2>@r.Title</h2><p>@r.Description</p><a asp-action="Details" asp-route-id="@r.Id">Read Resource</a></article>}</div>}</div></section>
+@using MindCare.Models
+@{
+    ViewData["Title"] = "Saved Resources";
+    var returnUrl = ViewContext.HttpContext.Request.Path;
+}
+
+<section class="mc-resource-library">
+    <div class="mc-resource-library-container">
+        <header class="mc-resource-library-header">
+            <p>YOUR WELLBEING</p>
+            <h1>Resources</h1>
+            <span>Keep your most helpful resources close at hand.</span>
+        </header>
+        <nav class="mc-resource-library-tabs" aria-label="Resource library sections">
+            <a asp-action="Index">All Resources</a>
+            <a asp-action="Saved" class="is-active" aria-current="page">Saved Resources</a>
+        </nav>
+        @if (!Model.Any())
+        {
+            <section class="mc-resource-library-empty">
+                <h2>No saved resources yet</h2>
+                <p>Save helpful resources to find them easily later.</p>
+                <a asp-action="Index" class="mc-resource-library-clear">Browse Resources</a>
+            </section>
+        }
+        else
+        {
+            <div class="mc-resource-library-grid">
+                @foreach (var resource in Model)
+                {
+                    <article class="mc-resource-library-card">
+                        <div class="mc-resource-library-card-top">
+                            <span class="mc-resource-library-category">@(resource.ResourceCategory?.Name ?? resource.Category)</span>
+                            @if (resource.IsFeatured) { <span class="mc-resource-library-featured">Featured</span> }
+                        </div>
+                        <h2>@resource.Title</h2>
+                        <p class="mc-resource-library-description">@resource.Description</p>
+                        <footer>
+                            <a asp-action="Details" asp-route-id="@resource.Id" class="mc-resource-library-read">Read Resource</a>
+                            <form asp-action="ToggleBookmark" asp-route-id="@resource.Id" asp-route-returnUrl="@returnUrl" method="post">
+                                @Html.AntiForgeryToken()
+                                <button class="mc-resource-library-save mc-resource-library-save--saved" type="submit" aria-label="Remove @resource.Title from saved resources"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.7L6 21V4.75Z" /><path d="m9.4 11.8 1.7 1.7 3.6-3.7" /></svg><span>Saved</span></button>
+                            </form>
+                        </footer>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>

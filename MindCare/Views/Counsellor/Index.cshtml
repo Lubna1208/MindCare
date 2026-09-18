@@ -18,6 +18,7 @@
         <section class="mc-counsellor-quick-actions" aria-labelledby="quick-actions-title">
             <div class="mc-counsellor-section-heading"><h2 id="quick-actions-title">Quick Actions</h2><p>Keep your counselling schedule organised.</p></div>
             <div class="mc-counsellor-action-grid">
+                <a asp-controller="CounsellorResources" asp-action="Index" class="mc-counsellor-action-card"><span class="mc-counsellor-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5v4h4M8.5 12h7m-7 3.5h4"/><path d="M17 16v4m-2-2h4"/></svg></span><h3>My Resources</h3><p>Create, edit, and track resources submitted for Admin review.</p><span class="mc-counsellor-action-link">Manage Resources <span aria-hidden="true">&rarr;</span></span></a>
                 <a asp-action="Availability" class="mc-counsellor-action-card"><span class="mc-counsellor-action-icon" aria-hidden="true">&#128197;</span><h3>Manage Availability</h3><p>Set and review your available counselling time slots.</p><span class="mc-counsellor-action-link">Manage <span aria-hidden="true">&rarr;</span></span></a>
                 <a asp-action="BookedAppointments" class="mc-counsellor-action-card"><span class="mc-counsellor-action-icon" aria-hidden="true">&#10003;</span><h3>View Appointments</h3><p>Review your booked counselling appointments.</p><span class="mc-counsellor-action-link">View <span aria-hidden="true">&rarr;</span></span></a>
             </div>
