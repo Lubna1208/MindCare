@@ -8,13 +8,7 @@
 
 A web-based mental wellness and counselling platform that brings mood tracking, self-assessment, curated resources, community support, and paid counsellor appointments (with chat and video) into one calm, accessible space.
 
-![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
-![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET_Core-MVC-5C2D91)
-![EF Core](https://img.shields.io/badge/EF_Core-10-68217A)
-![SQL Server](https://img.shields.io/badge/SQL_Server-Express-CC2927?logo=microsoftsqlserver&logoColor=white)
-![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)
-![Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4?logo=googlegemini&logoColor=white)
-![Azure](https://img.shields.io/badge/Deploy-Azure_Web_App-0078D4?logo=microsoftazure&logoColor=white)
+**ASP.NET Core MVC** · **.NET 10** · **EF Core** · **SQL Server** · **Stripe** · **Google Gemini** · **Azure**
 
 </div>
 
@@ -124,14 +118,14 @@ MindCare follows the classic **MVC** pattern, with a service layer for business 
 
 ```mermaid
 flowchart TD
-    Browser["Browser (Razor views, Bootstrap, JS)"]
+    Browser["Browser<br/>Razor views, Bootstrap, JS"]
 
-    subgraph App["ASP.NET Core Application (.NET 10)"]
-        MW["Middleware pipeline<br/>Authentication, no-cache, forced password change, authorization, rate limiter"]
-        C["Controllers<br/>Account, Booking, Mood, Assessment, Resources, Forum, Messaging, Support, Admin, Counsellor..."]
-        S["Services<br/>Notification, ChatWindow, VideoCallRoom, CounsellorMatching, Email, AI (Gemini)"]
-        W["Background worker<br/>Chat lifecycle notifications (every 30s)"]
-        D["ApplicationDbContext<br/>EF Core + Identity"]
+    subgraph App["ASP.NET Core App (.NET 10)"]
+        MW["Middleware pipeline<br/>Authentication<br/>No-cache headers<br/>Forced password change<br/>Rate limiter"]
+        C["Controllers<br/>Account, Booking, Mood<br/>Assessment, Resources<br/>Forum, Messaging<br/>Admin, Counsellor"]
+        S["Services<br/>Notification<br/>Chat window<br/>Video room<br/>Counsellor matching<br/>Email and AI"]
+        W["Background worker<br/>Chat notifications<br/>every 30 seconds"]
+        D["ApplicationDbContext<br/>EF Core and Identity"]
     end
 
     DB[("SQL Server<br/>MindCareDb")]
@@ -140,7 +134,9 @@ flowchart TD
     Jitsi["Jitsi Meet"]
     SMTP["SMTP server"]
 
-    Browser --> MW --> C --> S
+    Browser --> MW
+    MW --> C
+    C --> S
     C --> D
     S --> D
     W --> S
@@ -148,7 +144,7 @@ flowchart TD
     C --> Stripe
     S --> Gemini
     S --> SMTP
-    Browser -. video call .-> Jitsi
+    Browser -.-> Jitsi
 ```
 
 **Request pipeline** (`Program.cs`): HTTPS redirection, routing, authentication, `AuthenticatedResponseNoCacheMiddleware` (prevents caching of signed-in pages), `CounsellorPasswordChangeMiddleware` (forces first-login password change), authorization, and the rate limiter.
@@ -215,19 +211,14 @@ Chat and video are gated by the appointment time. The window is open only while 
 ```mermaid
 stateDiagram-v2
     [*] --> BeforeStart
-    BeforeStart --> Open: start time reached
-    Open --> Ended: end time reached
+    BeforeStart --> Open: Start time
+    Open --> Ended: End time
     Ended --> [*]
-    note right of Open
-        Chat enabled
-        Optional Jitsi video call
-        "Chat available" notification sent
-    end note
-    note right of Ended
-        Chat closed
-        "Chat ended" notification sent
-    end note
+    Open : Chat and video enabled
+    Ended : Chat closed
 ```
+
+When the window opens, both participants receive a "chat available" notification; when it ends, they receive a "chat ended" notification.
 
 Video rooms use opaque names derived with **HMAC-SHA256** from a server-side secret and the appointment ID, so room names cannot be guessed and nothing extra is stored in the database.
 
@@ -235,18 +226,19 @@ Video rooms use opaque names derived with **HMAC-SHA256** from a server-side sec
 
 ```mermaid
 stateDiagram-v2
+    direction LR
     [*] --> Draft
-    Draft --> PendingReview: Counsellor submits
-    PendingReview --> Published: Admin approves
-    PendingReview --> Rejected: Admin rejects (with note)
-    Rejected --> PendingReview: Author revises and resubmits
+    Draft --> PendingReview: Submit
+    PendingReview --> Published: Approve
+    PendingReview --> Rejected: Reject
+    Rejected --> PendingReview: Resubmit
     Draft --> Archived: Archive
     Rejected --> Archived: Archive
     Published --> Archived: Archive
-    Archived --> Draft: Admin restores
+    Archived --> Draft: Restore
 ```
 
-Counsellors can edit only their own resources while they are in *Draft* or *Rejected* status. Admins can also create resources directly, and an archived resource that is restored returns to *Draft*. Only **Published** resources are visible to the public.
+Admins add a review note when rejecting a resource. Counsellors can edit only their own resources while they are in *Draft* or *Rejected* status, and can resubmit after making changes. Admins can also create resources directly, and an archived resource that is restored returns to *Draft*. Only **Published** resources are visible to the public.
 
 ### 6.4 Forum Moderation
 
@@ -266,7 +258,7 @@ Counsellors can edit only their own resources while they are in *Draft* or *Reje
 
 ```mermaid
 erDiagram
-    ApplicationUser ||--o| CounsellorProfile : "has (counsellors)"
+    ApplicationUser ||--o| CounsellorProfile : "has profile"
     ApplicationUser ||--o{ Appointment : books
     ApplicationUser ||--o{ MoodLog : records
     ApplicationUser ||--o{ Assessment : takes
